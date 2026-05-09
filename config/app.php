@@ -21,7 +21,7 @@ if (file_exists($localConfigFile)) {
 
 // Application Settings
 define('APP_NAME', getenv('APP_NAME') ?: 'SchoolWeb CMS');
-define('APP_VERSION', '1.0.0');
+define('APP_VERSION', '1.0.1');
 define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
 $appUrl = getenv('APP_URL') ?: '';
 if (!$appUrl && !empty($_SERVER['HTTP_HOST'])) {
@@ -36,6 +36,8 @@ define('REQUIRED_DOMAIN_SUFFIX', getenv('REQUIRED_DOMAIN_SUFFIX') ?: '.sch.id');
 // System updater. Keep disabled unless the hosting account is ready to run Git.
 define('UPDATE_ENABLED', filter_var(getenv('UPDATE_ENABLED') ?: false, FILTER_VALIDATE_BOOLEAN));
 define('UPDATE_BRANCH', getenv('UPDATE_BRANCH') ?: 'main');
+define('UPDATE_CHECK_URL', getenv('UPDATE_CHECK_URL') ?: 'https://raw.githubusercontent.com/ruhy4t/rahayat-cms/main/version.json');
+define('UPDATE_DOWNLOAD_URL', getenv('UPDATE_DOWNLOAD_URL') ?: 'https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip');
 
 // Default Controller and Action
 define('DEFAULT_CONTROLLER', 'Home');

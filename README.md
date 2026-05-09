@@ -93,6 +93,26 @@ Update memakai `git fetch` dan `git pull --ff-only origin main`, sehingga akan
 ditolak jika ada perubahan lokal yang belum dirapikan. Pastikan backup database
 tersedia sebelum menjalankan update di hosting.
 
+### Hosting Tanpa Git
+
+Hosting tanpa Git tetap dapat mengetahui pembaruan dari menu **Pembaruan**.
+Aplikasi membaca `version.json` terbaru dari GitHub dan membandingkannya dengan
+`APP_VERSION` lokal.
+
+Langkah update manual:
+
+1. Backup database dari cPanel/phpMyAdmin.
+2. Backup folder aplikasi lama atau compress folder domain menjadi ZIP.
+3. Download ZIP terbaru dari GitHub:
+   `https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip`
+4. Upload ZIP ke hosting lewat File Manager, FTP, atau SFTP.
+5. Extract ZIP ke folder sementara, misalnya `rahayat-update`.
+6. Pindahkan file dan folder aplikasi baru ke root domain.
+7. Jangan timpa `config/local.php`, `storage/`, dan `public/uploads/`.
+8. Jika ada file baru di `database/migrations`, jalankan SQL tersebut lewat
+   phpMyAdmin.
+9. Buka halaman depan dan admin untuk memastikan semuanya normal.
+
 ## Lisensi
 
 Project ini memakai `Rahayat CMS Source Available License 1.0`.

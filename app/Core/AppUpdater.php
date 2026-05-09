@@ -19,6 +19,7 @@ class AppUpdater
 
     public function getStatus(): array
     {
+        $manualStatus = $this->getManualStatus();
         $gitVersion = $this->run(['git', '--version']);
         $isRepo = is_dir(ROOT_PATH . '/.git');
         $currentCommit = $gitVersion['success'] && $isRepo ? trim($this->git(['rev-parse', 'HEAD'])['output']) : '';
@@ -33,9 +34,11 @@ class AppUpdater
         $status = $gitVersion['success'] && $isRepo ? $this->git(['status', '--porcelain', '--untracked-files=no']) : ['success' => false, 'output' => ''];
         $dirty = trim($status['output'] ?? '') !== '';
         $updateAvailable = $relation === 'behind';
+        $manualUpdateAvailable = (bool) ($manualStatus['update_available'] ?? false);
 
         return [
             'enabled' => UPDATE_ENABLED,
+            'local_version' => APP_VERSION,
             'git_available' => $gitVersion['success'],
             'git_version' => trim($gitVersion['output'] ?: $gitVersion['error']),
             'is_repository' => $isRepo,
@@ -49,7 +52,9 @@ class AppUpdater
             'remote_error' => $fetch['success'] ? '' : trim($fetch['error']),
             'relation' => $relation,
             'dirty' => $dirty,
-            'update_available' => $updateAvailable,
+            'update_available' => $updateAvailable || $manualUpdateAvailable,
+            'git_update_available' => $updateAvailable,
+            'manual_update' => $manualStatus,
             'can_update' => UPDATE_ENABLED && $gitVersion['success'] && $isRepo && !$dirty && $updateAvailable,
         ];
     }
@@ -93,6 +98,84 @@ class AppUpdater
     private function git(array $args): array
     {
         return $this->run(array_merge(['git'], $args));
+    }
+
+    private function getManualStatus(): array
+    {
+        $manifest = $this->fetchRemoteManifest();
+        $downloadUrl = defined('UPDATE_DOWNLOAD_URL') ? UPDATE_DOWNLOAD_URL : '';
+
+        if (!$manifest['success']) {
+            return [
+                'can_check' => false,
+                'local_version' => APP_VERSION,
+                'remote_version' => '',
+                'update_available' => false,
+                'download_url' => $downloadUrl,
+                'repository_url' => 'https://github.com/ruhy4t/rahayat-cms',
+                'notes_url' => 'https://github.com/ruhy4t/rahayat-cms/commits/main',
+                'error' => $manifest['error'],
+            ];
+        }
+
+        $data = $manifest['data'];
+        $remoteVersion = (string) ($data['version'] ?? '');
+        return [
+            'can_check' => true,
+            'local_version' => APP_VERSION,
+            'remote_version' => $remoteVersion,
+            'update_available' => $remoteVersion !== '' && version_compare($remoteVersion, APP_VERSION, '>'),
+            'download_url' => (string) ($data['download_url'] ?? $downloadUrl),
+            'repository_url' => (string) ($data['repository_url'] ?? 'https://github.com/ruhy4t/rahayat-cms'),
+            'notes_url' => (string) ($data['notes_url'] ?? 'https://github.com/ruhy4t/rahayat-cms/commits/main'),
+            'error' => '',
+        ];
+    }
+
+    private function fetchRemoteManifest(): array
+    {
+        $url = defined('UPDATE_CHECK_URL') ? (string) UPDATE_CHECK_URL : '';
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return ['success' => false, 'data' => [], 'error' => 'URL cek pembaruan tidak valid.'];
+        }
+
+        $body = '';
+        if (function_exists('curl_init')) {
+            $curl = curl_init($url);
+            curl_setopt_array($curl, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_CONNECTTIMEOUT => 5,
+                CURLOPT_TIMEOUT => 10,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_USERAGENT => 'RahayatCMS/' . APP_VERSION,
+            ]);
+            $body = (string) curl_exec($curl);
+            $error = curl_error($curl);
+            $status = (int) curl_getinfo($curl, CURLINFO_RESPONSE_CODE);
+            curl_close($curl);
+
+            if ($body === '' || $status >= 400) {
+                return ['success' => false, 'data' => [], 'error' => $error ?: 'GitHub memberi respons HTTP ' . $status . '.'];
+            }
+        } else {
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 10,
+                    'header' => "User-Agent: RahayatCMS/" . APP_VERSION . "\r\n",
+                ],
+            ]);
+            $body = (string) @file_get_contents($url, false, $context);
+            if ($body === '') {
+                return ['success' => false, 'data' => [], 'error' => 'Server tidak bisa membaca file versi dari GitHub.'];
+            }
+        }
+
+        $data = json_decode($body, true);
+        if (!is_array($data)) {
+            return ['success' => false, 'data' => [], 'error' => 'Format file versi dari GitHub tidak valid.'];
+        }
+
+        return ['success' => true, 'data' => $data, 'error' => ''];
     }
 
     private function run(array $command): array
