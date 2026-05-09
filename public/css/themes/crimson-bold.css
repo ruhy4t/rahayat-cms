@@ -1,0 +1,76 @@
+/**
+ * Theme: Crimson Bold
+ * Primary: #BE123C
+ * Style: Dark solid navbar, diagonal clip-path hero, bold
+ */
+
+:root {
+    /* Primary Colors - Rose/Crimson */
+    --primary-50: #FFF1F2;
+    --primary-100: #FFE4E6;
+    --primary-200: #FECDD3;
+    --primary-300: #FDA4AF;
+    --primary-400: #FB7185;
+    --primary-500: #F43F5E;
+    --primary-600: #E11D48;
+    --primary-700: #BE123C;
+    --primary-800: #9F1239;
+    --primary-900: #881337;
+
+    /* Theme Variables */
+    --theme-gradient: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-900) 100%);
+    --theme-gradient-light: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
+    --theme-shadow: 0 4px 6px -1px rgba(225, 29, 72, 0.1), 0 2px 4px -1px rgba(225, 29, 72, 0.06);
+    --theme-shadow-lg: 0 10px 15px -3px rgba(225, 29, 72, 0.15), 0 4px 6px -2px rgba(225, 29, 72, 0.05);
+
+    --accent-color: #E11D48;
+    --accent-hover: #BE123C;
+
+    --bg-hero: var(--theme-gradient);
+}
+
+.theme-crimson-bold .hero-bg {
+    background: var(--theme-gradient);
+}
+
+.theme-crimson-bold .btn-primary {
+    background: var(--primary-600);
+}
+
+.theme-crimson-bold .btn-primary:hover {
+    background: var(--primary-700);
+}
+
+.theme-crimson-bold .text-primary {
+    color: var(--primary-600);
+}
+
+.theme-crimson-bold .bg-primary {
+    background-color: var(--primary-600);
+}
+
+.theme-crimson-bold .border-primary {
+    border-color: var(--primary-600);
+}
+
+.theme-crimson-bold .ring-primary:focus {
+    --tw-ring-color: var(--primary-500);
+}
+
+/* Card hover effects */
+.theme-crimson-bold .card-hover:hover {
+    box-shadow: var(--theme-shadow-lg);
+    transform: translateY(-2px);
+}
+
+/* Sidebar active state */
+.theme-crimson-bold .sidebar-active {
+    background: linear-gradient(90deg, var(--primary-600) 0%, var(--primary-500) 100%);
+    color: white;
+}
+
+/* Badge styles */
+.theme-crimson-bold .badge-primary {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}

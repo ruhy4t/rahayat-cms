@@ -1,0 +1,23 @@
+# Route requests safely when the hosting document root points to this project root.
+DirectoryIndex public/index.php
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^(app|config|database|views)(/|$) - [F,L]
+    RewriteRule ^storage/spmb(/|$) - [F,L]
+
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ public/index.php?url=$1 [QSA,L]
+</IfModule>
+
+<FilesMatch "^(user\.txt|README\.md)$">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(env|log|ini|sql|bak|config)$">
+    Require all denied
+</FilesMatch>

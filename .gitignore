@@ -1,0 +1,32 @@
+# Local/runtime configuration
+.env
+*.env
+*.log
+*.bak
+*.tmp
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Runtime uploads and private documents
+storage/**
+!storage/
+!storage/.htaccess
+!storage/*/
+!storage/*/.gitkeep
+!storage/uploads/
+!storage/uploads/*/
+!storage/uploads/*/.gitkeep
+
+# Local dependency/build folders
+vendor/
+node_modules/
+
+# Database dumps
+*.sql
+!database/schema.sql
+!database/*.sql
+!database/migrations/*.sql

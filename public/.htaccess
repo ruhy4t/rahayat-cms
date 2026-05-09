@@ -1,0 +1,80 @@
+# ============================================
+# SchoolWeb CMS - Apache Rewrite Rules
+# ============================================
+
+# Enable Rewrite Engine
+RewriteEngine On
+Options -Indexes
+
+# Set base directory
+RewriteBase /
+
+# ============================================
+# Security Headers
+# ============================================
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    # Prevent MIME type sniffing
+    Header always set X-Content-Type-Options "nosniff"
+    # Enable XSS protection
+    Header always set X-XSS-Protection "1; mode=block"
+    # Referrer Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    # Content Security Policy
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.ckeditor.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.ckeditor.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; media-src 'self'; frame-src 'self' https://www.google.com https://www.youtube.com https://youtube.com; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests;"
+    # Permissions Policy
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(self)"
+</IfModule>
+
+# HSTS (only when served over HTTPS)
+<IfModule mod_headers.c>
+    <If "%{HTTPS} == 'on'">
+        Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    </If>
+</IfModule>
+
+# ============================================
+# Block Access to Sensitive Files
+# ============================================
+<FilesMatch "\.(env|log|ini|sql|bak|config)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Block access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# ============================================
+# Pretty URL Routing
+# ============================================
+
+# Don't rewrite if file or directory exists
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Route all other requests to index.php
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+
+# ============================================
+# Performance Optimization
+# ============================================
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml
+</IfModule>
+
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType image/webp "access plus 1 month"
+</IfModule>

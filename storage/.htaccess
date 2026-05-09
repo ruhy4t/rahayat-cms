@@ -1,0 +1,44 @@
+# ============================================
+# Storage Directory - Allow Access
+# ============================================
+
+# Enable direct file access to uploaded files
+<IfModule mod_dir.c>
+    DirectoryIndex disabled
+</IfModule>
+
+Options -Indexes
+
+# Allow all file types to be served
+<IfModule mod_authz_core.c>
+    Require all granted
+</IfModule>
+
+# Cache control for images
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpeg "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType image/gif "access plus 30 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType video/mp4 "access plus 30 days"
+</IfModule>
+
+# Security - Block access to .php files
+<FilesMatch "\.php$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# SPMB documents contain private registration data and must be served only
+# through the application with an authenticated admin session.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^spmb/ - [F,L]
+</IfModule>
+
+# Security - Block access to hidden files
+<FilesMatch "^\.">
+    Order allow,deny
+    Deny from all
+</FilesMatch>

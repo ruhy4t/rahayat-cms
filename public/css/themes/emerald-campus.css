@@ -1,0 +1,56 @@
+/**
+ * Theme: Emerald Campus
+ * Primary: #059669
+ * Style: 2-tier Navbar, centered hero layout, clean, rounded
+ */
+
+:root {
+    /* Primary Colors - Emerald */
+    --primary-50: #ECFDF5;
+    --primary-100: #D1FAE5;
+    --primary-200: #A7F3D0;
+    --primary-300: #6EE7B7;
+    --primary-400: #34D399;
+    --primary-500: #10B981;
+    --primary-600: #059669;
+    --primary-700: #047857;
+    --primary-800: #065F46;
+    --primary-900: #064E3B;
+
+    /* Theme Variables */
+    --theme-gradient: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+    --theme-gradient-light: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+    --theme-shadow: 0 4px 6px -1px rgba(5, 150, 105, 0.1), 0 2px 4px -1px rgba(5, 150, 105, 0.06);
+    --theme-shadow-lg: 0 10px 15px -3px rgba(5, 150, 105, 0.1), 0 4px 6px -2px rgba(5, 150, 105, 0.05);
+
+    --accent-color: #10B981;
+    --accent-hover: #059669;
+    
+    --bg-hero: var(--theme-gradient);
+}
+
+.theme-emerald-campus .hero-bg { background: var(--theme-gradient); }
+.theme-emerald-campus .btn-primary { background: var(--primary-600); }
+.theme-emerald-campus .btn-primary:hover { background: var(--primary-700); }
+.theme-emerald-campus .text-primary { color: var(--primary-600); }
+.theme-emerald-campus .bg-primary { background-color: var(--primary-600); }
+.theme-emerald-campus .border-primary { border-color: var(--primary-600); }
+.theme-emerald-campus .ring-primary:focus { --tw-ring-color: var(--primary-500); }
+
+/* Card hover effects */
+.theme-emerald-campus .card-hover:hover {
+    box-shadow: var(--theme-shadow-lg);
+    transform: translateY(-4px);
+}
+
+/* Sidebar active state */
+.theme-emerald-campus .sidebar-active {
+    background: linear-gradient(90deg, var(--primary-600) 0%, var(--primary-500) 100%);
+    color: white;
+}
+
+/* Badge styles */
+.theme-emerald-campus .badge-primary {
+    background: var(--primary-100);
+    color: var(--primary-700);
+}
