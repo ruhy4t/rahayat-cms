@@ -8,6 +8,10 @@ Options -Indexes
     RewriteRule ^(app|config|database|views)(/|$) - [F,L]
     RewriteRule ^storage/spmb(/|$) - [F,L]
 
+    # Otomatis mencari file statis di folder public jika tidak ditemukan di root
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(css|js|img|images|fonts|assets|favicon\.ico)(.*)$ public/$1$2 [L,NC]
+
     RewriteCond %{REQUEST_URI} !^/public/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

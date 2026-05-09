@@ -230,7 +230,7 @@ class Security
     private static function uploadErrorDescription(int $code): string
     {
         return match ($code) {
-            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Ukuran file melebihi batas server.',
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Ukuran file melebihi batas PHP di server (' . self::serverUploadLimitLabel() . '). Naikkan upload_max_filesize dan post_max_size di hosting, atau pastikan file .user.ini terbaru sudah ter-upload.',
             UPLOAD_ERR_PARTIAL => 'File hanya terunggah sebagian. Coba unggah ulang.',
             UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diunggah.',
             UPLOAD_ERR_NO_TMP_DIR => 'Folder sementara upload tidak tersedia di server.',
@@ -238,6 +238,14 @@ class Security
             UPLOAD_ERR_EXTENSION => 'Upload diblokir oleh ekstensi PHP.',
             default => 'Upload gagal dengan kode error: ' . $code,
         };
+    }
+
+    private static function serverUploadLimitLabel(): string
+    {
+        $uploadMax = ini_get('upload_max_filesize') ?: 'tidak diketahui';
+        $postMax = ini_get('post_max_size') ?: 'tidak diketahui';
+
+        return 'upload_max_filesize=' . $uploadMax . ', post_max_size=' . $postMax;
     }
 
     private static function formatBytes(int $bytes): string
