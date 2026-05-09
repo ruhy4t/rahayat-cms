@@ -52,6 +52,26 @@ dengan akhiran `.sch.id`. Domain lokal seperti `localhost`, `127.0.0.1`,
 ### 3. Document Root
 Untuk produksi, arahkan document root hosting ke folder `public`.
 
+### 4. Installer Web
+Jika belum ada konfigurasi lokal dan database belum terdeteksi, aplikasi akan
+mengarahkan ke:
+
+```text
+/install
+```
+
+Installer akan:
+
+- menguji koneksi database,
+- membuat/import tabel awal,
+- membuat akun admin awal,
+- menulis `config/local.php`,
+- mengunci halaman install setelah selesai.
+
+Halaman install tetap mengikuti pembatasan domain `.sch.id` untuk deployment
+online. Domain lokal seperti `localhost`, `.test`, dan `.local` hanya untuk
+development.
+
 ## Login Admin
 Segera ganti password admin setelah import database pertama kali.
 

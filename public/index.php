@@ -18,6 +18,38 @@ define('PUBLIC_PATH', __DIR__);
 
 // Load application configuration before bootstrapping runtime behavior.
 require_once CONFIG_PATH . '/app.php';
+require_once CONFIG_PATH . '/database.php';
+
+function isInstallRequest(): bool
+{
+    $url = trim((string) ($_GET['url'] ?? ''), '/');
+    return $url === 'install' || str_starts_with($url, 'install/');
+}
+
+function isInstalled(): bool
+{
+    if (file_exists(CONFIG_PATH . '/local.php') || filter_var(getenv('APP_INSTALLED') ?: false, FILTER_VALIDATE_BOOLEAN)) {
+        return true;
+    }
+
+    try {
+        $pdo = new PDO(
+            sprintf('mysql:host=%s;port=%d;dbname=%s;charset=%s', DB_HOST, DB_PORT, DB_NAME, DB_CHARSET),
+            DB_USER,
+            DB_PASS,
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_EMULATE_PREPARES => false,
+            ]
+        );
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'users'");
+        $stmt->execute([DB_NAME]);
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (\Throwable) {
+        return false;
+    }
+}
 
 function isAllowedApplicationHost(): bool
 {
@@ -74,6 +106,11 @@ if (!isset($_SESSION['_created'])) {
 } elseif (time() - $_SESSION['_created'] > 1800) {
     session_regenerate_id(true);
     $_SESSION['_created'] = time();
+}
+
+if (!isInstalled() && !isInstallRequest()) {
+    header('Location: /install');
+    exit;
 }
 
 // Serve storage files through the app so private folders can be protected.
@@ -146,7 +183,6 @@ spl_autoload_register(function ($class) {
     }
 });
 
-require_once CONFIG_PATH . '/database.php';
 
 // Load Security class for helper functions (e.g., e() for XSS filtering)
 require_once APP_PATH . '/Core/Security.php';

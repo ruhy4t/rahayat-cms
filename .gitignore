@@ -1,6 +1,7 @@
 # Local/runtime configuration
 .env
 *.env
+config/local.php
 *.log
 *.bak
 *.tmp

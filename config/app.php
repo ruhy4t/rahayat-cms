@@ -7,6 +7,18 @@
 
 declare(strict_types=1);
 
+$localConfigFile = __DIR__ . '/local.php';
+if (file_exists($localConfigFile)) {
+    $localConfig = require $localConfigFile;
+    if (is_array($localConfig)) {
+        foreach ($localConfig as $key => $value) {
+            if (getenv($key) === false) {
+                putenv($key . '=' . $value);
+            }
+        }
+    }
+}
+
 // Application Settings
 define('APP_NAME', getenv('APP_NAME') ?: 'SchoolWeb CMS');
 define('APP_VERSION', '1.0.0');

@@ -22,6 +22,9 @@ class App
      */
     private function registerRoutes(): void
     {
+        // Installer
+        $this->router->add('install', ['controller' => 'Install', 'action' => 'index']);
+
         // Frontend routes
         $this->router->add('', ['controller' => 'Home', 'action' => 'index']);
         $this->router->add('berita', ['controller' => 'News', 'action' => 'index']);
