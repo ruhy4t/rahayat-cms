@@ -54,8 +54,8 @@ class Menu extends Model
     {
         $tree = [];
         foreach ($items as $item) {
-            if ($item['parent_id'] == $parentId) {
-                $children = $this->buildTree($items, $item['id']);
+            if ($this->normalizeParentId($item['parent_id'] ?? null) === $parentId) {
+                $children = $this->buildTree($items, (int) $item['id']);
                 if ($children) {
                     $item['children'] = $children;
                 }
@@ -129,5 +129,14 @@ class Menu extends Model
         ];
 
         return $row + $defaults;
+    }
+
+    private function normalizeParentId(mixed $parentId): ?int
+    {
+        if ($parentId === null || $parentId === '' || (string) $parentId === '0') {
+            return null;
+        }
+
+        return (int) $parentId;
     }
 }
