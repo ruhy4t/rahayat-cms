@@ -86,10 +86,11 @@ class Menu extends Model
                 LEFT JOIN {$this->table} p ON m.parent_id = p.id 
                 ORDER BY {$orderBy}";
         $rows = $this->db->fetchAll($sql);
-
-        return array_map(function (array $row): array {
+        $rows = array_map(function (array $row): array {
             return $this->normalizeMenuRow($row);
         }, $rows);
+
+        return $this->sortForAdminTree($rows);
     }
 
     /**
@@ -101,6 +102,28 @@ class Menu extends Model
             $this->update((int) $id, ['sort_order' => $index]);
         }
         return true;
+    }
+
+    public function delete(int $id): int
+    {
+        if ($this->hasColumn('parent_id')) {
+            $children = $this->db->fetchAll("SELECT id FROM {$this->table} WHERE parent_id = ?", [$id]);
+            foreach ($children as $child) {
+                $this->delete((int) $child['id']);
+            }
+        }
+
+        return parent::delete($id);
+    }
+
+    public function hasChildren(int $id): bool
+    {
+        if (!$this->hasColumn('parent_id')) {
+            return false;
+        }
+
+        $sql = "SELECT COUNT(*) FROM {$this->table} WHERE parent_id = ?";
+        return (int) $this->db->fetchColumn($sql, [$id]) > 0;
     }
 
     /**
@@ -138,5 +161,39 @@ class Menu extends Model
         }
 
         return (int) $parentId;
+    }
+
+    private function sortForAdminTree(array $rows): array
+    {
+        $parents = [];
+        $children = [];
+
+        foreach ($rows as $row) {
+            $parentId = $this->normalizeParentId($row['parent_id'] ?? null);
+            if ($parentId === null) {
+                $parents[] = $row;
+                continue;
+            }
+
+            $children[$parentId][] = $row;
+        }
+
+        $sorted = [];
+        foreach ($parents as $parent) {
+            $sorted[] = $parent;
+            $parentId = (int) $parent['id'];
+            foreach ($children[$parentId] ?? [] as $child) {
+                $sorted[] = $child;
+            }
+            unset($children[$parentId]);
+        }
+
+        foreach ($children as $orphanGroup) {
+            foreach ($orphanGroup as $orphan) {
+                $sorted[] = $orphan;
+            }
+        }
+
+        return $sorted;
     }
 }

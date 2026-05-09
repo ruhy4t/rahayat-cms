@@ -224,6 +224,7 @@ $flash = $data['flash'] ?? null;
         form.action = '/admin/menu/store';
         form.reset();
         document.getElementById('menuId').value = '';
+        resetParentOptions();
         modal.classList.remove('hidden');
         modal.classList.add('flex');
     }
@@ -232,6 +233,7 @@ $flash = $data['flash'] ?? null;
         document.getElementById('modalTitle').textContent = 'Edit Menu';
         form.action = '/admin/menu/update/' + menu.id;
         document.getElementById('menuId').value = menu.id;
+        resetParentOptions(menu.id);
         document.getElementById('menuTitle').value = menu.title;
         document.getElementById('menuUrl').value = menu.url;
         document.getElementById('menuParent').value = menu.parent_id || '';
@@ -245,6 +247,12 @@ $flash = $data['flash'] ?? null;
     function closeModal() {
         modal.classList.add('hidden');
         modal.classList.remove('flex');
+    }
+
+    function resetParentOptions(currentId = null) {
+        document.querySelectorAll('#menuParent option').forEach(option => {
+            option.disabled = currentId !== null && option.value === String(currentId);
+        });
     }
 
     function deleteMenu(id, title) {

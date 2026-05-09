@@ -467,15 +467,17 @@ class DashboardController extends Controller
             return;
         }
 
+        $parentId = $this->normalizeMenuParentId($this->post('parent_id'));
+
         $data = [
             'title' => $title,
             'url' => $url,
             'icon' => $this->postSafe('icon') ?: null,
-            'parent_id' => $this->post('parent_id') ?: null,
+            'parent_id' => $parentId,
             'sort_order' => (int) $this->post('sort_order', 0),
             'is_active' => $this->post('is_active') ? 1 : 0,
-            'target' => $this->post('target') ?: '_self',
-            'menu_location' => $this->post('menu_location') ?: 'header'
+            'target' => $this->normalizeMenuTarget($this->post('target')),
+            'menu_location' => $this->normalizeMenuLocation($this->post('menu_location'))
         ];
 
         try {
@@ -506,15 +508,25 @@ class DashboardController extends Controller
             return;
         }
 
+        $parentId = $this->normalizeMenuParentId($this->post('parent_id'));
+        if ($parentId === $menuId) {
+            $this->json(['success' => false, 'message' => 'Menu tidak bisa menjadi parent untuk dirinya sendiri']);
+            return;
+        }
+        if ($parentId !== null && $this->menuModel->hasChildren($menuId)) {
+            $this->json(['success' => false, 'message' => 'Menu utama yang memiliki sub menu tidak bisa dijadikan sub menu']);
+            return;
+        }
+
         $data = [
             'title' => $title,
             'url' => $url,
             'icon' => $this->postSafe('icon') ?: null,
-            'parent_id' => $this->post('parent_id') ?: null,
+            'parent_id' => $parentId,
             'sort_order' => (int) $this->post('sort_order', 0),
             'is_active' => $this->post('is_active') ? 1 : 0,
-            'target' => $this->post('target') ?: '_self',
-            'menu_location' => $this->post('menu_location') ?: 'header'
+            'target' => $this->normalizeMenuTarget($this->post('target')),
+            'menu_location' => $this->normalizeMenuLocation($this->post('menu_location'))
         ];
 
         try {
@@ -543,6 +555,25 @@ class DashboardController extends Controller
         } catch (Exception $e) {
             $this->json(['success' => false, 'message' => 'Gagal menghapus menu: ' . $e->getMessage()]);
         }
+    }
+
+    private function normalizeMenuParentId(mixed $value): ?int
+    {
+        if ($value === null || $value === '' || (string) $value === '0') {
+            return null;
+        }
+
+        return (int) $value;
+    }
+
+    private function normalizeMenuTarget(mixed $value): string
+    {
+        return in_array($value, ['_self', '_blank'], true) ? (string) $value : '_self';
+    }
+
+    private function normalizeMenuLocation(mixed $value): string
+    {
+        return in_array($value, ['header', 'footer', 'both'], true) ? (string) $value : 'header';
     }
 
     // ===================================================
