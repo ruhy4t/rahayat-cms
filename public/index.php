@@ -54,7 +54,7 @@ if (APP_DEBUG) {
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 } else {
-    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
+    error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED);
     ini_set('display_errors', '0');
 }
 

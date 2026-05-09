@@ -1,6 +1,6 @@
 # Rahayat CMS
 
-PHP 8.3 Native MVC dengan MariaDB/MySQL.
+PHP 8.3/8.4 Native MVC dengan MariaDB/MySQL.
 
 Repository publik yang disarankan:
 
