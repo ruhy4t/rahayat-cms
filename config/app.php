@@ -57,7 +57,7 @@ define('PASSWORD_OPTIONS', [
 
 // Upload Settings
 define('UPLOAD_MAX_SIZE', 5 * 1024 * 1024); // 5MB
-define('UPLOAD_ALLOWED_TYPES', ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+define('UPLOAD_ALLOWED_TYPES', ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp']);
 
 // Watermark Settings
 define('WATERMARK_ENABLED', true);

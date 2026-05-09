@@ -119,10 +119,10 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 
                         <!-- Upload Input -->
                         <div class="relative">
-                            <input type="file" id="image" name="image" accept="image/*"
+                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp"
                                 class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 transition-colors cursor-pointer">
                         </div>
-                        <p class="text-xs text-slate-500">Format: JPG, PNG, WEBP. Maks: 2MB.</p>
+                        <p class="text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 5MB.</p>
                     </div>
                 </div>
 

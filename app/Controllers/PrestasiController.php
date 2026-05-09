@@ -137,7 +137,7 @@ class PrestasiController extends Controller
 
         // Handle Image Upload
         if (!empty($_FILES['image']['tmp_name'])) {
-            $uploadedPath = $this->uploadFile($_FILES['image'], 'prestasi'); // max 2MB is checked inside by the security rules
+            $uploadedPath = $this->uploadFile($_FILES['image'], 'prestasi');
             if ($uploadedPath !== false) {
                 $data['image'] = $uploadedPath;
 
@@ -152,7 +152,7 @@ class PrestasiController extends Controller
                     }
                 }
             } else {
-                $_SESSION['flash'] = ['type' => 'error', 'message' => 'Gagal mengunggah gambar. Pastikan format valid dan ukuran maks 2MB'];
+                $_SESSION['flash'] = ['type' => 'error', 'message' => $this->uploadErrorMessage('Gambar prestasi gagal diunggah')];
                 $this->redirect($id ? "/admin/prestasi/edit/$id" : '/admin/prestasi/tambah');
             }
         }

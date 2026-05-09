@@ -304,9 +304,11 @@ class DashboardController extends Controller
         // Handle image upload
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image']);
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar berita gagal diunggah'));
+                $this->redirect('/admin/berita/create');
             }
+            $data['image'] = $imagePath;
         }
 
         $this->newsModel->create($data);
@@ -379,9 +381,11 @@ class DashboardController extends Controller
         // Handle image upload
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image']);
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar berita gagal diunggah'));
+                $this->redirect('/admin/berita/edit/' . $newsId);
             }
+            $data['image'] = $imagePath;
         }
 
         $this->newsModel->update($newsId, $data);
@@ -866,7 +870,7 @@ class DashboardController extends Controller
             if (!empty($_FILES['logo']['name'])) {
                 $logoPath = $this->uploadFile($_FILES['logo'], 'logos');
                 if (!$logoPath) {
-                    throw new RuntimeException('Logo gagal diunggah. Pastikan file berupa JPG, PNG, GIF, atau WebP dan ukurannya maksimal ' . $this->formatBytes(UPLOAD_MAX_SIZE) . '.');
+                    throw new RuntimeException($this->uploadErrorMessage('Logo gagal diunggah'));
                 }
                 $data['logo'] = $logoPath;
             }
@@ -875,7 +879,7 @@ class DashboardController extends Controller
             if (!empty($_FILES['principal_photo']['name'])) {
                 $photoPath = $this->uploadFile($_FILES['principal_photo'], 'photos');
                 if (!$photoPath) {
-                    throw new RuntimeException('Foto kepala sekolah gagal diunggah. Pastikan file berupa JPG, PNG, GIF, atau WebP dan ukurannya maksimal ' . $this->formatBytes(UPLOAD_MAX_SIZE) . '.');
+                    throw new RuntimeException($this->uploadErrorMessage('Foto kepala sekolah gagal diunggah'));
                 }
                 $data['principal_photo'] = $photoPath;
             }
@@ -1001,9 +1005,11 @@ class DashboardController extends Controller
 
         if (!empty($_FILES['photo']['name'])) {
             $photoPath = $this->uploadFile($_FILES['photo'], 'staff');
-            if ($photoPath) {
-                $data['photo'] = $photoPath;
+            if (!$photoPath) {
+                $this->flash('error', $this->uploadErrorMessage('Foto GTK gagal diunggah'));
+                $this->redirect('/admin/gtk');
             }
+            $data['photo'] = $photoPath;
         }
 
         $this->staffModel->create($data);
@@ -1039,9 +1045,11 @@ class DashboardController extends Controller
 
         if (!empty($_FILES['photo']['name'])) {
             $photoPath = $this->uploadFile($_FILES['photo'], 'staff');
-            if ($photoPath) {
-                $data['photo'] = $photoPath;
+            if (!$photoPath) {
+                $this->flash('error', $this->uploadErrorMessage('Foto GTK gagal diunggah'));
+                $this->redirect('/admin/gtk');
             }
+            $data['photo'] = $photoPath;
         }
 
         $this->staffModel->update($staffId, $data);

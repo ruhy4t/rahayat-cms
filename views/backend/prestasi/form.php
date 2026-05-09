@@ -85,14 +85,14 @@
                             </div>
                         <?php endif; ?>
                         <div class="relative">
-                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/webp" class="block w-full text-sm text-slate-500
+                            <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp" class="block w-full text-sm text-slate-500
                                 file:mr-4 file:py-2 file:px-4
                                 file:rounded-lg file:border-0
                                 file:text-sm file:font-semibold
                                 file:bg-primary-50 file:text-primary-700
                                 hover:file:bg-primary-100 transition-all cursor-pointer">
                         </div>
-                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, WEBP. Maks 2MB.</p>
+                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks 5MB.</p>
                     </div>
                 </div>
             </div>

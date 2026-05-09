@@ -184,9 +184,10 @@ class ApiController extends Controller
         // Handle image upload
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image']);
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar berita'), 422);
             }
+            $data['image'] = $imagePath;
         }
 
         try {
@@ -265,9 +266,10 @@ class ApiController extends Controller
         // Handle image upload
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image']);
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar berita'), 422);
             }
+            $data['image'] = $imagePath;
         }
 
         try {
@@ -448,7 +450,7 @@ class ApiController extends Controller
 
         $imagePath = $this->uploadFile($_FILES['image'], 'slides');
         if (!$imagePath) {
-            $this->jsonError('Gagal mengunggah gambar', 422);
+            $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar slide'), 422);
             return;
         }
 
@@ -493,6 +495,8 @@ class ApiController extends Controller
         $data = [
             'title' => $this->postSafe('title') ?: null,
             'subtitle' => $this->postSafe('subtitle') ?: null,
+            'button_text' => $this->postSafe('button_text') ?: null,
+            'button_url' => $this->postSafe('button_url') ?: null,
             'sort_order' => (int) $this->post('sort_order', 0),
             'is_active' => $this->post('is_active') ? 1 : 0
         ];
@@ -500,9 +504,11 @@ class ApiController extends Controller
         // Handle image upload if provided
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image'], 'slides');
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar slide'), 422);
+                return;
             }
+            $data['image'] = $imagePath;
         }
 
         try {
@@ -938,7 +944,7 @@ class ApiController extends Controller
 
             $filePath = $this->uploadFile($_FILES['file'], 'uploads/gallery');
             if (!$filePath) {
-                $this->jsonError('Gagal mengunggah gambar', 422);
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar galeri'), 422);
                 return;
             }
         } elseif ($type === 'video') {
@@ -1034,7 +1040,7 @@ class ApiController extends Controller
                 }
                 $data['file_path'] = $filePath;
             } else {
-                $this->jsonError('Gagal mengunggah gambar baru', 422);
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar galeri baru'), 422);
                 return;
             }
         }
@@ -1120,7 +1126,7 @@ class ApiController extends Controller
             if ($filePath) {
                 $data['cover_image'] = $filePath;
             } else {
-                $this->jsonError('Gagal mengunggah gambar sampul', 422);
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar sampul'), 422);
                 return;
             }
         }
@@ -1185,7 +1191,7 @@ class ApiController extends Controller
                 }
                 $data['cover_image'] = $filePath;
             } else {
-                $this->jsonError('Gagal mengunggah gambar sampul baru', 422);
+                $this->jsonError($this->uploadErrorMessage('Gagal mengunggah gambar sampul baru'), 422);
                 return;
             }
         }

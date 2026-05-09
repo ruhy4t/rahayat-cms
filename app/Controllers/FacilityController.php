@@ -69,9 +69,11 @@ class FacilityController extends Controller
 
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image'], 'facilities');
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar fasilitas gagal diunggah'));
+                $this->redirect('/admin/fasilitas');
             }
+            $data['image'] = $imagePath;
         }
 
         $this->facilityModel->create($data);
@@ -95,9 +97,11 @@ class FacilityController extends Controller
 
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image'], 'facilities');
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar fasilitas gagal diunggah'));
+                $this->redirect('/admin/fasilitas');
             }
+            $data['image'] = $imagePath;
         }
 
         $this->facilityModel->update($id, $data);

@@ -170,13 +170,20 @@ class SPMBController extends Controller
 
             // Handle document uploads
             $documents = [];
+            $documentAllowedTypes = array_merge(UPLOAD_ALLOWED_TYPES, ['application/pdf']);
+            $documentMaxSize = 2 * 1024 * 1024;
 
             foreach ($documentTypes as $type) {
                 if (!empty($_FILES[$type]['name'])) {
-                    $uploadPath = $this->uploadFile($_FILES[$type], 'spmb');
-                    if ($uploadPath) {
-                        $documents[$type] = $uploadPath;
+                    $uploadPath = $this->uploadFile($_FILES[$type], 'spmb', $documentAllowedTypes, $documentMaxSize);
+                    if (!$uploadPath) {
+                        $this->json([
+                            'success' => false,
+                            'message' => $this->uploadErrorMessage('Dokumen ' . str_replace('_', ' ', $type) . ' gagal diunggah')
+                        ]);
+                        return;
                     }
+                    $documents[$type] = $uploadPath;
                 }
             }
 

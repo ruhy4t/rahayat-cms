@@ -69,9 +69,11 @@ class EkstrakurikulerController extends Controller
 
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image'], 'ekstrakurikuler');
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar ekstrakurikuler gagal diunggah'));
+                $this->redirect('/admin/ekstrakurikuler');
             }
+            $data['image'] = $imagePath;
         }
 
         $this->ekskulModel->create($data);
@@ -95,9 +97,11 @@ class EkstrakurikulerController extends Controller
 
         if (!empty($_FILES['image']['name'])) {
             $imagePath = $this->uploadFile($_FILES['image'], 'ekstrakurikuler');
-            if ($imagePath) {
-                $data['image'] = $imagePath;
+            if (!$imagePath) {
+                $this->flash('error', $this->uploadErrorMessage('Gambar ekstrakurikuler gagal diunggah'));
+                $this->redirect('/admin/ekstrakurikuler');
             }
+            $data['image'] = $imagePath;
         }
 
         $this->ekskulModel->update($id, $data);

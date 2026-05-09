@@ -273,10 +273,10 @@ $flash = $data['flash'] ?? [];
                                 <label
                                     class="border border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-3 py-1.5 rounded-lg text-sm font-medium cursor-pointer transition-colors inline-block text-center mr-2">
                                     <input type="file" name="photo" id="photoInput" class="hidden"
-                                        accept="image/jpeg,image/png,image/webp">
+                                        accept="image/jpeg,image/png,image/gif,image/webp">
                                     Pilih Foto
                                 </label>
-                                <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, WEBP. Maks: 2MB</p>
+                                <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, GIF, WebP. Maks: 5MB</p>
                             </div>
                         </div>
                     </div>

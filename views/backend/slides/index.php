@@ -154,9 +154,9 @@ $flash = $data['flash'] ?? null;
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Gambar <span
                             class="text-red-500">*</span></label>
-                    <input type="file" id="slideImage" name="image" accept="image/*"
+                    <input type="file" id="slideImage" name="image" accept="image/jpeg,image/png,image/gif,image/webp"
                         class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-primary-50 file:text-primary-700">
-                    <p class="text-xs text-slate-500 mt-1">Ukuran optimal: 1920x1080 piksel</p>
+                    <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, GIF, WebP. Maks: 5MB. Ukuran optimal: 1920x1080 piksel.</p>
                     <div id="imagePreview" class="mt-2 hidden">
                         <img id="previewImg" src="" alt="Preview" class="w-full h-40 object-cover rounded-lg">
                     </div>

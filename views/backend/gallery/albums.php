@@ -242,13 +242,13 @@ $albums = $data['albums'] ?? [];
                         <img id="coverPreview" src="" alt="Preview" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1">
-                        <input type="file" id="albumCover" name="file" accept="image/*" class="block w-full text-sm text-slate-500
+                        <input type="file" id="albumCover" name="file" accept="image/jpeg,image/png,image/gif,image/webp" class="block w-full text-sm text-slate-500
                             file:mr-4 file:py-2 file:px-4
                             file:rounded-full file:border-0
                             file:text-sm file:font-semibold
                             file:bg-indigo-50 file:text-indigo-700
                             hover:file:bg-indigo-100">
-                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG. Maks: 2MB.</p>
+                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 5MB.</p>
                     </div>
                 </div>
             </div>

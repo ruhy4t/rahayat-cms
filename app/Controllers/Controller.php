@@ -10,6 +10,7 @@ declare(strict_types=1);
 abstract class Controller
 {
     protected array $data = [];
+    protected string $lastUploadError = '';
 
     /**
      * Render a view
@@ -358,22 +359,32 @@ abstract class Controller
     /**
      * Handle file upload
      */
-    protected function uploadFile(array $file, string $directory = 'uploads'): string|false
+    protected function uploadFile(array $file, string $directory = 'uploads', ?array $allowedTypes = null, ?int $maxSize = null): string|false
     {
-        $errors = Security::validateUpload($file);
+        $this->lastUploadError = '';
+
+        $errors = Security::validateUpload($file, $allowedTypes, $maxSize);
         if (!empty($errors)) {
+            $this->lastUploadError = implode(' ', $errors);
             return false;
         }
 
         $mimeType = mime_content_type($file['tmp_name']);
         $extension = Security::extensionForMime((string) $mimeType);
         if (!$extension) {
+            $this->lastUploadError = 'Tipe file tidak didukung (' . (string) $mimeType . '). Gunakan ' . Security::allowedUploadLabel($allowedTypes) . '.';
             return false;
         }
 
         $uploadDir = STORAGE_PATH . '/' . $directory;
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+            $this->lastUploadError = 'Folder upload tidak bisa dibuat: ' . $directory . '. Periksa permission folder storage.';
+            return false;
+        }
+
+        if (!is_writable($uploadDir)) {
+            $this->lastUploadError = 'Folder upload tidak bisa ditulis: ' . $directory . '. Periksa permission folder storage.';
+            return false;
         }
 
         $shouldOptimize = $this->shouldOptimizeUpload($directory, (string) $mimeType);
@@ -389,6 +400,7 @@ abstract class Controller
                 $optimized = $this->optimizeImage($filepath, (string) $mimeType);
                 if ($optimized === false) {
                     unlink($filepath);
+                    $this->lastUploadError = 'Gambar gagal diproses oleh server. Periksa ekstensi GD/Image WebP atau coba unggah gambar lain.';
                     return false;
                 }
             }
@@ -399,12 +411,18 @@ abstract class Controller
             return $directory . '/' . $filename;
         }
 
+        $this->lastUploadError = 'File gagal dipindahkan ke folder upload. Periksa permission storage dan konfigurasi upload_tmp_dir hosting.';
         return false;
+    }
+
+    protected function uploadErrorMessage(string $fallback = 'Gagal mengunggah file'): string
+    {
+        return $this->lastUploadError !== '' ? $fallback . ': ' . $this->lastUploadError : $fallback;
     }
 
     private function shouldOptimizeUpload(string $directory, string $mimeType): bool
     {
-        if (!function_exists('imagewebp') || !in_array($mimeType, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+        if (!function_exists('imagewebp') || !in_array($mimeType, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'], true)) {
             return false;
         }
 
@@ -415,8 +433,8 @@ abstract class Controller
     private function optimizeImage(string $filepath, string $mimeType): bool
     {
         $source = match ($mimeType) {
-            'image/jpeg' => imagecreatefromjpeg($filepath),
-            'image/png' => imagecreatefrompng($filepath),
+            'image/jpeg', 'image/pjpeg' => imagecreatefromjpeg($filepath),
+            'image/png', 'image/x-png' => imagecreatefrompng($filepath),
             'image/webp' => imagecreatefromwebp($filepath),
             default => false,
         };

@@ -165,27 +165,51 @@ class Security
     /**
      * Validate file upload
      */
-    public static function validateUpload(array $file): array
+    public static function validateUpload(array $file, ?array $allowedTypes = null, ?int $maxSize = null): array
     {
         $errors = [];
+        $allowedTypes = $allowedTypes ?? UPLOAD_ALLOWED_TYPES;
+        $maxSize = $maxSize ?? UPLOAD_MAX_SIZE;
+        $uploadError = (int) ($file['error'] ?? UPLOAD_ERR_NO_FILE);
 
-        if ($file['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = 'Upload failed with error code: ' . $file['error'];
+        if ($uploadError !== UPLOAD_ERR_OK) {
+            $errors[] = self::uploadErrorDescription($uploadError);
             return $errors;
         }
 
-        if ($file['size'] > UPLOAD_MAX_SIZE) {
-            $errors[] = 'File size exceeds maximum allowed size';
+        if (($file['size'] ?? 0) > $maxSize) {
+            $errors[] = 'Ukuran file melebihi batas ' . self::formatBytes($maxSize) . '.';
         }
 
         $finfo = new finfo(FILEINFO_MIME_TYPE);
-        $mimeType = $finfo->file($file['tmp_name']);
+        $mimeType = $finfo->file($file['tmp_name'] ?? '');
 
-        if (!in_array($mimeType, UPLOAD_ALLOWED_TYPES)) {
-            $errors[] = 'File type not allowed';
+        if (!$mimeType) {
+            $errors[] = 'Tipe file tidak dapat dibaca.';
+        } elseif (!in_array($mimeType, $allowedTypes, true)) {
+            $errors[] = 'Tipe file tidak didukung (' . $mimeType . '). Gunakan ' . self::allowedUploadLabel($allowedTypes) . '.';
         }
 
         return $errors;
+    }
+
+    public static function allowedUploadLabel(?array $allowedTypes = null): string
+    {
+        $allowedTypes = $allowedTypes ?? UPLOAD_ALLOWED_TYPES;
+        $labels = [];
+
+        foreach ($allowedTypes as $type) {
+            $labels[] = match ($type) {
+                'image/jpeg', 'image/pjpeg' => 'JPG/JPEG',
+                'image/png', 'image/x-png' => 'PNG',
+                'image/gif' => 'GIF',
+                'image/webp' => 'WebP',
+                'application/pdf' => 'PDF',
+                default => $type,
+            };
+        }
+
+        return implode(', ', array_values(array_unique($labels)));
     }
 
     /**
@@ -194,12 +218,40 @@ class Security
     public static function extensionForMime(string $mimeType): ?string
     {
         return match ($mimeType) {
-            'image/jpeg' => 'jpg',
-            'image/png' => 'png',
+            'image/jpeg', 'image/pjpeg' => 'jpg',
+            'image/png', 'image/x-png' => 'png',
             'image/gif' => 'gif',
             'image/webp' => 'webp',
+            'application/pdf' => 'pdf',
             default => null,
         };
+    }
+
+    private static function uploadErrorDescription(int $code): string
+    {
+        return match ($code) {
+            UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Ukuran file melebihi batas server.',
+            UPLOAD_ERR_PARTIAL => 'File hanya terunggah sebagian. Coba unggah ulang.',
+            UPLOAD_ERR_NO_FILE => 'Tidak ada file yang diunggah.',
+            UPLOAD_ERR_NO_TMP_DIR => 'Folder sementara upload tidak tersedia di server.',
+            UPLOAD_ERR_CANT_WRITE => 'Server gagal menulis file upload.',
+            UPLOAD_ERR_EXTENSION => 'Upload diblokir oleh ekstensi PHP.',
+            default => 'Upload gagal dengan kode error: ' . $code,
+        };
+    }
+
+    private static function formatBytes(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $size = (float) $bytes;
+        $unit = 0;
+
+        while ($size >= 1024 && $unit < count($units) - 1) {
+            $size /= 1024;
+            $unit++;
+        }
+
+        return rtrim(rtrim(number_format($size, 2, '.', ''), '0'), '.') . ' ' . $units[$unit];
     }
 
     /**
