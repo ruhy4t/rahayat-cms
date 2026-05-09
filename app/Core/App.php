@@ -202,8 +202,9 @@ class App
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $uri = trim($uri, '/');
 
-        // Allow admin routes, login, and static resources
+        // Allow install, admin routes, login, and static resources
         if (
+            str_starts_with($uri, 'install') ||
             str_starts_with($uri, 'admin') ||
             str_starts_with($uri, 'login') ||
             str_starts_with($uri, 'api') ||
@@ -238,7 +239,7 @@ class App
                 require_once VIEW_PATH . '/frontend/maintenance.php';
                 exit;
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             // If DB fails, proceed (fail open) or show generic error
             // For now fail open to allow debugging
         }

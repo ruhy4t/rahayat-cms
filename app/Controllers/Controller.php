@@ -18,6 +18,7 @@ abstract class Controller
     {
         // Merge data
         $this->data = array_merge($this->data, $data);
+        $isInstallView = str_starts_with($view, 'install.');
 
         // Inject frontend menus if not in admin backend
         if ($layout === 'frontend' && !isset($this->data['headerMenus'])) {
@@ -81,7 +82,7 @@ abstract class Controller
         }
 
         // Ensure theme configuration is injected
-        if (!isset($this->data['themeConfig'])) {
+        if (!$isInstallView && !isset($this->data['themeConfig'])) {
             require_once APP_PATH . '/Models/SiteSetting.php';
             $settingModel = new SiteSetting();
             $themeName = $settingModel->getTheme();

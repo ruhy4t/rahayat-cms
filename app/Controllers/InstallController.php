@@ -54,7 +54,27 @@ class InstallController extends Controller
 
     private function isInstalled(): bool
     {
-        return file_exists($this->localConfigPath) || filter_var(getenv('APP_INSTALLED') ?: false, FILTER_VALIDATE_BOOLEAN);
+        if (file_exists($this->localConfigPath) || filter_var(getenv('APP_INSTALLED') ?: false, FILTER_VALIDATE_BOOLEAN)) {
+            return true;
+        }
+
+        try {
+            $pdo = new PDO(
+                sprintf('mysql:host=%s;port=%d;dbname=%s;charset=%s', DB_HOST, DB_PORT, DB_NAME, DB_CHARSET),
+                DB_USER,
+                DB_PASS,
+                [
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                    PDO::ATTR_EMULATE_PREPARES => false,
+                ]
+            );
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'users'");
+            $stmt->execute([DB_NAME]);
+            return (int) $stmt->fetchColumn() > 0;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function install(): void
@@ -91,20 +111,7 @@ class InstallController extends Controller
             throw new RuntimeException('Password admin minimal 8 karakter.');
         }
 
-        $pdo = new PDO(
-            sprintf('mysql:host=%s;port=%d;charset=utf8mb4', $dbHost, $dbPort),
-            $dbUser,
-            $dbPass,
-            [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]
-        );
-
-        $quotedDb = '`' . str_replace('`', '``', $dbName) . '`';
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS {$quotedDb} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $pdo->exec("USE {$quotedDb}");
+        $pdo = $this->connectInstallerDatabase($dbHost, $dbPort, $dbName, $dbUser, $dbPass);
 
         $this->runSchema($pdo, $dbName);
         $this->createAdmin($pdo, $adminUsername, $adminEmail, $adminPassword, $adminName);
@@ -123,6 +130,43 @@ class InstallController extends Controller
             'DB_PASS' => $dbPass,
             'DB_CHARSET' => 'utf8mb4',
         ]);
+    }
+
+    private function connectInstallerDatabase(string $dbHost, int $dbPort, string $dbName, string $dbUser, string $dbPass): PDO
+    {
+        $options = [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+        ];
+        $quotedDb = '`' . str_replace('`', '``', $dbName) . '`';
+
+        try {
+            $pdo = new PDO(
+                sprintf('mysql:host=%s;port=%d;charset=utf8mb4', $dbHost, $dbPort),
+                $dbUser,
+                $dbPass,
+                $options
+            );
+
+            try {
+                $pdo->exec("CREATE DATABASE IF NOT EXISTS {$quotedDb} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            } catch (\Throwable $e) {
+                error_log('Installer skipped CREATE DATABASE: ' . $e->getMessage());
+            }
+
+            $pdo->exec("USE {$quotedDb}");
+            return $pdo;
+        } catch (\Throwable $e) {
+            error_log('Installer server-level DB connection failed: ' . $e->getMessage());
+        }
+
+        return new PDO(
+            sprintf('mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4', $dbHost, $dbPort, $dbName),
+            $dbUser,
+            $dbPass,
+            $options
+        );
     }
 
     private function runSchema(PDO $pdo, string $dbName): void
