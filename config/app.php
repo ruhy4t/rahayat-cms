@@ -21,7 +21,7 @@ if (file_exists($localConfigFile)) {
 
 // Application Settings
 define('APP_NAME', getenv('APP_NAME') ?: 'SchoolWeb CMS');
-define('APP_VERSION', '1.0.1');
+define('APP_VERSION', '1.0.2');
 define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
 $appUrl = getenv('APP_URL') ?: '';
 if (!$appUrl && !empty($_SERVER['HTTP_HOST'])) {

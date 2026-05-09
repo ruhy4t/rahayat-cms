@@ -110,6 +110,7 @@ CREATE TABLE IF NOT EXISTS site_visits (
 CREATE TABLE IF NOT EXISTS school_profile (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    tagline VARCHAR(255) NULL,
     npsn VARCHAR(20) NULL,
     address TEXT NULL,
     phone VARCHAR(50) NULL,
@@ -123,9 +124,12 @@ CREATE TABLE IF NOT EXISTS school_profile (
     mission TEXT NULL,
     motto VARCHAR(255) NULL,
     history TEXT NULL,
+    welcome_message LONGTEXT NULL,
+    principal_quote TEXT NULL,
     organizational_structure TEXT NULL COMMENT 'JSON or description of org structure',
     accreditation VARCHAR(10) NULL,
     school_type ENUM('negeri', 'swasta') DEFAULT 'negeri',
+    spmb_link VARCHAR(255) NULL,
     established_year YEAR NULL,
     google_maps_embed TEXT NULL,
     

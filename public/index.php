@@ -187,11 +187,19 @@ spl_autoload_register(function ($class) {
 // Load Security class for helper functions (e.g., e() for XSS filtering)
 require_once APP_PATH . '/Core/Security.php';
 
+if (isInstalled() && !isInstallRequest()) {
+    try {
+        SchemaRepairer::repair();
+    } catch (\Throwable $e) {
+        error_log('Schema repair failed: ' . $e->getMessage());
+    }
+}
+
 // Initialize and run application
 try {
     $app = new App();
     $app->run();
-} catch (Exception $e) {
+} catch (\Throwable $e) {
     // Log error
     error_log($e->getMessage());
 

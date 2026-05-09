@@ -426,11 +426,21 @@ class DashboardController extends Controller
 
     public function menus(): void
     {
+        try {
+            $menus = $this->menuModel->getAllForAdmin();
+            $parentMenus = $this->menuModel->getParentMenus();
+        } catch (\Throwable $e) {
+            error_log('Menu management load failed: ' . $e->getMessage());
+            $this->flash('error', 'Menu belum bisa dimuat karena struktur database belum lengkap. Upload versi terbaru lalu buka ulang halaman ini, atau jalankan file database/migrations/repair_hosting_schema_1_0_2.sql lewat phpMyAdmin.');
+            $menus = [];
+            $parentMenus = [];
+        }
+
         $data = [
             'title' => 'Kelola Menu',
             'user' => $this->currentUser(),
-            'menus' => $this->menuModel->getAllForAdmin(),
-            'parentMenus' => $this->menuModel->getParentMenus(),
+            'menus' => $menus,
+            'parentMenus' => $parentMenus,
             'flash' => $this->getFlash()
         ];
 
@@ -855,9 +865,14 @@ class DashboardController extends Controller
                 $data['principal_photo'] = $photoPath;
         }
 
-        $this->profileModel->saveProfile($data);
+        try {
+            $this->profileModel->saveProfile($data);
+            $this->flash('success', 'Profil sekolah berhasil diperbarui');
+        } catch (\Throwable $e) {
+            error_log('Profile update failed: ' . $e->getMessage());
+            $this->flash('error', 'Profil gagal disimpan karena struktur database belum lengkap. Upload versi terbaru lalu buka ulang halaman ini, atau jalankan file database/migrations/repair_hosting_schema_1_0_2.sql lewat phpMyAdmin.');
+        }
 
-        $this->flash('success', 'Profil sekolah berhasil diperbarui');
         $this->redirect('/admin/profil');
     }
 
