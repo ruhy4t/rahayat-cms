@@ -56,18 +56,25 @@ $flash = $data['flash'] ?? null;
                 </li>
             <?php else: ?>
                 <?php foreach ($menus as $menu): ?>
-                    <li class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 cursor-move" data-id="<?= $menu['id'] ?>">
-                        <div class="text-slate-400 cursor-grab">
+                    <?php $isChildMenu = !empty($menu['parent_id']); ?>
+                    <li class="flex items-center gap-4 px-6 py-4 hover:bg-slate-50 cursor-move <?= $isChildMenu ? 'bg-slate-50/60' : '' ?>"
+                        data-id="<?= $menu['id'] ?>">
+                        <div class="text-slate-400 cursor-grab <?= $isChildMenu ? 'ml-8 sm:ml-12' : '' ?>">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
                             </svg>
                         </div>
-                        <div class="flex-1">
-                            <div class="font-medium text-slate-800">
-                                <?php if ($menu['parent_id']): ?>
-                                    <span class="text-slate-400 mr-2">└</span>
+                        <div class="flex-1 <?= $isChildMenu ? 'relative border-l-2 border-primary-200 pl-4' : '' ?>">
+                            <?php if ($isChildMenu): ?>
+                                <span class="absolute -left-2 top-3 w-3 border-t-2 border-primary-200"></span>
+                            <?php endif; ?>
+                            <div class="flex flex-wrap items-center gap-2 font-medium <?= $isChildMenu ? 'text-slate-700 text-sm' : 'text-slate-800' ?>">
+                                <span><?= e($menu['title']) ?></span>
+                                <?php if ($isChildMenu): ?>
+                                    <span class="px-2 py-0.5 text-[11px] rounded-full bg-primary-50 text-primary-700 border border-primary-100">
+                                        Sub menu dari <?= e($menu['parent_title'] ?? 'menu utama') ?>
+                                    </span>
                                 <?php endif; ?>
-                                <?= e($menu['title']) ?>
                             </div>
                             <div class="text-sm text-slate-500">
                                 <?= e($menu['url']) ?>
