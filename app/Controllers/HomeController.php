@@ -37,17 +37,17 @@ class HomeController extends Controller
      */
     public function index(): void
     {
-        $profile = $this->profileModel->getProfile();
+        $profile = $this->safeValue(fn () => $this->profileModel->getProfile(), []);
 
         $data = [
             'title' => 'Beranda',
-            'news' => $this->newsModel->getRecent(6),
+            'news' => $this->safeValue(fn () => $this->newsModel->getRecent(6), []),
             'profile' => $profile,
-            'slides' => $this->slideModel->getActive(),
-            'settings' => $this->settingModel->getAll(),
-            'theme' => $this->settingModel->getTheme(),
-            'facilities' => $this->facilityModel->getActive(),
-            'ekskul' => $this->ekskulModel->getActive(),
+            'slides' => $this->safeValue(fn () => $this->slideModel->getActive(), []),
+            'settings' => $this->safeValue(fn () => $this->settingModel->getAll(), []),
+            'theme' => $this->safeValue(fn () => $this->settingModel->getTheme(), 'indigo-modern'),
+            'facilities' => $this->safeValue(fn () => $this->facilityModel->getActive(), []),
+            'ekskul' => $this->safeValue(fn () => $this->ekskulModel->getActive(), []),
             'flash' => $this->getFlash()
         ];
 
@@ -59,13 +59,13 @@ class HomeController extends Controller
      */
     public function profile(): void
     {
-        $profile = $this->profileModel->getProfile();
+        $profile = $this->safeValue(fn () => $this->profileModel->getProfile(), []);
 
         $data = [
             'title' => 'Profil Sekolah',
             'profile' => $profile,
-            'settings' => $this->settingModel->getAll(),
-            'facilities' => $this->facilityModel->getActive()
+            'settings' => $this->safeValue(fn () => $this->settingModel->getAll(), []),
+            'facilities' => $this->safeValue(fn () => $this->facilityModel->getActive(), [])
         ];
 
         $this->view('frontend.profile', $data, 'frontend');
@@ -132,11 +132,21 @@ class HomeController extends Controller
     {
         $data = [
             'title' => 'Kontak',
-            'profile' => $this->profileModel->getProfile(),
-            'settings' => $this->settingModel->getAll(),
+            'profile' => $this->safeValue(fn () => $this->profileModel->getProfile(), []),
+            'settings' => $this->safeValue(fn () => $this->settingModel->getAll(), []),
             'flash' => $this->getFlash()
         ];
 
         $this->view('frontend.contact', $data, 'frontend');
+    }
+
+    private function safeValue(callable $callback, mixed $fallback): mixed
+    {
+        try {
+            return $callback();
+        } catch (\Throwable $e) {
+            error_log('Homepage data load failed: ' . $e->getMessage());
+            return $fallback;
+        }
     }
 }

@@ -22,18 +22,31 @@ abstract class Controller
 
         // Inject frontend menus if not in admin backend
         if ($layout === 'frontend' && !isset($this->data['headerMenus'])) {
-            require_once APP_PATH . '/Models/Menu.php';
-            $menuModel = new Menu();
-            $headerMenus = $menuModel->getHierarchical('header');
-            $footerMenus = $menuModel->getHierarchical('footer');
+            $headerMenus = [];
+            $footerMenus = [];
+
+            try {
+                require_once APP_PATH . '/Models/Menu.php';
+                $menuModel = new Menu();
+                $headerMenus = $menuModel->getHierarchical('header');
+                $footerMenus = $menuModel->getHierarchical('footer');
+            } catch (\Throwable $e) {
+                error_log('Frontend menu load failed: ' . $e->getMessage());
+            }
 
             // Conditionally hide SPMB menus for 'Negeri' schools
             $profile = $this->data['profile'] ?? [];
             if (empty($profile)) {
-                require_once APP_PATH . '/Models/SchoolProfile.php';
-                $profileModel = new SchoolProfile();
-                $profile = $profileModel->getProfile();
-                $this->data['profile'] = $profile; // Ensuring profile is available
+                try {
+                    require_once APP_PATH . '/Models/SchoolProfile.php';
+                    $profileModel = new SchoolProfile();
+                    $profile = $profileModel->getProfile();
+                    $this->data['profile'] = $profile; // Ensuring profile is available
+                } catch (\Throwable $e) {
+                    error_log('Frontend profile load failed: ' . $e->getMessage());
+                    $profile = [];
+                    $this->data['profile'] = [];
+                }
             }
 
             if (($profile['school_type'] ?? '') === 'negeri' && !empty($profile['spmb_link'])) {
@@ -83,13 +96,23 @@ abstract class Controller
 
         // Ensure theme configuration is injected
         if (!$isInstallView && !isset($this->data['themeConfig'])) {
-            require_once APP_PATH . '/Models/SiteSetting.php';
-            $settingModel = new SiteSetting();
-            $themeName = $settingModel->getTheme();
-            $availableThemes = $settingModel->getAvailableThemes();
+            try {
+                require_once APP_PATH . '/Models/SiteSetting.php';
+                $settingModel = new SiteSetting();
+                $themeName = $settingModel->getTheme();
+                $availableThemes = $settingModel->getAvailableThemes();
 
-            $this->data['themeName'] = $themeName;
-            $this->data['themeConfig'] = $availableThemes[$themeName] ?? $availableThemes['indigo-modern'];
+                $this->data['themeName'] = $themeName;
+                $this->data['themeConfig'] = $availableThemes[$themeName] ?? $availableThemes['indigo-modern'];
+            } catch (\Throwable $e) {
+                error_log('Frontend theme load failed: ' . $e->getMessage());
+                $this->data['themeName'] = 'indigo-modern';
+                $this->data['themeConfig'] = [
+                    'name' => 'Indigo Modern',
+                    'primary' => '#4F46E5',
+                    'description' => 'Default fallback theme',
+                ];
+            }
         }
 
         // Extract data to variables
