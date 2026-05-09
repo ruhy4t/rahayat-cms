@@ -37,6 +37,8 @@ Set environment variable di virtual host / hosting panel:
 SetEnv APP_DEBUG false
 SetEnv APP_URL https://domain-sekolah.sch.id
 SetEnv REQUIRED_DOMAIN_SUFFIX .sch.id
+SetEnv UPDATE_ENABLED false
+SetEnv UPDATE_BRANCH main
 SetEnv DB_HOST localhost
 SetEnv DB_NAME schoolweb_db
 SetEnv DB_USER schoolweb_user
@@ -57,6 +59,19 @@ Segera ganti password admin setelah import database pertama kali.
 
 Kontribusi publik diterima melalui pull request. Baca [CONTRIBUTING.md](CONTRIBUTING.md)
 sebelum mengirim perubahan.
+
+## Pembaruan Sistem
+
+Admin dapat mengecek pembaruan dari menu **Pembaruan**. Tombol eksekusi update
+default nonaktif dan hanya aktif jika server diberi environment variable:
+
+```apache
+SetEnv UPDATE_ENABLED true
+```
+
+Update memakai `git fetch` dan `git pull --ff-only origin main`, sehingga akan
+ditolak jika ada perubahan lokal yang belum dirapikan. Pastikan backup database
+tersedia sebelum menjalankan update di hosting.
 
 ## Lisensi
 

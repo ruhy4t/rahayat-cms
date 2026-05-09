@@ -21,6 +21,10 @@ define('APP_URL', rtrim($appUrl, '/'));
 // Online deployments are restricted to Indonesian school domains.
 define('REQUIRED_DOMAIN_SUFFIX', getenv('REQUIRED_DOMAIN_SUFFIX') ?: '.sch.id');
 
+// System updater. Keep disabled unless the hosting account is ready to run Git.
+define('UPDATE_ENABLED', filter_var(getenv('UPDATE_ENABLED') ?: false, FILTER_VALIDATE_BOOLEAN));
+define('UPDATE_BRANCH', getenv('UPDATE_BRANCH') ?: 'main');
+
 // Default Controller and Action
 define('DEFAULT_CONTROLLER', 'Home');
 define('DEFAULT_ACTION', 'index');

@@ -97,6 +97,8 @@ class DashboardController extends Controller
             'menuUpdate',
             'menuDelete',
             'menuReorder',
+            'systemUpdate',
+            'systemUpdateRun',
         ];
 
         if (in_array($action, $adminOnly)) {
@@ -947,5 +949,30 @@ class DashboardController extends Controller
         $this->userModel->update($userId, ['is_spmb_committee' => $newStatus ? 1 : 0]);
 
         $this->json(['success' => true, 'is_committee' => $newStatus]);
+    }
+
+    public function systemUpdate(): void
+    {
+        $updater = new AppUpdater();
+
+        $data = [
+            'title' => 'Pembaruan Sistem',
+            'user' => $this->currentUser(),
+            'updateStatus' => $updater->getStatus(),
+            'flash' => $this->getFlash(),
+        ];
+
+        $this->view('backend.system.update', $data, 'backend');
+    }
+
+    public function systemUpdateRun(): void
+    {
+        $this->requireCsrf();
+
+        $updater = new AppUpdater();
+        $result = $updater->update();
+
+        $this->flash($result['success'] ? 'success' : 'error', $result['message'] . (!empty($result['output']) ? "\n" . $result['output'] : ''));
+        $this->redirect('/admin/pembaruan');
     }
 }

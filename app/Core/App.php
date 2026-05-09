@@ -133,6 +133,10 @@ class App
         $this->router->add('admin/pengguna/delete/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'userDelete']);
         $this->router->add('admin/pengguna/spmb-committee/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'toggleSPMBCommittee']);
 
+        // Admin - System Updates
+        $this->router->add('admin/pembaruan', ['controller' => 'Dashboard', 'action' => 'systemUpdate']);
+        $this->router->add('admin/pembaruan/run', ['controller' => 'Dashboard', 'action' => 'systemUpdateRun']);
+
         // API routes for AJAX
         $this->router->add('api/users/change-password', ['controller' => 'Api', 'action' => 'changePassword']);
         $this->router->add('api/news', ['controller' => 'Api', 'action' => 'news']);
