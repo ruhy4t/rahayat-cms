@@ -1,3 +1,7 @@
+<?php
+$topContent = $topContent ?? [];
+?>
+
 <!-- Dashboard Stats -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
     <!-- Total News -->
@@ -55,7 +59,9 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-slate-500 text-sm font-medium">Pengunjung Hari Ini</p>
-                <p class="text-3xl font-bold text-slate-800 mt-1">-</p>
+                <p class="text-3xl font-bold text-slate-800 mt-1">
+                    <?= e($stats['visitors_today'] ?? 0) ?>
+                </p>
             </div>
             <div
                 class="w-12 h-12 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-lg shadow-amber-500/30">
@@ -68,7 +74,9 @@
             </div>
         </div>
         <div class="mt-4 flex items-center text-sm">
-            <span class="text-slate-500">Coming soon</span>
+            <span class="text-slate-500">
+                <?= e($stats['page_views_today'] ?? 0) ?> halaman dilihat
+            </span>
         </div>
     </div>
 
@@ -77,7 +85,9 @@
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-slate-500 text-sm font-medium">Penyimpanan</p>
-                <p class="text-3xl font-bold text-slate-800 mt-1">-</p>
+                <p class="text-3xl font-bold text-slate-800 mt-1">
+                    <?= e($stats['storage_size'] ?? '0 B') ?>
+                </p>
             </div>
             <div
                 class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30">
@@ -88,15 +98,74 @@
             </div>
         </div>
         <div class="mt-4 flex items-center text-sm">
-            <span class="text-slate-500">Coming soon</span>
+            <span class="text-slate-500">Total file storage</span>
         </div>
     </div>
 </div>
 
-<!-- Recent News -->
-<div class="grid lg:grid-cols-2 gap-6">
+<!-- Dashboard Content -->
+<div class="grid lg:grid-cols-3 gap-6">
+    <!-- Top Content -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50 lg:col-span-3">
+        <div class="flex items-center justify-between p-6 border-b border-slate-200">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-800">Konten Paling Banyak Dikunjungi</h2>
+                <p class="text-sm text-slate-500 mt-1">Berdasarkan kunjungan 30 hari terakhir</p>
+            </div>
+        </div>
+        <div class="divide-y divide-slate-100">
+            <?php if (!empty($topContent)): ?>
+                <?php foreach ($topContent as $index => $item): ?>
+                    <?php
+                    $contentLabel = match ($item['content_type'] ?? '') {
+                        'news' => 'Berita',
+                        'news_index' => 'Daftar Berita',
+                        'gallery' => 'Galeri',
+                        'gallery_album' => 'Album Galeri',
+                        'profile' => 'Profil',
+                        'gtk' => 'GTK',
+                        'prestasi' => 'Prestasi',
+                        'contact' => 'Kontak',
+                        'spmb' => 'SPMB',
+                        'spmb_register' => 'Form SPMB',
+                        'spmb_status' => 'Cek Status SPMB',
+                        default => 'Halaman',
+                    };
+                    ?>
+                    <a href="<?= e($item['path'] ?? '#') ?>" target="_blank"
+                        class="p-4 flex items-center gap-4 hover:bg-slate-50 transition-colors">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-primary-50 text-primary-700 font-bold flex items-center justify-center">
+                            <?= $index + 1 ?>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-medium text-slate-800 truncate">
+                                <?= e($item['title'] ?? '-') ?>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-1">
+                                <?= e($contentLabel) ?> · <?= e($item['path'] ?? '-') ?>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-sm font-semibold text-slate-800">
+                                <?= e($item['views'] ?? 0) ?> views
+                            </div>
+                            <div class="text-xs text-slate-500">
+                                <?= e($item['visitors'] ?? 0) ?> pengunjung
+                            </div>
+                        </div>
+                    </a>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="p-8 text-center text-slate-500">
+                    Belum ada data kunjungan. Data akan muncul setelah halaman frontend dikunjungi.
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
     <!-- Recent News Table -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50 lg:col-span-2">
         <div class="flex items-center justify-between p-6 border-b border-slate-200">
             <h2 class="text-lg font-semibold text-slate-800">Berita Terbaru</h2>
             <a href="/admin/berita" class="text-primary-600 hover:text-primary-700 text-sm font-medium">Lihat Semua</a>

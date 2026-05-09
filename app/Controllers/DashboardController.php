@@ -20,6 +20,7 @@ class DashboardController extends Controller
     private GalleryItem $galleryModel;
     private HeroSlide $slideModel;
     private Staff $staffModel;
+    private SiteVisit $visitModel;
 
     public function __construct()
     {
@@ -34,6 +35,7 @@ class DashboardController extends Controller
         $this->galleryModel = new GalleryItem();
         $this->slideModel = new HeroSlide();
         $this->staffModel = new Staff();
+        $this->visitModel = new SiteVisit();
     }
 
     /**
@@ -191,13 +193,51 @@ class DashboardController extends Controller
             'stats' => [
                 'news_count' => $this->newsModel->count(),
                 'news_published' => $this->newsModel->countPublished(),
-                'user_count' => $this->userModel->count()
+                'user_count' => $this->userModel->count(),
+                'visitors_today' => $this->visitModel->countVisitorsToday(),
+                'page_views_today' => $this->visitModel->countPageViewsToday(),
+                'storage_size' => $this->formatBytes($this->directorySize(STORAGE_PATH)),
             ],
             'recentNews' => $this->newsModel->getRecent(5),
+            'topContent' => $this->visitModel->getTopContent(6, 30),
             'flash' => $this->getFlash()
         ];
 
         $this->view('backend.dashboard', $data, 'backend');
+    }
+
+    private function directorySize(string $path): int
+    {
+        if (!is_dir($path)) {
+            return 0;
+        }
+
+        $size = 0;
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS)
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile()) {
+                $size += $file->getSize();
+            }
+        }
+
+        return $size;
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        $units = ['B', 'KB', 'MB', 'GB'];
+        $value = (float) $bytes;
+        $unit = 0;
+
+        while ($value >= 1024 && $unit < count($units) - 1) {
+            $value /= 1024;
+            $unit++;
+        }
+
+        return number_format($value, $unit === 0 ? 0 : 1) . ' ' . $units[$unit];
     }
 
     /**

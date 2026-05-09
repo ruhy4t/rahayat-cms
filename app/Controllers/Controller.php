@@ -106,6 +106,10 @@ abstract class Controller
 
         $content = ob_get_clean();
 
+        if ($layout === 'frontend') {
+            $this->trackFrontendVisit($view, $data);
+        }
+
         // If layout is specified, wrap content in layout
         if ($layout) {
             $layoutFile = VIEW_PATH . '/layouts/' . $layout . '.php';
@@ -468,5 +472,78 @@ abstract class Controller
             // Silently fail — don't block upload if watermark fails
             error_log('Watermark failed: ' . $e->getMessage());
         }
+    }
+
+    private function trackFrontendVisit(string $view, array $data): void
+    {
+        if (PHP_SAPI === 'cli' || $this->isLoggedIn()) {
+            return;
+        }
+
+        $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+        if (str_starts_with($path, '/storage') || str_starts_with($path, '/api')) {
+            return;
+        }
+
+        $userAgent = strtolower((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''));
+        if ($userAgent === '' || preg_match('/bot|crawl|spider|slurp|preview|facebookexternalhit|whatsapp/i', $userAgent)) {
+            return;
+        }
+
+        if (empty($_SESSION['_visitor_id'])) {
+            $_SESSION['_visitor_id'] = Security::randomString(32);
+        }
+
+        $meta = $this->resolveVisitContent($view, $data);
+        $ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+        $visitorKey = hash('sha256', $_SESSION['_visitor_id'] . '|' . $ip . '|' . $userAgent);
+
+        try {
+            (new SiteVisit())->record([
+                'visitor_key' => $visitorKey,
+                'path' => $path,
+                'title' => $meta['title'],
+                'content_type' => $meta['content_type'],
+                'content_id' => $meta['content_id'],
+            ]);
+        } catch (\Throwable $e) {
+            error_log('Visit tracking failed: ' . $e->getMessage());
+        }
+    }
+
+    private function resolveVisitContent(string $view, array $data): array
+    {
+        $title = (string) ($data['title'] ?? 'Halaman');
+        $type = match ($view) {
+            'frontend.home' => 'home',
+            'frontend.profile' => 'profile',
+            'frontend.gtk' => 'gtk',
+            'frontend.gallery' => 'gallery',
+            'frontend.gallery-detail' => 'gallery_album',
+            'frontend.contact' => 'contact',
+            'frontend.news.index' => 'news_index',
+            'frontend.news.show' => 'news',
+            'frontend.news.search' => 'search',
+            'frontend.prestasi' => 'prestasi',
+            'frontend.spmb.index' => 'spmb',
+            'frontend.spmb.register' => 'spmb_register',
+            'frontend.spmb.status' => 'spmb_status',
+            default => str_replace('frontend.', '', $view),
+        };
+
+        $contentId = null;
+        if (!empty($data['news']['id'])) {
+            $contentId = (int) $data['news']['id'];
+            $title = (string) $data['news']['title'];
+        } elseif (!empty($data['album']['id'])) {
+            $contentId = (int) $data['album']['id'];
+            $title = (string) $data['album']['title'];
+        }
+
+        return [
+            'title' => substr($title, 0, 255),
+            'content_type' => $type,
+            'content_id' => $contentId,
+        ];
     }
 }
