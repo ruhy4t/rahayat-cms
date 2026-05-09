@@ -4,6 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdn.ckeditor.com 'unsafe-inline';
+        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+        img-src 'self' data: https://*;
+        connect-src 'self' https://cdn.ckeditor.com https://*.ckeditor.com;
+        font-src 'self' https://fonts.gstatic.com;
+        object-src 'none';
+        base-uri 'self';
+        form-action 'self';
+    ">
     <?= Security::csrfMeta() ?>
 
     <title>

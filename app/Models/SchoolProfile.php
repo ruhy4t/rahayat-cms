@@ -77,7 +77,7 @@ class SchoolProfile extends Model
         $existing = $this->getProfile();
 
         if ($existing) {
-            $this->update($existing['id'], $data);
+            $this->update((int) $existing['id'], $data);
         } else {
             $this->create($data);
         }

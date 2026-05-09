@@ -222,7 +222,8 @@ class App
 
         try {
             $settingModel = new SiteSetting();
-            $isMaintenance = $settingModel->get('maintenance_mode') === '1';
+            $maintenanceValue = $settingModel->get('maintenance_mode', false);
+            $isMaintenance = filter_var($maintenanceValue, FILTER_VALIDATE_BOOLEAN);
 
             if ($isMaintenance) {
                 // If user is logged in as admin/staff, allow access

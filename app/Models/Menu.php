@@ -17,10 +17,25 @@ class Menu extends Model
      */
     public function getByLocation(string $location = 'header'): array
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE is_active = 1 AND (menu_location = ? OR menu_location = 'both')
-                ORDER BY sort_order ASC";
-        return $this->db->fetchAll($sql, [$location]);
+        $filters = [];
+        $params = [];
+
+        if ($this->hasColumn('is_active')) {
+            $filters[] = 'is_active = 1';
+        }
+
+        if ($this->hasColumn('menu_location')) {
+            $filters[] = "(menu_location = ? OR menu_location = 'both')";
+            $params[] = $location;
+        }
+
+        $where = empty($filters) ? '1=1' : implode(' AND ', $filters);
+        $orderBy = $this->hasColumn('sort_order') ? 'sort_order ASC' : 'id ASC';
+
+        $sql = "SELECT * FROM {$this->table} WHERE {$where} ORDER BY {$orderBy}";
+        $rows = $this->db->fetchAll($sql, $params);
+
+        return array_map([$this, 'normalizeMenuRow'], $rows);
     }
 
     /**
@@ -55,11 +70,26 @@ class Menu extends Model
      */
     public function getAllForAdmin(): array
     {
+        if (!$this->hasColumn('parent_id')) {
+            $orderBy = $this->hasColumn('sort_order') ? 'sort_order ASC' : 'id ASC';
+            $rows = $this->db->fetchAll("SELECT * FROM {$this->table} ORDER BY {$orderBy}");
+            return array_map(function (array $row): array {
+                $row = $this->normalizeMenuRow($row);
+                $row['parent_title'] = null;
+                return $row;
+            }, $rows);
+        }
+
+        $orderBy = $this->hasColumn('sort_order') ? 'm.sort_order ASC' : 'm.id ASC';
         $sql = "SELECT m.*, p.title as parent_title 
                 FROM {$this->table} m 
                 LEFT JOIN {$this->table} p ON m.parent_id = p.id 
-                ORDER BY m.sort_order ASC";
-        return $this->db->fetchAll($sql);
+                ORDER BY {$orderBy}";
+        $rows = $this->db->fetchAll($sql);
+
+        return array_map(function (array $row): array {
+            return $this->normalizeMenuRow($row);
+        }, $rows);
     }
 
     /**
@@ -78,7 +108,26 @@ class Menu extends Model
      */
     public function getParentMenus(): array
     {
+        if (!$this->hasColumn('parent_id')) {
+            $sql = "SELECT id, title FROM {$this->table} ORDER BY title ASC";
+            return $this->db->fetchAll($sql);
+        }
+
         $sql = "SELECT id, title FROM {$this->table} WHERE parent_id IS NULL ORDER BY title ASC";
         return $this->db->fetchAll($sql);
+    }
+
+    private function normalizeMenuRow(array $row): array
+    {
+        $defaults = [
+            'icon' => null,
+            'parent_id' => null,
+            'sort_order' => 0,
+            'is_active' => 1,
+            'target' => '_self',
+            'menu_location' => 'header',
+        ];
+
+        return $row + $defaults;
     }
 }

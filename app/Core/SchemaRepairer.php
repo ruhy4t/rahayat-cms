@@ -31,7 +31,10 @@ class SchemaRepairer
     {
         $this->ensureCoreTables();
 
-        if ($this->schemaVersion() === APP_VERSION) {
+        // Only skip if version matches AND the database actually has all
+        // required columns and default data.  A partially-imported hosting
+        // database may have the version flag set while columns are missing.
+        if ($this->schemaVersion() === APP_VERSION && $this->hasRequiredSchema()) {
             return;
         }
 
@@ -39,6 +42,7 @@ class SchemaRepairer
         $this->ensureSiteSettingsColumns();
         $this->ensureUsersColumns();
         $this->ensureSchoolProfileColumns();
+        $this->ensureNewsColumns();
         $this->ensureDefaultProfile();
         $this->ensureDefaultMenus();
         $this->ensureDefaultSettings();
@@ -154,7 +158,7 @@ class SchemaRepairer
 
         $this->addColumn('users', 'editor_id', 'INT UNSIGNED NULL');
         $this->addColumn('users', 'is_spmb_committee', 'TINYINT(1) DEFAULT 0');
-        $this->addColumn('users', 'permissions', 'JSON NULL');
+        $this->addColumn('users', 'permissions', 'LONGTEXT NULL');
     }
 
     private function ensureMenusColumns(): void
@@ -228,6 +232,27 @@ class SchemaRepairer
 
         foreach ($columns as $column => $definition) {
             $this->addColumn('school_profile', $column, $definition);
+        }
+    }
+
+    private function ensureNewsColumns(): void
+    {
+        if (!$this->tableExists('news')) {
+            return;
+        }
+
+        $columns = [
+            'slug' => 'VARCHAR(255) NULL',
+            'excerpt' => 'TEXT NULL',
+            'category' => "VARCHAR(50) DEFAULT 'umum'",
+            'category_id' => 'INT UNSIGNED NULL',
+            'status' => "ENUM('draft', 'pending', 'published', 'archived') DEFAULT 'draft'",
+            'views' => 'INT UNSIGNED DEFAULT 0',
+            'published_at' => 'DATETIME NULL',
+        ];
+
+        foreach ($columns as $column => $definition) {
+            $this->addColumn('news', $column, $definition);
         }
     }
 
@@ -328,9 +353,20 @@ class SchemaRepairer
     private function hasRequiredSchema(): bool
     {
         $requiredColumns = [
-            'menus' => ['menu_location', 'target', 'is_active', 'sort_order'],
-            'school_profile' => ['tagline', 'spmb_link', 'welcome_message', 'principal_quote', 'watermark_enabled'],
+            'menus' => ['menu_location', 'target', 'is_active', 'sort_order', 'parent_id', 'icon'],
+            'school_profile' => [
+                'tagline', 'spmb_link', 'welcome_message', 'principal_quote',
+                'watermark_enabled', 'principal_nip', 'principal_photo',
+                'google_maps_embed',
+                // Operating hours (a representative subset is enough)
+                'monday_open', 'monday_close', 'is_closed_monday',
+                'friday_open', 'sunday_close', 'is_closed_sunday',
+                // Statistics
+                'total_students', 'total_teachers', 'graduation_rate',
+            ],
             'site_settings' => ['setting_key', 'setting_value', 'setting_type'],
+            'users' => ['permissions', 'is_spmb_committee', 'editor_id'],
+            'news' => ['slug', 'category', 'status', 'views', 'published_at'],
         ];
 
         foreach ($requiredColumns as $table => $columns) {
@@ -342,6 +378,24 @@ class SchemaRepairer
                     return false;
                 }
             }
+        }
+
+        // Ensure default data exists
+        try {
+            if ($this->tableExists('menus')) {
+                $count = (int) $this->pdo->query('SELECT COUNT(*) FROM menus')->fetchColumn();
+                if ($count === 0) {
+                    return false;
+                }
+            }
+            if ($this->tableExists('school_profile')) {
+                $count = (int) $this->pdo->query('SELECT COUNT(*) FROM school_profile')->fetchColumn();
+                if ($count === 0) {
+                    return false;
+                }
+            }
+        } catch (\Throwable) {
+            return false;
         }
 
         return true;
@@ -361,16 +415,42 @@ class SchemaRepairer
 
     private function tableExists(string $table): bool
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
-        $stmt->execute([$table]);
-        return (int) $stmt->fetchColumn() > 0;
+        try {
+            $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
+            $stmt->execute([$table]);
+            return (int) $stmt->fetchColumn() > 0;
+        } catch (\Throwable) {
+            if (!$this->isSafeIdentifier($table)) {
+                return false;
+            }
+
+            try {
+                $stmt = $this->pdo->query("SHOW TABLES LIKE " . $this->pdo->quote($table));
+                return (bool) $stmt->fetchColumn();
+            } catch (\Throwable) {
+                return false;
+            }
+        }
     }
 
     private function columnExists(string $table, string $column): bool
     {
-        $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?');
-        $stmt->execute([$table, $column]);
-        return (int) $stmt->fetchColumn() > 0;
+        try {
+            $stmt = $this->pdo->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?');
+            $stmt->execute([$table, $column]);
+            return (int) $stmt->fetchColumn() > 0;
+        } catch (\Throwable) {
+            if (!$this->isSafeIdentifier($table)) {
+                return false;
+            }
+
+            try {
+                $stmt = $this->pdo->query("SHOW COLUMNS FROM `{$table}` LIKE " . $this->pdo->quote($column));
+                return (bool) $stmt->fetchColumn();
+            } catch (\Throwable) {
+                return false;
+            }
+        }
     }
 
     private function addColumn(string $table, string $column, string $definition): void
@@ -389,5 +469,10 @@ class SchemaRepairer
         } catch (\Throwable $e) {
             error_log('Schema repair SQL failed: ' . $e->getMessage());
         }
+    }
+
+    private function isSafeIdentifier(string $value): bool
+    {
+        return (bool) preg_match('/^[a-zA-Z0-9_]+$/', $value);
     }
 }

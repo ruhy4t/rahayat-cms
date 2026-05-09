@@ -4,7 +4,7 @@
 -- ============================================
 
 ALTER TABLE users
-ADD COLUMN IF NOT EXISTS permissions JSON NULL COMMENT 'GTK configurable permissions (JSON array)'
+ADD COLUMN IF NOT EXISTS permissions LONGTEXT NULL COMMENT 'GTK configurable permissions (JSON array)'
 AFTER is_spmb_committee;
 
 -- Set default permissions for existing GTK users (all permissions)

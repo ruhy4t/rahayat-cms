@@ -32,6 +32,13 @@ abstract class Controller
                 $footerMenus = $menuModel->getHierarchical('footer');
             } catch (\Throwable $e) {
                 error_log('Frontend menu load failed: ' . $e->getMessage());
+                $headerMenus = [
+                    ['title' => 'Beranda', 'url' => '/', 'target' => '_self', 'children' => []],
+                    ['title' => 'Profil', 'url' => '/profil', 'target' => '_self', 'children' => []],
+                    ['title' => 'Berita', 'url' => '/berita', 'target' => '_self', 'children' => []],
+                    ['title' => 'Galeri', 'url' => '/galeri', 'target' => '_self', 'children' => []],
+                    ['title' => 'Kontak', 'url' => '/kontak', 'target' => '_self', 'children' => []],
+                ];
             }
 
             // Conditionally hide SPMB menus for 'Negeri' schools

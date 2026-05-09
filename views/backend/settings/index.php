@@ -245,7 +245,7 @@ $flash = $data['flash'] ?? null;
             <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="maintenance_mode" value="1" class="sr-only peer"
-                        <?= ($settings['maintenance_mode'] ?? '0') === '1' ? 'checked' : '' ?>>
+                        <?= filter_var($settings['maintenance_mode'] ?? false, FILTER_VALIDATE_BOOLEAN) ? 'checked' : '' ?>>
                     <div
                         class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-orange-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500">
                     </div>

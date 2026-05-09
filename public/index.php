@@ -43,11 +43,69 @@ function isInstalled(): bool
                 PDO::ATTR_EMULATE_PREPARES => false,
             ]
         );
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = ? AND table_name = 'users'");
-        $stmt->execute([DB_NAME]);
-        return (int) $stmt->fetchColumn() > 0;
+        $requiredTables = ['users', 'school_profile', 'site_settings', 'menus'];
+        foreach ($requiredTables as $table) {
+            if (!tableExists($pdo, $table)) {
+                return false;
+            }
+        }
+
+        $requiredColumns = [
+            ['menus', 'menu_location'],
+            ['menus', 'target'],
+            ['menus', 'is_active'],
+            ['school_profile', 'welcome_message'],
+            ['school_profile', 'spmb_link'],
+            ['school_profile', 'monday_open'],
+            ['users', 'is_spmb_committee'],
+            ['users', 'permissions'],
+            ['site_settings', 'setting_key'],
+            ['site_settings', 'setting_value'],
+        ];
+
+        foreach ($requiredColumns as [$table, $column]) {
+            if (!columnExists($pdo, $table, $column)) {
+                return false;
+            }
+        }
+
+        $hasAdmin = (int) $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'")->fetchColumn() > 0;
+        $hasProfile = (int) $pdo->query('SELECT COUNT(*) FROM school_profile')->fetchColumn() > 0;
+        $hasMenu = (int) $pdo->query('SELECT COUNT(*) FROM menus')->fetchColumn() > 0;
+
+        return $hasAdmin && $hasProfile && $hasMenu;
     } catch (\Throwable) {
         return false;
+    }
+}
+
+function tableExists(PDO $pdo, string $table): bool
+{
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
+        $stmt->execute([$table]);
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (\Throwable) {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return false;
+        }
+        $stmt = $pdo->query('SHOW TABLES LIKE ' . $pdo->quote($table));
+        return (bool) $stmt->fetchColumn();
+    }
+}
+
+function columnExists(PDO $pdo, string $table, string $column): bool
+{
+    try {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?');
+        $stmt->execute([$table, $column]);
+        return (int) $stmt->fetchColumn() > 0;
+    } catch (\Throwable) {
+        if (!preg_match('/^[a-zA-Z0-9_]+$/', $table)) {
+            return false;
+        }
+        $stmt = $pdo->query("SHOW COLUMNS FROM `{$table}` LIKE " . $pdo->quote($column));
+        return (bool) $stmt->fetchColumn();
     }
 }
 

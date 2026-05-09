@@ -431,7 +431,7 @@ class DashboardController extends Controller
             $parentMenus = $this->menuModel->getParentMenus();
         } catch (\Throwable $e) {
             error_log('Menu management load failed: ' . $e->getMessage());
-            $this->flash('error', 'Menu belum bisa dimuat karena struktur database belum lengkap. Upload versi terbaru lalu buka ulang halaman ini, atau jalankan file database/migrations/repair_hosting_schema_1_0_2.sql lewat phpMyAdmin.');
+            $this->flash('error', 'Menu belum bisa dimuat karena struktur database belum lengkap. Upload versi terbaru lalu buka ulang halaman ini, atau jalankan database/migrations/repair_hosting_schema_1_0_2.sql. Jika hosting MySQL lama, jalankan database/migrations/repair_hosting_schema_menu_profile_legacy.sql lewat phpMyAdmin.');
             $menus = [];
             $parentMenus = [];
         }
@@ -792,88 +792,148 @@ class DashboardController extends Controller
     {
         $this->requireCsrf();
 
-        $data = [
-            // Informasi Umum
-            'name' => $this->postSafe('name'),
-            'tagline' => $this->postSafe('tagline'),
-            'school_type' => $this->post('school_type'),
-            'spmb_link' => $this->postSafe('spmb_link'),
-            'npsn' => $this->postSafe('npsn'),
-            'accreditation' => $this->postSafe('accreditation'),
-            'established_year' => $this->post('established_year'),
-            'principal_name' => $this->postSafe('principal_name'),
-            'principal_nip' => $this->postSafe('principal_nip'),
-
-            // Visi & Misi
-            'vision' => $this->post('vision'),
-            'mission' => $this->post('mission'),
-            'motto' => $this->post('motto'),
-            'history' => $this->post('history'),
-            'welcome_message' => $this->post('welcome_message'),
-            'principal_quote' => $this->post('principal_quote'),
-
-            // Kontak
-            'address' => $this->postSafe('address'),
-            'phone' => $this->postSafe('phone'),
-            'email' => $this->postSafe('email'),
-            'website' => $this->postSafe('website'),
-            'google_maps_embed' => $this->post('google_maps_embed'),
-
-            // Jam Operasional (per hari)
-            'monday_open' => $this->post('monday_open'),
-            'monday_close' => $this->post('monday_close'),
-            'is_closed_monday' => $this->post('is_closed_monday') ? 1 : 0,
-            'tuesday_open' => $this->post('tuesday_open'),
-            'tuesday_close' => $this->post('tuesday_close'),
-            'is_closed_tuesday' => $this->post('is_closed_tuesday') ? 1 : 0,
-            'wednesday_open' => $this->post('wednesday_open'),
-            'wednesday_close' => $this->post('wednesday_close'),
-            'is_closed_wednesday' => $this->post('is_closed_wednesday') ? 1 : 0,
-            'thursday_open' => $this->post('thursday_open'),
-            'thursday_close' => $this->post('thursday_close'),
-            'is_closed_thursday' => $this->post('is_closed_thursday') ? 1 : 0,
-            'friday_open' => $this->post('friday_open'),
-            'friday_close' => $this->post('friday_close'),
-            'is_closed_friday' => $this->post('is_closed_friday') ? 1 : 0,
-            'saturday_open' => $this->post('saturday_open'),
-            'saturday_close' => $this->post('saturday_close'),
-            'is_closed_saturday' => $this->post('is_closed_saturday') ? 1 : 0,
-            'sunday_open' => $this->post('sunday_open'),
-            'sunday_close' => $this->post('sunday_close'),
-            'is_closed_sunday' => $this->post('is_closed_sunday') ? 1 : 0,
-
-            // Statistik
-            'total_students' => (int) $this->post('total_students', 0),
-            'total_teachers' => (int) $this->post('total_teachers', 0),
-            'graduation_rate' => (int) $this->post('graduation_rate', 100),
-
-            // Watermark
-            'watermark_enabled' => $this->post('watermark_enabled') ? 1 : 0,
-        ];
-
-        // Handle logo upload
-        if (!empty($_FILES['logo']['name'])) {
-            $logoPath = $this->uploadFile($_FILES['logo'], 'logos');
-            if ($logoPath)
-                $data['logo'] = $logoPath;
-        }
-
-        // Handle principal photo upload
-        if (!empty($_FILES['principal_photo']['name'])) {
-            $photoPath = $this->uploadFile($_FILES['principal_photo'], 'photos');
-            if ($photoPath)
-                $data['principal_photo'] = $photoPath;
-        }
-
         try {
+            $data = [
+                // Informasi Umum
+                'name' => $this->postSafe('name'),
+                'tagline' => $this->postSafe('tagline'),
+                'school_type' => $this->normalizeSchoolType($this->post('school_type')),
+                'spmb_link' => $this->postSafe('spmb_link'),
+                'npsn' => $this->postSafe('npsn'),
+                'accreditation' => $this->postSafe('accreditation') ?: null,
+                'established_year' => $this->normalizeYear($this->post('established_year')),
+                'principal_name' => $this->postSafe('principal_name'),
+                'principal_nip' => $this->postSafe('principal_nip'),
+
+                // Visi & Misi
+                'vision' => $this->post('vision'),
+                'mission' => $this->post('mission'),
+                'motto' => $this->post('motto'),
+                'history' => $this->post('history'),
+                'welcome_message' => $this->post('welcome_message'),
+                'principal_quote' => $this->post('principal_quote'),
+
+                // Kontak
+                'address' => $this->postSafe('address'),
+                'phone' => $this->postSafe('phone'),
+                'email' => $this->postSafe('email'),
+                'website' => $this->postSafe('website'),
+                'google_maps_embed' => $this->post('google_maps_embed'),
+
+                // Statistik
+                'total_students' => max(0, (int) $this->post('total_students', 0)),
+                'total_teachers' => max(0, (int) $this->post('total_teachers', 0)),
+                'graduation_rate' => min(100, max(0, (int) $this->post('graduation_rate', 100))),
+
+                // Watermark
+                'watermark_enabled' => $this->post('watermark_enabled') ? 1 : 0,
+            ];
+
+            $data = array_merge($data, $this->profileOperatingHoursData());
+
+            // Handle logo upload
+            if (!empty($_FILES['logo']['name'])) {
+                $logoPath = $this->uploadFile($_FILES['logo'], 'logos');
+                if (!$logoPath) {
+                    throw new RuntimeException('Logo gagal diunggah. Pastikan file berupa JPG, PNG, GIF, atau WebP dan ukurannya maksimal ' . $this->formatBytes(UPLOAD_MAX_SIZE) . '.');
+                }
+                $data['logo'] = $logoPath;
+            }
+
+            // Handle principal photo upload
+            if (!empty($_FILES['principal_photo']['name'])) {
+                $photoPath = $this->uploadFile($_FILES['principal_photo'], 'photos');
+                if (!$photoPath) {
+                    throw new RuntimeException('Foto kepala sekolah gagal diunggah. Pastikan file berupa JPG, PNG, GIF, atau WebP dan ukurannya maksimal ' . $this->formatBytes(UPLOAD_MAX_SIZE) . '.');
+                }
+                $data['principal_photo'] = $photoPath;
+            }
+
             $this->profileModel->saveProfile($data);
             $this->flash('success', 'Profil sekolah berhasil diperbarui');
         } catch (\Throwable $e) {
             error_log('Profile update failed: ' . $e->getMessage());
-            $this->flash('error', 'Profil gagal disimpan karena struktur database belum lengkap. Upload versi terbaru lalu buka ulang halaman ini, atau jalankan file database/migrations/repair_hosting_schema_1_0_2.sql lewat phpMyAdmin.');
+            $this->flash('error', $this->profileUpdateErrorMessage($e));
         }
 
         $this->redirect('/admin/profil');
+    }
+
+    private function normalizeSchoolType(mixed $value): string
+    {
+        return in_array($value, ['negeri', 'swasta'], true) ? (string) $value : 'negeri';
+    }
+
+    private function normalizeYear(mixed $value): ?int
+    {
+        $year = trim((string) ($value ?? ''));
+        if ($year === '') {
+            return null;
+        }
+
+        if (!preg_match('/^\d{4}$/', $year)) {
+            throw new RuntimeException('Tahun berdiri harus berupa 4 digit, misalnya 1998.');
+        }
+
+        $yearInt = (int) $year;
+        $currentYear = (int) date('Y') + 1;
+        if ($yearInt < 1800 || $yearInt > $currentYear) {
+            throw new RuntimeException('Tahun berdiri tidak valid.');
+        }
+
+        return $yearInt;
+    }
+
+    private function profileOperatingHoursData(): array
+    {
+        $defaults = [
+            'monday' => ['07:00', '15:00', 0],
+            'tuesday' => ['07:00', '15:00', 0],
+            'wednesday' => ['07:00', '15:00', 0],
+            'thursday' => ['07:00', '15:00', 0],
+            'friday' => ['07:00', '15:00', 0],
+            'saturday' => ['07:00', '12:00', 0],
+            'sunday' => ['07:00', '15:00', 1],
+        ];
+
+        $data = [];
+        foreach ($defaults as $day => [$openDefault, $closeDefault]) {
+            $isClosed = $this->post("is_closed_{$day}") ? 1 : 0;
+            $data["{$day}_open"] = $this->normalizeTime($this->post("{$day}_open"), $openDefault);
+            $data["{$day}_close"] = $this->normalizeTime($this->post("{$day}_close"), $closeDefault);
+            $data["is_closed_{$day}"] = $isClosed;
+        }
+
+        return $data;
+    }
+
+    private function normalizeTime(mixed $value, string $default): string
+    {
+        $time = trim((string) ($value ?? ''));
+        if ($time === '') {
+            return $default;
+        }
+
+        if (!preg_match('/^(?:[01]\d|2[0-3]):[0-5]\d$/', $time)) {
+            throw new RuntimeException('Format jam operasional tidak valid.');
+        }
+
+        return $time;
+    }
+
+    private function profileUpdateErrorMessage(\Throwable $e): string
+    {
+        $message = $e->getMessage();
+
+        if ($message !== '' && str_contains($message, 'Unknown column')) {
+            return 'Profil gagal disimpan karena ada kolom database yang belum lengkap: ' . $message . '. Jalankan ulang installer terbaru atau migration repair.';
+        }
+
+        if ($message !== '' && str_contains($message, 'Data truncated')) {
+            return 'Profil gagal disimpan karena ada nilai form yang tidak cocok dengan tipe kolom database: ' . $message;
+        }
+
+        return 'Profil gagal disimpan: ' . ($message ?: 'Terjadi error tidak diketahui. Cek error_log hosting untuk detail.');
     }
 
     // ===================================================
