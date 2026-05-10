@@ -285,7 +285,8 @@ abstract class Controller
 
     protected function editorContent(string $key = 'content'): string
     {
-        return $this->normalizeEditorAssetUrls((string) $this->post($key, ''));
+        $content = $this->normalizeEditorAssetUrls((string) $this->post($key, ''));
+        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''));
     }
 
     protected function normalizeEditorAssetUrls(string $content): string
@@ -370,6 +371,68 @@ abstract class Controller
         }
 
         return $url;
+    }
+
+    private function appendEditorEmbeds(string $content, string $embedsJson): string
+    {
+        if ($embedsJson === '') {
+            return $content;
+        }
+
+        $embeds = json_decode($embedsJson, true);
+        if (!is_array($embeds)) {
+            return $content;
+        }
+
+        foreach ($embeds as $embed) {
+            if (!is_array($embed)) {
+                continue;
+            }
+
+            $url = $this->normalizeEditorAssetUrl((string) ($embed['url'] ?? ''));
+            if (!$this->isAllowedNewsEmbedUrl($url) || str_contains($content, $url)) {
+                continue;
+            }
+
+            $type = strtolower((string) ($embed['type'] ?? ''));
+            $title = (string) ($embed['title'] ?? '');
+            $html = $this->buildEditorEmbedHtml($url, $type, $title);
+            if ($html !== '') {
+                $content .= "\n" . $html;
+            }
+        }
+
+        return $this->normalizeEditorAssetUrls($content);
+    }
+
+    private function isAllowedNewsEmbedUrl(string $url): bool
+    {
+        if (!str_starts_with($url, '/storage/uploads/news/')) {
+            return false;
+        }
+
+        $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        return in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf'], true);
+    }
+
+    private function buildEditorEmbedHtml(string $url, string $type, string $title = ''): string
+    {
+        $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $safeUrl = Security::escape($url);
+        $safeTitle = Security::escape($title !== '' ? $title : pathinfo($path, PATHINFO_FILENAME));
+
+        if ($type === 'pdf' || $extension === 'pdf') {
+            return '<figure class="pdf-embed"><iframe src="' . $safeUrl . '" title="' . $safeTitle . '" loading="lazy"></iframe><figcaption>' . $safeTitle . '</figcaption></figure>';
+        }
+
+        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true)) {
+            return '<figure class="image"><img src="' . $safeUrl . '" alt="' . $safeTitle . '"></figure>';
+        }
+
+        return '';
     }
 
     /**

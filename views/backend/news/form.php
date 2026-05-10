@@ -11,6 +11,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
     <form id="newsForm" enctype="multipart/form-data">
         <?= Security::csrfInput() ?>
+        <input type="hidden" id="editorEmbedsJson" name="editor_embeds_json" value="[]">
         <div class="flex flex-col lg:flex-row">
             <!-- Left Column: Main Content -->
             <div class="flex-1 p-6 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-200">
@@ -228,6 +229,28 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
         }
 
         // Custom Upload Adapter
+        const editorEmbeds = [];
+
+        function rememberEditorEmbed(embed) {
+            if (!embed?.url || editorEmbeds.some(item => item.url === embed.url)) {
+                return;
+            }
+
+            editorEmbeds.push(embed);
+            const embedsInput = document.getElementById('editorEmbedsJson');
+            if (embedsInput) embedsInput.value = JSON.stringify(editorEmbeds);
+        }
+
+        function escapeHtml(value) {
+            return String(value || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
         class MyUploadAdapter {
             constructor(loader) {
                 this.loader = loader;
@@ -270,9 +293,20 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                         return reject(response && response.error ? response.error.message : genericErrorText);
                     }
 
-                    resolve({
-                        default: response.url || response.default
-                    });
+                    const url = response.url || response.default;
+                    if (!url) {
+                        return reject(genericErrorText);
+                    }
+
+                    if (url) {
+                        rememberEditorEmbed({
+                            type: 'image',
+                            url: url,
+                            title: file.name || 'Gambar berita'
+                        });
+                    }
+
+                    resolve({ default: url });
                 });
 
                 if (xhr.upload) {
@@ -400,8 +434,6 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
         const pdfInput = document.getElementById('pdfUpload');
         const pdfButton = document.getElementById('pdfUploadBtn');
         const pdfStatus = document.getElementById('pdfUploadStatus');
-        const pendingPdfEmbeds = [];
-
         function insertHtmlToEditor(html) {
             if (window.editorInstance) {
                 try {
@@ -463,7 +495,11 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     }
 
                     insertHtmlToEditor(result.embedHtml);
-                    pendingPdfEmbeds.push({ url: result.url, html: result.embedHtml });
+                    rememberEditorEmbed({
+                        type: 'pdf',
+                        url: result.url,
+                        title: file.name.replace(/\.pdf$/i, '')
+                    });
                     showNotification('success', 'PDF berhasil ditambahkan ke isi berita.');
                     if (pdfStatus) pdfStatus.textContent = file.name;
                 } catch (error) {
@@ -490,9 +526,15 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                 } else {
                     content = document.getElementById('content').value;
                 }
-                pendingPdfEmbeds.forEach(embed => {
+                editorEmbeds.forEach(embed => {
                     if (embed.url && !content.includes(embed.url)) {
-                        content += embed.html;
+                        if (embed.type === 'pdf') {
+                            const title = escapeHtml(embed.title || 'Dokumen PDF');
+                            content += `<figure class="pdf-embed"><iframe src="${embed.url}" title="${title}" loading="lazy"></iframe><figcaption>${title}</figcaption></figure>`;
+                        } else if (embed.type === 'image') {
+                            const title = escapeHtml(embed.title || 'Gambar berita');
+                            content += `<figure class="image"><img src="${embed.url}" alt="${title}"></figure>`;
+                        }
                     }
                 });
 
