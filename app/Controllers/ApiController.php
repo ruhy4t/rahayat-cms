@@ -133,7 +133,16 @@ class ApiController extends Controller
             $this->jsonError('Berita tidak ditemukan', 404);
         }
 
-        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+        $originalContent = (string) ($news['content'] ?? '');
+        $preparedContent = $this->prepareStoredEditorContent($originalContent);
+        if ($preparedContent !== $originalContent) {
+            try {
+                $this->newsModel->update((int) $id, ['content' => $preparedContent]);
+            } catch (\Throwable $e) {
+                error_log('News API content preparation failed: ' . $e->getMessage());
+            }
+        }
+        $news['content'] = $preparedContent;
 
         $this->jsonSuccess($news);
     }

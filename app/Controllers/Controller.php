@@ -306,6 +306,14 @@ abstract class Controller
         }, $content) ?? $content;
     }
 
+    protected function prepareStoredEditorContent(string $content): string
+    {
+        $content = $this->persistEditorDataImages($content);
+        $content = $this->normalizeEditorAssetUrls($content);
+
+        return $this->removeEmptyImageFigures($content);
+    }
+
     protected function normalizeEditorAssetUrls(string $content): string
     {
         if ($content === '' || (stripos($content, 'storage') === false && stripos($content, 'uploads/') === false)) {
@@ -420,6 +428,15 @@ abstract class Controller
         }
 
         return $this->normalizeEditorAssetUrls($content);
+    }
+
+    private function removeEmptyImageFigures(string $content): string
+    {
+        if ($content === '' || stripos($content, 'figure') === false || stripos($content, 'image') === false) {
+            return $content;
+        }
+
+        return preg_replace('/<figure\b(?=[^>]*\bclass=(["\'])(?:(?!\1).)*\bimage\b(?:(?!\1).)*\1)[^>]*>(?:\s|&nbsp;|<p>(?:\s|&nbsp;)*<\/p>)*<\/figure>/i', '', $content) ?? $content;
     }
 
     private function extractEditorEmbedsFromContent(string $content): array

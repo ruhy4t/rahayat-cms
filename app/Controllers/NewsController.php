@@ -66,7 +66,16 @@ class NewsController extends Controller
             return;
         }
 
-        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+        $originalContent = (string) ($news['content'] ?? '');
+        $preparedContent = $this->prepareStoredEditorContent($originalContent);
+        if ($preparedContent !== $originalContent) {
+            try {
+                $this->newsModel->update((int) $news['id'], ['content' => $preparedContent]);
+            } catch (\Throwable $e) {
+                error_log('Public news content preparation failed: ' . $e->getMessage());
+            }
+        }
+        $news['content'] = $preparedContent;
 
         // Increment view count (fail silently if column missing on hosting)
         try {

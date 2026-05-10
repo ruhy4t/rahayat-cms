@@ -331,7 +331,16 @@ class DashboardController extends Controller
             $this->redirect('/admin/berita');
         }
 
-        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+        $originalContent = (string) ($news['content'] ?? '');
+        $preparedContent = $this->prepareStoredEditorContent($originalContent);
+        if ($preparedContent !== $originalContent) {
+            try {
+                $this->newsModel->update((int) $id, ['content' => $preparedContent]);
+            } catch (\Throwable $e) {
+                error_log('News editor content preparation failed: ' . $e->getMessage());
+            }
+        }
+        $news['content'] = $preparedContent;
 
         $data = [
             'title' => 'Edit Berita',
