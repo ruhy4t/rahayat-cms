@@ -10,6 +10,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
     <form id="newsForm" enctype="multipart/form-data">
+        <?= Security::csrfInput() ?>
         <div class="flex flex-col lg:flex-row">
             <!-- Left Column: Main Content -->
             <div class="flex-1 p-6 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-200">
@@ -174,6 +175,46 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 <!-- Script Handling -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const csrfFieldName = '<?= CSRF_TOKEN_NAME ?>';
+
+        function getCsrfToken() {
+            const csrfInput = document.querySelector(`input[name="${csrfFieldName}"]`);
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+
+            return csrfInput?.value || csrfTokenMeta?.getAttribute('content') || '';
+        }
+
+        function updateCsrfToken(token) {
+            const csrfInput = document.querySelector(`input[name="${csrfFieldName}"]`);
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+
+            if (csrfInput) csrfInput.value = token;
+            if (csrfTokenMeta) csrfTokenMeta.setAttribute('content', token);
+        }
+
+        async function refreshCsrfToken() {
+            let csrfToken = getCsrfToken();
+
+            try {
+                const tokenResponse = await fetch('/api/csrf-token', {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    credentials: 'same-origin',
+                    cache: 'no-store'
+                });
+                const tokenPayload = await tokenResponse.json();
+                const freshToken = tokenPayload?.data?.token;
+                if (freshToken) {
+                    csrfToken = freshToken;
+                    updateCsrfToken(freshToken);
+                }
+            } catch (tokenError) {
+                console.warn('CSRF token refresh failed, using current page token.', tokenError);
+            }
+
+            return csrfToken;
+        }
+
         // Custom Upload Adapter
         class MyUploadAdapter {
             constructor(loader) {
@@ -182,10 +223,12 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 
             upload() {
                 return this.loader.file
-                    .then(file => new Promise((resolve, reject) => {
-                        this._initRequest();
-                        this._initListeners(resolve, reject, file);
-                        this._sendRequest(file);
+                    .then(file => refreshCsrfToken().then(csrfToken => {
+                        return new Promise((resolve, reject) => {
+                            this._initRequest();
+                            this._initListeners(resolve, reject, file);
+                            this._sendRequest(file, csrfToken);
+                        });
                     }));
             }
 
@@ -230,9 +273,15 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                 }
             }
 
-            _sendRequest(file) {
+            _sendRequest(file, csrfToken) {
                 const data = new FormData();
                 data.append('upload', file);
+
+                if (csrfToken) {
+                    data.append(csrfFieldName, csrfToken);
+                    this.xhr.setRequestHeader('X-CSRF-TOKEN', csrfToken);
+                }
+
                 this.xhr.send(data);
             }
         }
@@ -329,7 +378,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
         // 3. Form Submission Logic
         const form = document.getElementById('newsForm');
         if (form) {
-            form.addEventListener('submit', function (e) {
+            form.addEventListener('submit', async function (e) {
                 e.preventDefault();
 
                 // Sync CKEditor data to textarea
@@ -340,12 +389,11 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     content = document.getElementById('content').value;
                 }
 
+                const csrfToken = await refreshCsrfToken();
+
                 const formData = new FormData(this);
                 formData.set('content', content);
-
-                // Get CSRF Token
-                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-                const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+                formData.set(csrfFieldName, csrfToken);
 
                 // Setup Endpoint (API)
                 const isEdit = <?= $isEdit ? 'true' : 'false' ?>;
@@ -373,17 +421,21 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                 })
                     .then(async response => {
                         const text = await response.text();
+                        let data;
+
                         // Try to parse JSON
                         try {
-                            const data = JSON.parse(text);
-                            if (!response.ok || !data.success) {
-                                throw new Error(data.message || 'Server returned an error.');
-                            }
-                            return data;
+                            data = JSON.parse(text);
                         } catch (e) {
                             console.error('Server Raw Response:', text);
                             throw new Error('Server returned invalid JSON. Cek Console untuk detail raw response.');
                         }
+
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Server returned an error.');
+                        }
+
+                        return data;
                     })
                     .then(data => {
                         showNotification('success', data.message || 'Berita berhasil disimpan!');

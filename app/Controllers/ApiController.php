@@ -114,6 +114,14 @@ class ApiController extends Controller
         $this->jsonSuccess($result);
     }
 
+    public function csrfToken(): void
+    {
+        $this->jsonSuccess([
+            'token' => Security::csrf(),
+            'field' => CSRF_TOKEN_NAME,
+        ]);
+    }
+
     /**
      * Get single news
      */
@@ -134,7 +142,7 @@ class ApiController extends Controller
     public function newsStore(): void
     {
         // Validate CSRF
-        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME);
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME) ?? $this->post('csrf_token');
         if (!Security::validateCsrfToken($token)) {
             $this->jsonError('Invalid CSRF token', 403);
         }
@@ -206,7 +214,7 @@ class ApiController extends Controller
     public function newsUpdate(string $id): void
     {
         // Validate CSRF
-        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME);
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME) ?? $this->post('csrf_token');
         if (!Security::validateCsrfToken($token)) {
             $this->jsonError('Invalid CSRF token', 403);
         }

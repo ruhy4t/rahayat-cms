@@ -141,6 +141,7 @@ class App
         $this->router->add('admin/pembaruan/run', ['controller' => 'Dashboard', 'action' => 'systemUpdateRun']);
 
         // API routes for AJAX
+        $this->router->add('api/csrf-token', ['controller' => 'Api', 'action' => 'csrfToken']);
         $this->router->add('api/users/change-password', ['controller' => 'Api', 'action' => 'changePassword']);
         $this->router->add('api/news', ['controller' => 'Api', 'action' => 'news']);
         $this->router->add('api/news/store', ['controller' => 'Api', 'action' => 'newsStore']);
