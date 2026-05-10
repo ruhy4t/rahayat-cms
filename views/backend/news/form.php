@@ -3,6 +3,7 @@ $isEdit = isset($news);
 $item = $isEdit ? $news : [];
 $currentUser = $data['user'] ?? $user ?? [];
 $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
+$editorUploadBatch = Security::randomString(32);
 ?>
 
 <!-- CKEditor 5 Superbuild (Includes all features + Table Resize) -->
@@ -12,6 +13,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
     <form id="newsForm" enctype="multipart/form-data">
         <?= Security::csrfInput() ?>
         <input type="hidden" id="editorEmbedsJson" name="editor_embeds_json" value="[]">
+        <input type="hidden" id="editorUploadBatch" name="editor_upload_batch" value="<?= e($editorUploadBatch) ?>">
         <div class="flex flex-col lg:flex-row">
             <!-- Left Column: Main Content -->
             <div class="flex-1 p-6 space-y-6 border-b lg:border-b-0 lg:border-r border-slate-200">
@@ -189,6 +191,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const csrfFieldName = '<?= CSRF_TOKEN_NAME ?>';
+        const editorUploadBatch = document.getElementById('editorUploadBatch')?.value || '';
 
         function getCsrfToken() {
             const csrfInput = document.querySelector(`input[name="${csrfFieldName}"]`);
@@ -364,6 +367,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
             _sendRequest(file, csrfToken) {
                 const data = new FormData();
                 data.append('upload', file);
+                if (editorUploadBatch) data.append('editor_upload_batch', editorUploadBatch);
 
                 if (csrfToken) {
                     data.append(csrfFieldName, csrfToken);
@@ -520,6 +524,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     const formData = new FormData();
                     formData.append('pdf', file);
                     formData.append(csrfFieldName, csrfToken);
+                    if (editorUploadBatch) formData.append('editor_upload_batch', editorUploadBatch);
 
                     const response = await fetch('/admin/upload/pdf', {
                         method: 'POST',

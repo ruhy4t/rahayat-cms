@@ -287,7 +287,9 @@ abstract class Controller
     {
         $content = $this->persistEditorDataImages((string) $this->post($key, ''));
         $content = $this->normalizeEditorAssetUrls($content);
-        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent);
+        $batchEmbeds = $this->editorUploadBatchEmbeds((string) $this->post('editor_upload_batch', ''));
+
+        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent, $batchEmbeds);
     }
 
     protected function persistEditorDataImages(string $content): string
@@ -398,9 +400,47 @@ abstract class Controller
         return $url;
     }
 
-    private function appendEditorEmbeds(string $content, string $embedsJson, string $existingContent = ''): string
+    protected function rememberEditorUpload(string $batch, string $url, string $type, string $title = ''): void
     {
-        $embeds = $this->extractEditorEmbedsFromContent($existingContent);
+        if (!$this->isValidEditorUploadBatch($batch) || !$this->isAllowedNewsEmbedUrl($url)) {
+            return;
+        }
+
+        $_SESSION['_news_editor_uploads'] ??= [];
+        $_SESSION['_news_editor_uploads'][$batch] ??= [];
+
+        foreach ($_SESSION['_news_editor_uploads'][$batch] as $upload) {
+            if (($upload['url'] ?? '') === $url) {
+                return;
+            }
+        }
+
+        $_SESSION['_news_editor_uploads'][$batch][] = [
+            'type' => $type,
+            'url' => $url,
+            'title' => $title,
+            'time' => time(),
+        ];
+    }
+
+    private function editorUploadBatchEmbeds(string $batch): array
+    {
+        if (!$this->isValidEditorUploadBatch($batch)) {
+            return [];
+        }
+
+        $uploads = $_SESSION['_news_editor_uploads'][$batch] ?? [];
+        return is_array($uploads) ? $uploads : [];
+    }
+
+    private function isValidEditorUploadBatch(string $batch): bool
+    {
+        return preg_match('/^[a-f0-9]{16,64}$/i', $batch) === 1;
+    }
+
+    private function appendEditorEmbeds(string $content, string $embedsJson, string $existingContent = '', array $extraEmbeds = []): string
+    {
+        $embeds = array_merge($this->extractEditorEmbedsFromContent($existingContent), $extraEmbeds);
 
         if ($embedsJson !== '') {
             $postedEmbeds = json_decode($embedsJson, true);

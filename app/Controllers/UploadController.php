@@ -33,6 +33,12 @@ class UploadController extends Controller
 
         if ($uploadPath) {
             $url = '/storage/' . $uploadPath;
+            $this->rememberEditorUpload(
+                (string) $this->post('editor_upload_batch', ''),
+                $url,
+                'image',
+                (string) ($file['name'] ?? 'Gambar berita')
+            );
 
             // Return JSON response for CKEditor
             echo json_encode([
@@ -77,6 +83,13 @@ class UploadController extends Controller
         }
 
         $url = '/storage/' . $uploadPath;
+        $this->rememberEditorUpload(
+            (string) $this->post('editor_upload_batch', ''),
+            $url,
+            'pdf',
+            pathinfo((string) ($_FILES['pdf']['name'] ?? 'Dokumen PDF'), PATHINFO_FILENAME)
+        );
+
         echo json_encode([
             'success' => true,
             'url' => $url,
