@@ -324,7 +324,7 @@ abstract class Controller
             return $content;
         }
 
-        return preg_replace_callback('/\b(src|srcset)=([\'"])(.*?)\2/i', function (array $matches): string {
+        return preg_replace_callback('/\b(src|srcset|href)=([\'"])(.*?)\2/i', function (array $matches): string {
             $attribute = strtolower($matches[1]);
             $quote = $matches[2];
             $value = html_entity_decode($matches[3], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -501,6 +501,7 @@ abstract class Controller
             $content = preg_replace('/<figure\b[^>]*>[\s\S]*?' . $quoted . '[\s\S]*?<\/figure>/i', '', $content) ?? $content;
             $content = preg_replace('/<p>\s*<iframe\b[^>]*src=(["\'])' . $quoted . '\1[^>]*>\s*<\/iframe>\s*<\/p>/i', '', $content) ?? $content;
             $content = preg_replace('/<iframe\b[^>]*src=(["\'])' . $quoted . '\1[^>]*>\s*<\/iframe>/i', '', $content) ?? $content;
+            $content = preg_replace('/<img\b[^>]*src=(["\'])' . $quoted . '\1[^>]*>/i', '', $content) ?? $content;
             $content = preg_replace('/<a\b[^>]*href=(["\'])' . $quoted . '\1[^>]*>[\s\S]*?<\/a>/i', '', $content) ?? $content;
         }
 

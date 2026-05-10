@@ -54,9 +54,9 @@ $editorUploadBatch = Security::randomString(32);
                         </button>
                         <span id="pdfUploadStatus" class="text-xs text-slate-500">PDF maks. 10MB.</span>
                     </div>
-                    <div id="pdfEmbedManager" class="hidden mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
-                        <div class="text-xs font-semibold text-slate-600 mb-2">PDF di isi berita</div>
-                        <div id="pdfEmbedList" class="space-y-2"></div>
+                    <div id="editorMediaManager" class="hidden mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div class="text-xs font-semibold text-slate-600 mb-2">Media di isi berita</div>
+                        <div id="editorMediaList" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
@@ -325,58 +325,98 @@ $editorUploadBatch = Security::randomString(32);
             if (textarea) textarea.value = html;
         }
 
-        function extractPdfEmbeds(html) {
-            const pdfs = new Map();
-            const pattern = /\b(?:src|href)=["']([^"']+\.pdf(?:\?[^"']*)?)["'][^>]*?(?:title=["']([^"']*)["'])?/gi;
-            let match;
+        function mediaTypeFromUrl(url) {
+            const path = (url || '').split('?')[0].toLowerCase();
+            if (path.endsWith('.pdf')) return 'pdf';
+            if (/\.(jpe?g|png|gif|webp)$/.test(path)) return 'image';
+            return '';
+        }
 
-            while ((match = pattern.exec(html)) !== null) {
-                const url = normalizeEditorMediaUrl(match[1]);
-                if (!url || removedEditorEmbeds.has(url)) continue;
+        function mediaTitleFromElement(element, url, type) {
+            const caption = element.closest('figure')?.querySelector('figcaption')?.textContent?.trim();
+            const fallback = type === 'pdf' ? 'Dokumen PDF' : 'Gambar berita';
+            let filename = (url.split('/').pop() || fallback).replace(/\.(jpe?g|png|gif|webp|pdf)(?:\?.*)?$/i, '');
 
-                const title = match[2] || decodeURIComponent((url.split('/').pop() || 'Dokumen PDF').replace(/\.pdf(?:\?.*)?$/i, ''));
-                pdfs.set(url, title);
+            try {
+                filename = decodeURIComponent(filename);
+            } catch (error) {
+                // Keep the raw filename if the URL contains an invalid escape sequence.
             }
 
-            return [...pdfs.entries()].map(([url, title]) => ({ url, title }));
+            return element.getAttribute('title') || element.getAttribute('alt') || caption || filename || fallback;
         }
 
-        function removePdfFromHtml(html, url) {
-            const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const relativeUrl = escapedUrl.replace(/^\\\/storage\\\//, '\\/?storage/');
-            const urlPattern = `(?:${escapedUrl}|${relativeUrl})`;
+        function extractEditorMediaEmbeds(html) {
+            const media = new Map();
+            const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
 
-            html = html.replace(new RegExp(`<figure\\b[^>]*>[\\s\\S]*?${urlPattern}[\\s\\S]*?<\\/figure>`, 'gi'), '');
-            html = html.replace(new RegExp(`<p>\\s*<iframe\\b[^>]*(?:src=["']${urlPattern}["'])[^>]*>\\s*<\\/iframe>\\s*<\\/p>`, 'gi'), '');
-            html = html.replace(new RegExp(`<iframe\\b[^>]*(?:src=["']${urlPattern}["'])[^>]*>\\s*<\\/iframe>`, 'gi'), '');
-            html = html.replace(new RegExp(`<a\\b[^>]*(?:href=["']${urlPattern}["'])[^>]*>[\\s\\S]*?<\\/a>`, 'gi'), '');
+            doc.querySelectorAll('img[src], iframe[src], a[href]').forEach(element => {
+                const url = normalizeEditorMediaUrl(element.getAttribute('src') || element.getAttribute('href'));
+                const type = mediaTypeFromUrl(url);
+                if (!url || !type || removedEditorEmbeds.has(url)) return;
 
-            return html;
+                media.set(url, {
+                    type,
+                    url,
+                    title: mediaTitleFromElement(element, url, type)
+                });
+            });
+
+            return [...media.values()];
         }
 
-        function renderPdfEmbedManager() {
-            const manager = document.getElementById('pdfEmbedManager');
-            const list = document.getElementById('pdfEmbedList');
+        function removeEditorMediaFromHtml(html, url) {
+            const doc = new DOMParser().parseFromString(`<div>${html}</div>`, 'text/html');
+            const wrapper = doc.body.firstElementChild;
+            if (!wrapper) return html;
+
+            wrapper.querySelectorAll('img[src], iframe[src], a[href]').forEach(element => {
+                const elementUrl = normalizeEditorMediaUrl(element.getAttribute('src') || element.getAttribute('href'));
+                if (elementUrl !== url) return;
+
+                const figure = element.closest('figure');
+                if (figure) {
+                    figure.remove();
+                    return;
+                }
+
+                const parent = element.parentElement;
+                element.remove();
+                if (parent?.tagName === 'P' && parent.textContent.trim() === '' && parent.querySelectorAll('*').length === 0) {
+                    parent.remove();
+                }
+            });
+
+            return wrapper.innerHTML;
+        }
+
+        function renderEditorMediaManager() {
+            const manager = document.getElementById('editorMediaManager');
+            const list = document.getElementById('editorMediaList');
             if (!manager || !list) return;
 
-            const pdfs = extractPdfEmbeds(getEditorHtml());
-            manager.classList.toggle('hidden', pdfs.length === 0);
+            const mediaItems = extractEditorMediaEmbeds(getEditorHtml());
+            manager.classList.toggle('hidden', mediaItems.length === 0);
             list.innerHTML = '';
 
-            pdfs.forEach(pdf => {
+            mediaItems.forEach(media => {
+                const isImage = media.type === 'image';
                 const row = document.createElement('div');
                 row.className = 'flex items-center justify-between gap-3 rounded-md bg-white border border-slate-200 px-3 py-2';
                 row.innerHTML = `
-                    <div class="min-w-0">
-                        <div class="text-sm font-medium text-slate-700 truncate">${escapeHtml(pdf.title || 'Dokumen PDF')}</div>
-                        <div class="text-xs text-slate-400 truncate">${escapeHtml(pdf.url)}</div>
+                    <div class="flex items-center gap-3 min-w-0">
+                        ${isImage ? `<img src="${escapeHtml(media.url)}" alt="" class="w-12 h-12 rounded object-cover bg-slate-100 border border-slate-200">` : `<div class="w-12 h-12 rounded bg-red-50 border border-red-100 flex items-center justify-center text-red-600 text-xs font-bold">PDF</div>`}
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium text-slate-700 truncate">${escapeHtml(media.title || (isImage ? 'Gambar berita' : 'Dokumen PDF'))}</div>
+                            <div class="text-xs text-slate-400 truncate">${escapeHtml(media.url)}</div>
+                        </div>
                     </div>
                     <button type="button" class="shrink-0 px-3 py-1.5 rounded-md bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100">Hapus</button>
                 `;
                 row.querySelector('button').addEventListener('click', () => {
-                    rememberRemovedEditorEmbed(pdf.url);
-                    setEditorHtml(removePdfFromHtml(getEditorHtml(), pdf.url));
-                    renderPdfEmbedManager();
+                    rememberRemovedEditorEmbed(media.url);
+                    setEditorHtml(removeEditorMediaFromHtml(getEditorHtml(), media.url));
+                    renderEditorMediaManager();
                 });
                 list.appendChild(row);
             });
@@ -536,10 +576,10 @@ $editorUploadBatch = Security::randomString(32);
                         writer.setStyle('min-height', '400px', editor.editing.view.document.getRoot());
                     });
 
-                    renderPdfEmbedManager();
+                    renderEditorMediaManager();
                     editor.model.document.on('change:data', () => {
                         window.clearTimeout(window.__newsPdfRenderTimer);
-                        window.__newsPdfRenderTimer = window.setTimeout(renderPdfEmbedManager, 250);
+                        window.__newsPdfRenderTimer = window.setTimeout(renderEditorMediaManager, 250);
                     });
                 })
                 .catch(err => {
@@ -639,7 +679,7 @@ $editorUploadBatch = Security::randomString(32);
                         url: result.url,
                         title: file.name.replace(/\.pdf$/i, '')
                     });
-                    renderPdfEmbedManager();
+                    renderEditorMediaManager();
                     showNotification('success', 'PDF berhasil ditambahkan ke isi berita.');
                     if (pdfStatus) pdfStatus.textContent = file.name;
                 } catch (error) {

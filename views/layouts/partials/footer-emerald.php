@@ -120,5 +120,13 @@
                 Tema Emerald Campus
             </p>
         </div>
+        <div class="mt-4 text-center md:text-left">
+            <?php
+            $appDisclaimerClass = 'text-xs text-slate-500';
+            $appDisclaimerLabelClass = 'font-semibold text-slate-700';
+            $appDisclaimerHighlightClass = 'font-semibold text-primary-700';
+            include __DIR__ . '/app-disclaimer.php';
+            ?>
+        </div>
     </div>
 </footer>
