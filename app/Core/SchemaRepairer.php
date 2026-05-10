@@ -495,7 +495,7 @@ class SchemaRepairer
             ],
             'site_settings' => ['setting_key', 'setting_value', 'setting_type'],
             'users' => ['permissions', 'is_spmb_committee', 'editor_id'],
-            'news' => ['slug', 'category', 'status', 'views', 'published_at'],
+            'news' => ['slug', 'category', 'status', 'views', 'published_at', 'meta_description', 'meta_keywords'],
             'gallery_albums' => ['slug', 'type', 'cover_image', 'is_active', 'sort_order'],
             'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'is_active', 'sort_order'],
         ];

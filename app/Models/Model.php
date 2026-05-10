@@ -69,6 +69,7 @@ abstract class Model
     {
         // Filter only fillable fields
         $data = array_intersect_key($data, array_flip($this->fillable));
+        $data = $this->filterExistingColumns($data);
 
         if ($this->hasColumn('created_at')) {
             $data['created_at'] = date('Y-m-d H:i:s');
@@ -91,6 +92,7 @@ abstract class Model
     {
         // Filter only fillable fields
         $data = array_intersect_key($data, array_flip($this->fillable));
+        $data = $this->filterExistingColumns($data);
 
         if ($this->hasColumn('updated_at')) {
             $data['updated_at'] = date('Y-m-d H:i:s');
@@ -180,6 +182,16 @@ abstract class Model
     protected function hasColumn(string $column): bool
     {
         return in_array($column, $this->getTableColumns(), true);
+    }
+
+    protected function filterExistingColumns(array $data): array
+    {
+        $columns = $this->getTableColumns();
+        if (empty($columns)) {
+            return $data;
+        }
+
+        return array_intersect_key($data, array_flip($columns));
     }
 
     protected function getTableColumns(): array
