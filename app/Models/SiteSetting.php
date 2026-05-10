@@ -127,4 +127,44 @@ class SiteSetting extends Model
     {
         return $this->get('spmb_enabled', false);
     }
+
+    /**
+     * Check if SPMB is enabled and today's date is inside the configured period.
+     */
+    public function isSPMBPeriodActive(?array $settings = null): bool
+    {
+        $settings ??= $this->getAll();
+
+        if (empty($settings['spmb_enabled'])) {
+            return false;
+        }
+
+        $today = date('Y-m-d');
+        $startDate = $this->normalizeDateSetting($settings['spmb_start_date'] ?? null);
+        $endDate = $this->normalizeDateSetting($settings['spmb_end_date'] ?? null);
+
+        if ($startDate !== null && $today < $startDate) {
+            return false;
+        }
+
+        if ($endDate !== null && $today > $endDate) {
+            return false;
+        }
+
+        return true;
+    }
+
+    private function normalizeDateSetting(mixed $value): ?string
+    {
+        $date = trim((string) $value);
+        if ($date === '') {
+            return null;
+        }
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
+            return null;
+        }
+
+        return $date;
+    }
 }

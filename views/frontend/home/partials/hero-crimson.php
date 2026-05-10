@@ -1,10 +1,10 @@
 <?php
 // hero-crimson.php
-$schoolType = $profile['school_type'] ?? 'negeri';
-$spmbLink = $schoolType === 'swasta' ? '/spmb' : ($profile['spmb_link'] ?? '#');
-$showSpmbButton = $schoolType === 'swasta' || !empty($profile['spmb_link']);
-$spmbButtonText = $schoolType === 'swasta' ? 'Daftar SPMB' : 'SPMB Wilayah';
-$spmbButtonTarget = $schoolType === 'swasta' ? '_self' : '_blank';
+$spmbPublic = $spmbPublic ?? ['active' => false];
+$showSpmbButton = !empty($spmbPublic['active']);
+$spmbLink = $spmbPublic['url'] ?? '#';
+$spmbButtonText = $spmbPublic['label'] ?? 'Info SPMB';
+$spmbButtonTarget = $spmbPublic['target'] ?? '_self';
 ?>
 <!-- Main Hero -->
 <section class="relative bg-slate-900 overflow-hidden min-h-[600px] lg:min-h-[700px] flex items-center">
@@ -42,10 +42,10 @@ $spmbButtonTarget = $schoolType === 'swasta' ? '_self' : '_blank';
         class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col md:flex-row items-center">
         <!-- Content Left -->
         <div class="w-full md:w-[55%] lg:w-[45%] text-white pr-4 md:pr-12">
-            <?php if (!empty($profile['school_type']) && $profile['school_type'] === 'swasta'): ?>
+            <?php if ($showSpmbButton): ?>
                 <div
                     class="inline-flex items-center px-4 py-1.5 bg-primary-900/50 text-red-200 border border-primary-500/30 font-bold uppercase tracking-widest text-[10px] mb-8 pb-1 border-b-2 border-b-primary-500">
-                    <span class="w-2 h-2 bg-red-400 mr-2 rounded-sm animate-pulse"></span> Pendaftaran Dibuka
+                    <span class="w-2 h-2 bg-red-400 mr-2 rounded-sm animate-pulse"></span> Info SPMB Tersedia
                 </div>
             <?php endif; ?>
 

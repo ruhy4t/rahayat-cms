@@ -10,6 +10,7 @@
         style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
         img-src 'self' data: https://*;
         connect-src 'self' https://cdn.ckeditor.com https://*.ckeditor.com;
+        frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com;
         font-src 'self' https://fonts.gstatic.com;
         object-src 'none';
         base-uri 'self';

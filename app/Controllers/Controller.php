@@ -42,7 +42,7 @@ abstract class Controller
                 ];
             }
 
-            // Conditionally hide SPMB menus for 'Negeri' schools
+            // Build the public SPMB menu from school status, independent of manual menu rows.
             $profile = $this->data['profile'] ?? [];
             if (empty($profile)) {
                 try {
@@ -57,47 +57,15 @@ abstract class Controller
                 }
             }
 
-            if (($profile['school_type'] ?? '') === 'negeri' && !empty($profile['spmb_link'])) {
-                $spmbLink = $profile['spmb_link'];
-                $filterMenu = function ($menus) use (&$filterMenu, $spmbLink) {
-                    $filtered = [];
-                    foreach ($menus as $menu) {
-                        // Redirect to external SPMB link
-                        if (str_contains(strtolower($menu['title']), 'spmb') || str_contains(strtolower($menu['url']), '/spmb')) {
-                            $menu['url'] = $spmbLink;
-                            $menu['target'] = '_blank';
-                        }
-                        if (!empty($menu['children'])) {
-                            $menu['children'] = $filterMenu($menu['children']);
-                        }
-                        $filtered[] = $menu;
-                    }
-                    return $filtered;
-                };
+            $spmbPublic = $this->data['spmbPublic'] ?? $this->resolvePublicSpmbState(
+                $profile,
+                $this->data['settings'] ?? null
+            );
 
-                $headerMenus = $filterMenu($headerMenus);
-                $footerMenus = $filterMenu($footerMenus);
+            $headerMenus = $this->applySpmbMenuRules($headerMenus, $spmbPublic);
+            $footerMenus = $this->applySpmbMenuRules($footerMenus, $spmbPublic);
 
-            } else if (($profile['school_type'] ?? '') === 'negeri' && empty($profile['spmb_link'])) {
-                // If negeri but no SPMB link, hide the menu
-                $filterMenu = function ($menus) use (&$filterMenu) {
-                    $filtered = [];
-                    foreach ($menus as $menu) {
-                        if (str_contains(strtolower($menu['title']), 'spmb') || str_contains(strtolower($menu['url']), '/spmb')) {
-                            continue;
-                        }
-                        if (!empty($menu['children'])) {
-                            $menu['children'] = $filterMenu($menu['children']);
-                        }
-                        $filtered[] = $menu;
-                    }
-                    return $filtered;
-                };
-
-                $headerMenus = $filterMenu($headerMenus);
-                $footerMenus = $filterMenu($footerMenus);
-            }
-
+            $this->data['spmbPublic'] = $spmbPublic;
             $this->data['headerMenus'] = $headerMenus;
             $this->data['footerMenus'] = $footerMenus;
         }
@@ -152,6 +120,99 @@ abstract class Controller
         } else {
             echo $content;
         }
+    }
+
+    private function applySpmbMenuRules(array $menus, array $spmbPublic): array
+    {
+        $menus = $this->removeSpmbMenus($menus);
+
+        if (!empty($spmbPublic['active'])) {
+            return $this->insertDynamicSpmbMenu($menus, [
+                'title' => $spmbPublic['label'] ?? 'Info SPMB',
+                'url' => $spmbPublic['url'] ?? '/spmb',
+                'target' => $spmbPublic['target'] ?? '_self',
+                'children' => [],
+            ]);
+        }
+
+        return $menus;
+    }
+
+    private function removeSpmbMenus(array $menus): array
+    {
+        $filtered = [];
+
+        foreach ($menus as $menu) {
+            if ($this->isSpmbMenu($menu)) {
+                continue;
+            }
+
+            if (!empty($menu['children'])) {
+                $menu['children'] = $this->removeSpmbMenus($menu['children']);
+            }
+
+            $filtered[] = $menu;
+        }
+
+        return $filtered;
+    }
+
+    private function isSpmbMenu(array $menu): bool
+    {
+        $title = strtolower((string) ($menu['title'] ?? ''));
+        $url = strtolower((string) ($menu['url'] ?? ''));
+
+        return str_contains($title, 'spmb') || str_contains($url, '/spmb');
+    }
+
+    private function insertDynamicSpmbMenu(array $menus, array $spmbMenu): array
+    {
+        foreach ($menus as $index => $menu) {
+            $title = strtolower((string) ($menu['title'] ?? ''));
+            if ($title === 'kontak' || str_contains((string) ($menu['url'] ?? ''), '/kontak')) {
+                array_splice($menus, $index, 0, [$spmbMenu]);
+                return $menus;
+            }
+        }
+
+        $menus[] = $spmbMenu;
+        return $menus;
+    }
+
+    private function resolvePublicSpmbState(array $profile, ?array $settings = null): array
+    {
+        try {
+            require_once APP_PATH . '/Models/SiteSetting.php';
+            $settingModel = new SiteSetting();
+            $settings ??= $settingModel->getAll();
+            $isPeriodActive = $settingModel->isSPMBPeriodActive($settings);
+        } catch (\Throwable $e) {
+            error_log('Public SPMB state failed: ' . $e->getMessage());
+            $settings ??= [];
+            $isPeriodActive = false;
+        }
+
+        $schoolType = strtolower((string) ($profile['school_type'] ?? 'negeri'));
+        $spmbLink = trim((string) ($profile['spmb_link'] ?? ''));
+        $url = '';
+        $target = '_self';
+
+        if ($isPeriodActive && $schoolType === 'swasta') {
+            $url = '/spmb';
+        } elseif ($isPeriodActive && $schoolType === 'negeri' && $spmbLink !== '') {
+            $url = $spmbLink;
+            $target = '_blank';
+        }
+
+        return [
+            'active' => $url !== '',
+            'label' => 'Info SPMB',
+            'url' => $url,
+            'target' => $target,
+            'school_type' => $schoolType,
+            'start_date' => $settings['spmb_start_date'] ?? null,
+            'end_date' => $settings['spmb_end_date'] ?? null,
+        ];
     }
 
     /**

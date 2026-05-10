@@ -7,6 +7,7 @@ $profile = $data['profile'] ?? [];
 $news = $data['news'] ?? [];
 $slides = $data['slides'] ?? [];
 $theme = $data['theme'] ?? 'indigo-modern';
+$spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
 ?>
 
 <!-- Hero Section with Slider -->
@@ -44,11 +45,11 @@ $theme = $data['theme'] ?? 'indigo-modern';
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Left Column: Content & Buttons -->
                 <div class="space-y-8">
-                    <?php if (!empty($profile['school_type']) && $profile['school_type'] === 'swasta'): ?>
+                    <?php if (!empty($spmbPublic['active'])): ?>
                         <div
                             class="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm">
                             <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                            Pendaftaran SPMB Dibuka
+                            Info SPMB Tersedia
                         </div>
                     <?php endif; ?>
 
@@ -83,25 +84,10 @@ $theme = $data['theme'] ?? 'indigo-modern';
                         </a>
 
                         <?php
-                        // SPMB Button Logic
-                        $schoolType = $profile['school_type'] ?? 'negeri';
-                        $spmbLink = $profile['spmb_link'] ?? '#';
-                        $showSpmbButton = false;
-                        $spmbButtonText = 'Daftar Sekarang';
-                        $spmbButtonTarget = '_self'; // Default self
-                    
-                        if ($schoolType === 'swasta') {
-                            // Swasta: Use internal SPMB feature
-                            $spmbLink = '/spmb';
-                            $showSpmbButton = true;
-                            $spmbButtonText = 'Daftar SPMB';
-                        } elseif ($schoolType === 'negeri' && !empty($profile['spmb_link'])) {
-                            // Negeri: External Link
-                            $spmbLink = $profile['spmb_link'];
-                            $showSpmbButton = true;
-                            $spmbButtonText = 'SPMB Wilayah';
-                            $spmbButtonTarget = '_blank'; // External link usually blank
-                        }
+                        $showSpmbButton = !empty($spmbPublic['active']);
+                        $spmbLink = $spmbPublic['url'] ?? '#';
+                        $spmbButtonText = $spmbPublic['label'] ?? 'Info SPMB';
+                        $spmbButtonTarget = $spmbPublic['target'] ?? '_self';
                         ?>
 
                         <?php if ($showSpmbButton): ?>
@@ -422,15 +408,27 @@ $theme = $data['theme'] ?? 'indigo-modern';
     <?php endif; ?>
 <?php endif; ?>
 
+<?php
+$ctaHref = '/kontak';
+$ctaText = 'Hubungi Kami';
+$ctaTarget = '_self';
+
+if (!empty($spmbPublic['active'])) {
+    $ctaHref = $spmbPublic['url'] ?? '/spmb';
+    $ctaText = $spmbPublic['label'] ?? 'Info SPMB';
+    $ctaTarget = $spmbPublic['target'] ?? '_self';
+}
+?>
+
 <!-- CTA Section -->
 <section class="py-16 lg:py-24 bg-gradient-to-r from-primary-600 to-primary-800">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">Bergabunglah Bersama Kami</h2>
         <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">Daftarkan putra-putri Anda untuk mendapatkan
             pendidikan berkualitas dan masa depan yang cerah.</p>
-        <a href="<?= (!empty($profile['school_type']) && $profile['school_type'] === 'swasta') ? '/spmb' : '/kontak' ?>"
+        <a href="<?= e($ctaHref) ?>" target="<?= e($ctaTarget) ?>"
             class="inline-flex items-center px-8 py-4 bg-white text-primary-700 font-semibold rounded-lg hover:bg-primary-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-            <?= (!empty($profile['school_type']) && $profile['school_type'] === 'swasta') ? 'Daftar SPMB' : 'Hubungi Kami' ?>
+            <?= e($ctaText) ?>
             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
             </svg>

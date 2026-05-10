@@ -33,8 +33,8 @@ class SPMBController extends Controller
             return false;
         }
 
-        // Check if SPMB is enabled
-        if (!$this->settingModel->isSPMBEnabled()) {
+        // Check if SPMB is enabled and inside the configured public period.
+        if (!$this->settingModel->isSPMBPeriodActive()) {
             return false;
         }
 

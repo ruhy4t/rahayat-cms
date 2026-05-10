@@ -85,7 +85,7 @@
             <?php if (!empty($headerMenus)):
                 foreach ($headerMenus as $menu): ?>
                     <?php if (empty($menu['children'])): ?>
-                        <a href="<?= e($menu['url']) ?>"
+                        <a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?>
                             class="block px-4 py-3 text-slate-300 hover:text-white hover:bg-slate-800 rounded-xl font-bold uppercase tracking-wide text-sm">
                             <?= e($menu['title']) ?>
                         </a>
@@ -96,7 +96,7 @@
                             </div>
                             <div class="space-y-1">
                                 <?php foreach ($menu['children'] as $child): ?>
-                                    <a href="<?= e($child['url']) ?>"
+                                    <a href="<?= e($child['url']) ?>" <?= $child['target'] === '_blank' ? 'target="_blank"' : '' ?>
                                         class="block px-4 py-2 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg text-sm font-semibold">
                                         <?= e($child['title']) ?>
                                     </a>

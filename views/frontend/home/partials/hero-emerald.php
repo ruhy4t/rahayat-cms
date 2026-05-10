@@ -1,10 +1,10 @@
 <?php
 // hero-emerald.php
-$schoolType = $profile['school_type'] ?? 'negeri';
-$spmbLink = $schoolType === 'swasta' ? '/spmb' : ($profile['spmb_link'] ?? '#');
-$showSpmbButton = $schoolType === 'swasta' || !empty($profile['spmb_link']);
-$spmbButtonText = $schoolType === 'swasta' ? 'Daftar SPMB' : 'SPMB Wilayah';
-$spmbButtonTarget = $schoolType === 'swasta' ? '_self' : '_blank';
+$spmbPublic = $spmbPublic ?? ['active' => false];
+$showSpmbButton = !empty($spmbPublic['active']);
+$spmbLink = $spmbPublic['url'] ?? '#';
+$spmbButtonText = $spmbPublic['label'] ?? 'Info SPMB';
+$spmbButtonTarget = $spmbPublic['target'] ?? '_self';
 ?>
 <section
     class="relative overflow-hidden min-h-[550px] lg:min-h-[650px] flex items-center rounded-b-[2rem] lg:rounded-b-[4rem] shadow-xl xl:mx-8 xl:mt-4 xl:rounded-[3rem] border-b-4 xl:border-4 border-primary-500/20 mb-12">
@@ -24,11 +24,11 @@ $spmbButtonTarget = $schoolType === 'swasta' ? '_self' : '_blank';
     <div class="absolute inset-0 z-[6] bg-gradient-to-t from-primary-900/90 via-primary-900/20 to-transparent"></div>
 
     <div class="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white pt-20 pb-24">
-        <?php if (!empty($profile['school_type']) && $profile['school_type'] === 'swasta'): ?>
+        <?php if ($showSpmbButton): ?>
             <div
                 class="inline-flex items-center px-5 py-2 bg-green-500/20 text-green-300 rounded-full text-xs font-bold uppercase tracking-wider backdrop-blur-md border border-green-400/30 mb-8">
                 <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                Pendaftaran Telah Dibuka
+                Info SPMB Tersedia
             </div>
         <?php endif; ?>
 

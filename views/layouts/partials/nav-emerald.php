@@ -91,7 +91,7 @@
             <?php if (!empty($headerMenus)):
                 foreach ($headerMenus as $menu): ?>
                     <?php if (empty($menu['children'])): ?>
-                        <a href="<?= e($menu['url']) ?>"
+                        <a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?>
                             class="block px-3 py-2 text-slate-700 hover:bg-primary-50 hover:text-primary-600 rounded-lg">
                             <?= e($menu['title']) ?>
                         </a>
@@ -102,7 +102,7 @@
                             </div>
                             <div class="pl-4">
                                 <?php foreach ($menu['children'] as $child): ?>
-                                    <a href="<?= e($child['url']) ?>"
+                                    <a href="<?= e($child['url']) ?>" <?= $child['target'] === '_blank' ? 'target="_blank"' : '' ?>
                                         class="block px-3 py-2 text-sm text-slate-600 hover:bg-primary-50 hover:text-primary-600 rounded-lg">
                                         <?= e($child['title']) ?>
                                     </a>

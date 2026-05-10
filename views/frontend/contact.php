@@ -61,78 +61,79 @@
                 <?php endif; ?>
             </div>
 
-            <!-- Operating Hours -->
-            <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-200">
-                <h3 class="font-semibold text-slate-800 mb-3">Jam Operasional</h3>
-                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-3 text-slate-600">
-                    <?php
-                    $days = [
-                        'monday' => 'Senin',
-                        'tuesday' => 'Selasa',
-                        'wednesday' => 'Rabu',
-                        'thursday' => 'Kamis',
-                        'friday' => 'Jumat',
-                        'saturday' => 'Sabtu',
-                        'sunday' => 'Minggu',
-                    ];
-                    $defaultClosed = [
-                        'monday' => 0,
-                        'tuesday' => 0,
-                        'wednesday' => 0,
-                        'thursday' => 0,
-                        'friday' => 0,
-                        'saturday' => 0,
-                        'sunday' => 1,
-                    ];
-                    foreach ($days as $key => $label):
-                        $isClosed = (int) ($profile["is_closed_{$key}"] ?? $defaultClosed[$key]);
-                        ?>
-                        <div class="flex justify-between p-3 rounded-lg <?= $isClosed ? 'bg-red-50' : 'bg-green-50' ?>">
-                            <span class="font-medium"><?= $label ?></span>
-                            <?php if ($isClosed): ?>
-                                <span class="font-medium text-red-500">Tutup</span>
-                            <?php else: ?>
-                                <span class="font-medium text-green-700">
-                                    <?= e($profile["{$key}_open"] ?? '07:00') ?> -
-                                    <?= e($profile["{$key}_close"] ?? '15:00') ?> WIB
-                                </span>
-                            <?php endif; ?>
-                        </div>
-                    <?php endforeach; ?>
+            <?php
+            $mapEmbedSrc = '';
+            $embedCode = $profile['google_maps_embed'] ?? '';
+            if (!empty($embedCode)) {
+                if (preg_match('/src=["\']([^"\']+)["\']/i', $embedCode, $mMatches)) {
+                    $mapEmbedSrc = $mMatches[1];
+                } elseif (filter_var($embedCode, FILTER_VALIDATE_URL)) {
+                    $mapEmbedSrc = $embedCode;
+                }
+            }
+
+            $days = [
+                'monday' => 'Senin',
+                'tuesday' => 'Selasa',
+                'wednesday' => 'Rabu',
+                'thursday' => 'Kamis',
+                'friday' => 'Jumat',
+                'saturday' => 'Sabtu',
+                'sunday' => 'Minggu',
+            ];
+            $defaultClosed = [
+                'monday' => 0,
+                'tuesday' => 0,
+                'wednesday' => 0,
+                'thursday' => 0,
+                'friday' => 0,
+                'saturday' => 0,
+                'sunday' => 1,
+            ];
+            ?>
+
+            <div class="<?= !empty($mapEmbedSrc) ? 'grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-6 items-stretch' : '' ?>">
+                <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
+                    <h3 class="font-semibold text-slate-800 mb-4">Jam Operasional</h3>
+                    <div class="space-y-3 text-slate-600">
+                        <?php foreach ($days as $key => $label):
+                            $isClosed = (int) ($profile["is_closed_{$key}"] ?? $defaultClosed[$key]);
+                            ?>
+                            <div class="flex items-center justify-between gap-4 p-3 rounded-lg <?= $isClosed ? 'bg-red-50' : 'bg-green-50' ?>">
+                                <span class="font-medium"><?= $label ?></span>
+                                <?php if ($isClosed): ?>
+                                    <span class="font-medium text-red-500">Tutup</span>
+                                <?php else: ?>
+                                    <span class="font-medium text-green-700 text-right">
+                                        <?= e($profile["{$key}_open"] ?? '07:00') ?> -
+                                        <?= e($profile["{$key}_close"] ?? '15:00') ?> WIB
+                                    </span>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
+
+                <?php if (!empty($mapEmbedSrc)): ?>
+                    <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full flex flex-col">
+                        <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-3">
+                            <span class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                            </span>
+                            Peta Lokasi
+                        </h3>
+                        <div class="rounded-xl overflow-hidden border border-slate-200 flex-1 min-h-[360px]">
+                            <iframe src="<?= e($mapEmbedSrc) ?>" width="100%" height="100%" style="border:0;" allowfullscreen=""
+                                loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="w-full h-full"></iframe>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
-
-        <!-- Google Maps Section -->
-        <?php
-        $mapEmbedSrc = '';
-        $embedCode = $profile['google_maps_embed'] ?? '';
-        if (!empty($embedCode)) {
-            if (preg_match('/src=["\']([^"\']+)["\']/i', $embedCode, $mMatches)) {
-                $mapEmbedSrc = $mMatches[1];
-            } elseif (filter_var($embedCode, FILTER_VALIDATE_URL)) {
-                $mapEmbedSrc = $embedCode;
-            }
-        }
-        ?>
-        <?php if (!empty($mapEmbedSrc)): ?>
-            <div class="mt-12">
-                <h2 class="text-2xl font-bold text-slate-800 mb-6 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </div>
-                    Lokasi Kami
-                </h2>
-                <div class="rounded-2xl overflow-hidden shadow-sm border border-slate-200">
-                    <iframe src="<?= e($mapEmbedSrc) ?>" width="100%" height="400" style="border:0;" allowfullscreen=""
-                        loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="w-full"></iframe>
-                </div>
-            </div>
-        <?php endif; ?>
     </div>
 </section>
