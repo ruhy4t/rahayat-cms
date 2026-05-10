@@ -17,7 +17,7 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
 
             <div class="flex items-center gap-3">
                 <h1 class="text-3xl lg:text-4xl font-bold text-slate-800">
-                    <?= e($album['title']) ?>
+                    <?= e($album['title'] ?? 'Album Galeri') ?>
                 </h1>
                 <?php if ($isVideo): ?>
                     <span
@@ -95,10 +95,10 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>
                         <div class="aspect-square bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-lg transition-all"
-                            onclick="openImageModal('<?= e($item['file_path']) ?>', '<?= e($item['title'] ?? '') ?>')">
+                            onclick='openImageModal(<?= json_encode((string) ($item['file_path'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>, <?= json_encode((string) ($item['title'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
                             <div class="w-full h-full relative overflow-hidden">
                                 <?php if (!empty($item['file_path'])): ?>
-                                    <img src="/storage/<?= e($item['file_path']) ?>" alt="<?= e($item['title'] ?? $album['title']) ?>"
+                                    <img src="/storage/<?= e($item['file_path']) ?>" alt="<?= e($item['title'] ?? ($album['title'] ?? 'Album Galeri')) ?>"
                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                         onerror="this.src='https://placehold.co/400x400?text=Error'">
                                 <?php else: ?>

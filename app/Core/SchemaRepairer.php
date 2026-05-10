@@ -43,6 +43,7 @@ class SchemaRepairer
         $this->ensureUsersColumns();
         $this->ensureSchoolProfileColumns();
         $this->ensureNewsColumns();
+        $this->ensureGalleryTablesAndColumns();
         $this->ensureDefaultProfile();
         $this->ensureDefaultMenus();
         $this->ensureDefaultSettings();
@@ -256,6 +257,132 @@ class SchemaRepairer
         }
     }
 
+    private function ensureGalleryTablesAndColumns(): void
+    {
+        $this->safeExec("CREATE TABLE IF NOT EXISTS gallery_albums (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            title VARCHAR(255) NOT NULL,
+            slug VARCHAR(255) NOT NULL UNIQUE,
+            description TEXT NULL,
+            type ENUM('foto', 'video') DEFAULT 'foto',
+            cover_image VARCHAR(255) NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            sort_order INT DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_slug (slug),
+            INDEX idx_is_active (is_active)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $this->safeExec("CREATE TABLE IF NOT EXISTS gallery_items (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            album_id INT UNSIGNED NULL,
+            title VARCHAR(255) NULL,
+            description TEXT NULL,
+            type ENUM('image', 'video') DEFAULT 'image',
+            file_path VARCHAR(255) NULL,
+            youtube_url VARCHAR(255) NULL,
+            youtube_video_id VARCHAR(50) NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            sort_order INT DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_album_id (album_id),
+            INDEX idx_is_active (is_active)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        if ($this->tableExists('gallery_albums')) {
+            $columns = [
+                'slug' => 'VARCHAR(255) NULL',
+                'description' => 'TEXT NULL',
+                'type' => "ENUM('foto', 'video') DEFAULT 'foto'",
+                'cover_image' => 'VARCHAR(255) NULL',
+                'is_active' => 'TINYINT(1) DEFAULT 1',
+                'sort_order' => 'INT DEFAULT 0',
+                'created_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP',
+                'updated_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ];
+
+            foreach ($columns as $column => $definition) {
+                $this->addColumn('gallery_albums', $column, $definition);
+            }
+
+            $this->ensureGalleryAlbumSlugs();
+        }
+
+        if ($this->tableExists('gallery_items')) {
+            $columns = [
+                'album_id' => 'INT UNSIGNED NULL',
+                'title' => 'VARCHAR(255) NULL',
+                'description' => 'TEXT NULL',
+                'type' => "ENUM('image', 'video') DEFAULT 'image'",
+                'file_path' => 'VARCHAR(255) NULL',
+                'youtube_url' => 'VARCHAR(255) NULL',
+                'youtube_video_id' => 'VARCHAR(50) NULL',
+                'is_active' => 'TINYINT(1) DEFAULT 1',
+                'sort_order' => 'INT DEFAULT 0',
+                'created_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP',
+                'updated_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+            ];
+
+            foreach ($columns as $column => $definition) {
+                $this->addColumn('gallery_items', $column, $definition);
+            }
+        }
+    }
+
+    private function ensureGalleryAlbumSlugs(): void
+    {
+        if (!$this->tableExists('gallery_albums') || !$this->columnExists('gallery_albums', 'slug')) {
+            return;
+        }
+
+        try {
+            $stmt = $this->pdo->query("SELECT id, title, slug FROM gallery_albums WHERE slug IS NULL OR slug = ''");
+            $albums = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            if (empty($albums)) {
+                return;
+            }
+
+            $update = $this->pdo->prepare('UPDATE gallery_albums SET slug = ? WHERE id = ?');
+            foreach ($albums as $album) {
+                $slug = $this->uniqueGallerySlug((string) ($album['title'] ?? 'album'), (int) $album['id']);
+                $update->execute([$slug, (int) $album['id']]);
+            }
+        } catch (\Throwable $e) {
+            error_log('Gallery slug repair failed: ' . $e->getMessage());
+        }
+    }
+
+    private function uniqueGallerySlug(string $title, int $id): string
+    {
+        $slug = strtolower(trim((string) preg_replace('/[^A-Za-z0-9-]+/', '-', $title), '-'));
+        if ($slug === '') {
+            $slug = 'album';
+        }
+
+        $base = $slug;
+        $counter = 1;
+
+        while ($this->gallerySlugExists($slug, $id)) {
+            $slug = $base . '-' . $counter;
+            $counter++;
+        }
+
+        return $slug;
+    }
+
+    private function gallerySlugExists(string $slug, int $excludeId): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare('SELECT id FROM gallery_albums WHERE slug = ? AND id != ? LIMIT 1');
+            $stmt->execute([$slug, $excludeId]);
+            return (bool) $stmt->fetchColumn();
+        } catch (\Throwable) {
+            return false;
+        }
+    }
+
     private function ensureDefaultProfile(): void
     {
         if (!$this->tableExists('school_profile')) {
@@ -367,6 +494,8 @@ class SchemaRepairer
             'site_settings' => ['setting_key', 'setting_value', 'setting_type'],
             'users' => ['permissions', 'is_spmb_committee', 'editor_id'],
             'news' => ['slug', 'category', 'status', 'views', 'published_at'],
+            'gallery_albums' => ['slug', 'type', 'cover_image', 'is_active', 'sort_order'],
+            'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'is_active', 'sort_order'],
         ];
 
         foreach ($requiredColumns as $table => $columns) {

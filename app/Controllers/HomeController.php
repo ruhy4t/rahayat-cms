@@ -94,9 +94,9 @@ class HomeController extends Controller
     {
         $data = [
             'title' => 'Galeri',
-            'profile' => $this->profileModel->getProfile(),
-            'settings' => $this->settingModel->getAll(),
-            'albums' => $this->albumModel->getWithItemCount()
+            'profile' => $this->safeValue(fn () => $this->profileModel->getProfile(), []),
+            'settings' => $this->safeValue(fn () => $this->settingModel->getAll(), []),
+            'albums' => $this->safeValue(fn () => $this->albumModel->getWithItemCount(), [])
         ];
 
         $this->view('frontend.gallery', $data, 'frontend');
@@ -107,7 +107,7 @@ class HomeController extends Controller
      */
     public function galleryAlbum(string $slug): void
     {
-        $album = $this->albumModel->findBySlug($slug);
+        $album = $this->safeValue(fn () => $this->albumModel->findBySlug($slug), false);
 
         if (!$album) {
             $this->redirect('/galeri');
@@ -115,11 +115,11 @@ class HomeController extends Controller
         }
 
         $data = [
-            'title' => 'Galeri - ' . $album['title'],
-            'profile' => $this->profileModel->getProfile(),
-            'settings' => $this->settingModel->getAll(),
+            'title' => 'Galeri - ' . ($album['title'] ?? 'Album'),
+            'profile' => $this->safeValue(fn () => $this->profileModel->getProfile(), []),
+            'settings' => $this->safeValue(fn () => $this->settingModel->getAll(), []),
             'album' => $album,
-            'items' => $this->itemModel->getByAlbum($album['id'])
+            'items' => $this->safeValue(fn () => $this->itemModel->getByAlbum((int) $album['id']), [])
         ];
 
         $this->view('frontend.gallery-detail', $data, 'frontend');

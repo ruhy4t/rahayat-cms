@@ -17,7 +17,9 @@ class GalleryItem extends Model
      */
     public function getByAlbum(int $albumId): array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE album_id = ? AND is_active = 1 ORDER BY sort_order ASC";
+        $activeFilter = $this->hasColumn('is_active') ? ' AND is_active = 1' : '';
+        $orderBy = $this->hasColumn('sort_order') ? 'sort_order ASC' : 'id ASC';
+        $sql = "SELECT * FROM {$this->table} WHERE album_id = ?{$activeFilter} ORDER BY {$orderBy}";
         return $this->db->fetchAll($sql, [$albumId]);
     }
 
@@ -26,11 +28,15 @@ class GalleryItem extends Model
      */
     public function getImages(): array
     {
+        $typeFilter = $this->hasColumn('type') ? "i.type = 'image' AND " : '';
+        $activeFilter = $this->hasColumn('is_active') ? 'i.is_active = 1' : '1=1';
+        $orderBy = $this->hasColumn('sort_order') ? 'i.sort_order ASC' : 'i.id ASC';
+
         $sql = "SELECT i.*, a.title as album_title 
                 FROM {$this->table} i 
                 LEFT JOIN gallery_albums a ON i.album_id = a.id
-                WHERE i.type = 'image' AND i.is_active = 1 
-                ORDER BY i.sort_order ASC";
+                WHERE {$typeFilter}{$activeFilter}
+                ORDER BY {$orderBy}";
         return $this->db->fetchAll($sql);
     }
 
@@ -39,11 +45,15 @@ class GalleryItem extends Model
      */
     public function getVideos(): array
     {
+        $typeFilter = $this->hasColumn('type') ? "i.type = 'video' AND " : '';
+        $activeFilter = $this->hasColumn('is_active') ? 'i.is_active = 1' : '1=1';
+        $orderBy = $this->hasColumn('sort_order') ? 'i.sort_order ASC' : 'i.id ASC';
+
         $sql = "SELECT i.*, a.title as album_title 
                 FROM {$this->table} i 
                 LEFT JOIN gallery_albums a ON i.album_id = a.id
-                WHERE i.type = 'video' AND i.is_active = 1 
-                ORDER BY i.sort_order ASC";
+                WHERE {$typeFilter}{$activeFilter}
+                ORDER BY {$orderBy}";
         return $this->db->fetchAll($sql);
     }
 
@@ -103,7 +113,9 @@ class GalleryItem extends Model
      */
     public function getRecent(int $limit = 8): array
     {
-        $sql = "SELECT * FROM {$this->table} WHERE is_active = 1 ORDER BY created_at DESC LIMIT ?";
+        $activeFilter = $this->hasColumn('is_active') ? 'WHERE is_active = 1' : '';
+        $orderBy = $this->hasColumn('created_at') ? 'created_at DESC' : 'id DESC';
+        $sql = "SELECT * FROM {$this->table} {$activeFilter} ORDER BY {$orderBy} LIMIT ?";
         return $this->db->fetchAll($sql, [$limit]);
     }
 }
