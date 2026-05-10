@@ -38,6 +38,18 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     <div class="prose max-w-none">
                         <textarea id="content" name="content"><?= $item['content'] ?? '' ?></textarea>
                     </div>
+                    <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
+                        <input type="file" id="pdfUpload" accept="application/pdf" class="hidden">
+                        <button type="button" id="pdfUploadBtn"
+                            class="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+                            <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                            </svg>
+                            Unggah PDF ke Isi Berita
+                        </button>
+                        <span id="pdfUploadStatus" class="text-xs text-slate-500">PDF maks. 10MB.</span>
+                    </div>
                 </div>
             </div>
 
@@ -259,7 +271,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     }
 
                     resolve({
-                        default: response.url
+                        default: response.url || response.default
                     });
                 });
 
@@ -337,6 +349,15 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                     ]
                 },
 
+                htmlSupport: {
+                    allow: [
+                        { name: 'figure', classes: true, styles: true, attributes: true },
+                        { name: 'figcaption', classes: true, styles: true, attributes: true },
+                        { name: 'iframe', classes: true, styles: true, attributes: ['src', 'title', 'loading', 'allow', 'allowfullscreen', 'frameborder'] },
+                        { name: 'img', classes: true, styles: true, attributes: true }
+                    ]
+                },
+
                 // Remove premium/AI plugins to avoid license errors
                 removePlugins: ['CaseChange', 'ExportPdf', 'ExportWord', 'ImportWord', 'AIAssistant', 'CKBox', 'CKFinder', 'EasyImage', 'RealTimeCollaborativeComments', 'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory', 'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData', 'RevisionHistory', 'Pagination', 'WProofreader', 'MathType', 'SlashCommand', 'Template', 'DocumentOutline', 'FormatPainter', 'TableOfContents', 'PasteFromOfficeEnhanced'],
             })
@@ -375,7 +396,88 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
             });
         }
 
-        // 3. Form Submission Logic
+        // 3. PDF Upload Logic
+        const pdfInput = document.getElementById('pdfUpload');
+        const pdfButton = document.getElementById('pdfUploadBtn');
+        const pdfStatus = document.getElementById('pdfUploadStatus');
+        const pendingPdfEmbeds = [];
+
+        function insertHtmlToEditor(html) {
+            if (window.editorInstance) {
+                try {
+                    const viewFragment = window.editorInstance.data.processor.toView(html);
+                    const modelFragment = window.editorInstance.data.toModel(viewFragment);
+                    window.editorInstance.model.insertContent(modelFragment, window.editorInstance.model.document.selection);
+                    return;
+                } catch (error) {
+                    console.warn('Insert PDF embed failed, appending to editor data.', error);
+                    window.editorInstance.setData(window.editorInstance.getData() + html);
+                    return;
+                }
+            }
+
+            const textarea = document.getElementById('content');
+            if (textarea) textarea.value += html;
+        }
+
+        if (pdfInput && pdfButton) {
+            pdfButton.addEventListener('click', () => pdfInput.click());
+            pdfInput.addEventListener('change', async function () {
+                const file = this.files?.[0];
+                if (!file) return;
+
+                if (file.type !== 'application/pdf') {
+                    showNotification('error', 'File harus berformat PDF.');
+                    this.value = '';
+                    return;
+                }
+
+                if (file.size > 10 * 1024 * 1024) {
+                    showNotification('error', 'Ukuran PDF maksimal 10MB.');
+                    this.value = '';
+                    return;
+                }
+
+                pdfButton.disabled = true;
+                if (pdfStatus) pdfStatus.textContent = 'Mengunggah PDF...';
+
+                try {
+                    const csrfToken = await refreshCsrfToken();
+                    const formData = new FormData();
+                    formData.append('pdf', file);
+                    formData.append(csrfFieldName, csrfToken);
+
+                    const response = await fetch('/admin/upload/pdf', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        credentials: 'same-origin',
+                        body: formData
+                    });
+                    const result = await response.json();
+
+                    if (!response.ok || !result.success) {
+                        throw new Error(result.message || 'Gagal mengunggah PDF.');
+                    }
+
+                    insertHtmlToEditor(result.embedHtml);
+                    pendingPdfEmbeds.push({ url: result.url, html: result.embedHtml });
+                    showNotification('success', 'PDF berhasil ditambahkan ke isi berita.');
+                    if (pdfStatus) pdfStatus.textContent = file.name;
+                } catch (error) {
+                    console.error('PDF Upload Error:', error);
+                    showNotification('error', error.message || 'Gagal mengunggah PDF.');
+                    if (pdfStatus) pdfStatus.textContent = 'PDF maks. 10MB.';
+                } finally {
+                    pdfButton.disabled = false;
+                    this.value = '';
+                }
+            });
+        }
+
+        // 4. Form Submission Logic
         const form = document.getElementById('newsForm');
         if (form) {
             form.addEventListener('submit', async function (e) {
@@ -388,6 +490,11 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                 } else {
                     content = document.getElementById('content').value;
                 }
+                pendingPdfEmbeds.forEach(embed => {
+                    if (embed.url && !content.includes(embed.url)) {
+                        content += embed.html;
+                    }
+                });
 
                 const csrfToken = await refreshCsrfToken();
 

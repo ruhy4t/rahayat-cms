@@ -66,6 +66,8 @@ class NewsController extends Controller
             return;
         }
 
+        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+
         // Increment view count (fail silently if column missing on hosting)
         try {
             $this->newsModel->incrementViews($news['id']);

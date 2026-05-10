@@ -331,6 +331,8 @@ class DashboardController extends Controller
             $this->redirect('/admin/berita');
         }
 
+        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+
         $data = [
             'title' => 'Edit Berita',
             'user' => $this->currentUser(),

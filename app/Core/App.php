@@ -52,6 +52,7 @@ class App
 
         // Admin - Uploads (CKEditor)
         $this->router->add('admin/upload/image', ['controller' => 'Upload', 'action' => 'image']);
+        $this->router->add('admin/upload/pdf', ['controller' => 'Upload', 'action' => 'pdf']);
 
         // Admin - Berita
         $this->router->add('admin/berita', ['controller' => 'Dashboard', 'action' => 'news']);

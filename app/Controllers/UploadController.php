@@ -44,4 +44,52 @@ class UploadController extends Controller
             echo json_encode(['error' => ['message' => $this->uploadErrorMessage('Gagal mengunggah gambar')]]);
         }
     }
+
+    /**
+     * Handle PDF upload from the news editor.
+     */
+    public function pdf(): void
+    {
+        $this->requireAuth();
+
+        header('Content-Type: application/json');
+
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME);
+        if (!Security::validateCsrfToken($token)) {
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Invalid CSRF token']);
+            return;
+        }
+
+        if (empty($_FILES['pdf'])) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Tidak ada file PDF yang diunggah.']);
+            return;
+        }
+
+        $uploadDir = 'uploads/news/pdf/' . date('Y/m');
+        $uploadPath = $this->uploadFile($_FILES['pdf'], $uploadDir, ['application/pdf'], 10 * 1024 * 1024);
+
+        if (!$uploadPath) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'message' => $this->uploadErrorMessage('Gagal mengunggah PDF')]);
+            return;
+        }
+
+        $url = '/storage/' . $uploadPath;
+        echo json_encode([
+            'success' => true,
+            'url' => $url,
+            'embedHtml' => $this->pdfEmbedHtml($url, $_FILES['pdf']['name'] ?? 'Dokumen PDF'),
+        ]);
+    }
+
+    private function pdfEmbedHtml(string $url, string $filename): string
+    {
+        $title = pathinfo($filename, PATHINFO_FILENAME) ?: 'Dokumen PDF';
+        $safeTitle = Security::escape($title);
+        $safeUrl = Security::escape($url);
+
+        return '<figure class="pdf-embed"><iframe src="' . $safeUrl . '" title="' . $safeTitle . '" loading="lazy"></iframe><figcaption>' . $safeTitle . '</figcaption></figure>';
+    }
 }

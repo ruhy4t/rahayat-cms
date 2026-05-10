@@ -197,6 +197,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
                 'gif' => 'image/gif',
                 'webp' => 'image/webp',
                 'svg' => 'image/svg+xml',
+                'pdf' => 'application/pdf',
                 'mp4' => 'video/mp4',
                 'webm' => 'video/webm',
             ];

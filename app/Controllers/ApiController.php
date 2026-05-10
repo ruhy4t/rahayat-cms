@@ -133,6 +133,8 @@ class ApiController extends Controller
             $this->jsonError('Berita tidak ditemukan', 404);
         }
 
+        $news['content'] = $this->normalizeEditorAssetUrls((string) ($news['content'] ?? ''));
+
         $this->jsonSuccess($news);
     }
 

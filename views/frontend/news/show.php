@@ -52,8 +52,34 @@
             </div>
         <?php endif; ?>
 
+        <style>
+            .news-content img {
+                max-width: 100%;
+                height: auto;
+                border-radius: 0.75rem;
+            }
+
+            .news-content .pdf-embed {
+                margin: 2rem 0;
+            }
+
+            .news-content .pdf-embed iframe {
+                width: 100%;
+                min-height: min(72vh, 720px);
+                border: 1px solid rgb(226 232 240);
+                border-radius: 0.75rem;
+                background: rgb(248 250 252);
+            }
+
+            .news-content .pdf-embed figcaption {
+                margin-top: 0.5rem;
+                font-size: 0.875rem;
+                color: rgb(100 116 139);
+            }
+        </style>
+
         <!-- Article Content -->
-        <div class="prose prose-lg prose-slate max-w-none">
+        <div class="news-content prose prose-lg prose-slate max-w-none">
             <?= $news['content'] ?>
         </div>
 

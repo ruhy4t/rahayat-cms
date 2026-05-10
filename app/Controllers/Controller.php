@@ -290,7 +290,7 @@ abstract class Controller
 
     protected function normalizeEditorAssetUrls(string $content): string
     {
-        if ($content === '' || stripos($content, 'storage') === false) {
+        if ($content === '' || (stripos($content, 'storage') === false && stripos($content, 'uploads/') === false)) {
             return $content;
         }
 
@@ -342,8 +342,16 @@ abstract class Controller
         }
 
         $normalized = preg_replace('#^(\./|\../)+#', '', $url) ?? $url;
+        if (str_starts_with($normalized, '/uploads/')) {
+            return '/storage' . $normalized;
+        }
+
         if (str_starts_with($normalized, 'storage/')) {
             return '/' . $normalized;
+        }
+
+        if (str_starts_with($normalized, 'uploads/')) {
+            return '/storage/' . $normalized;
         }
 
         return $url;
