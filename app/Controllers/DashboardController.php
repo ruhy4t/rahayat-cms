@@ -360,7 +360,7 @@ class DashboardController extends Controller
 
         $data = [
             'title' => $this->postSafe('title'),
-            'content' => $this->editorContent(),
+            'content' => $this->editorContent('content', (string) ($news['content'] ?? '')),
             'excerpt' => $this->postSafe('excerpt'),
             'category_id' => $this->post('category_id') ?: null,
             'category' => $this->postSafe('category'),

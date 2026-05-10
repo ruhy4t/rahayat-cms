@@ -283,10 +283,10 @@ abstract class Controller
         return $value !== null ? Security::sanitize($value) : '';
     }
 
-    protected function editorContent(string $key = 'content'): string
+    protected function editorContent(string $key = 'content', string $existingContent = ''): string
     {
         $content = $this->normalizeEditorAssetUrls((string) $this->post($key, ''));
-        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''));
+        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent);
     }
 
     protected function normalizeEditorAssetUrls(string $content): string
@@ -373,15 +373,15 @@ abstract class Controller
         return $url;
     }
 
-    private function appendEditorEmbeds(string $content, string $embedsJson): string
+    private function appendEditorEmbeds(string $content, string $embedsJson, string $existingContent = ''): string
     {
-        if ($embedsJson === '') {
-            return $content;
-        }
+        $embeds = $this->extractEditorEmbedsFromContent($existingContent);
 
-        $embeds = json_decode($embedsJson, true);
-        if (!is_array($embeds)) {
-            return $content;
+        if ($embedsJson !== '') {
+            $postedEmbeds = json_decode($embedsJson, true);
+            if (is_array($postedEmbeds)) {
+                $embeds = array_merge($embeds, $postedEmbeds);
+            }
         }
 
         foreach ($embeds as $embed) {
@@ -403,6 +403,34 @@ abstract class Controller
         }
 
         return $this->normalizeEditorAssetUrls($content);
+    }
+
+    private function extractEditorEmbedsFromContent(string $content): array
+    {
+        $content = $this->normalizeEditorAssetUrls($content);
+        if ($content === '') {
+            return [];
+        }
+
+        $embeds = [];
+        if (preg_match_all('/\b(src|href)=([\'"])(.*?)\2/i', $content, $matches, PREG_SET_ORDER)) {
+            foreach ($matches as $match) {
+                $url = $this->normalizeEditorAssetUrl(html_entity_decode($match[3], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                if (!$this->isAllowedNewsEmbedUrl($url)) {
+                    continue;
+                }
+
+                $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+                $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+                $embeds[] = [
+                    'type' => $extension === 'pdf' ? 'pdf' : 'image',
+                    'url' => $url,
+                    'title' => pathinfo($path, PATHINFO_FILENAME) ?: ($extension === 'pdf' ? 'Dokumen PDF' : 'Gambar berita'),
+                ];
+            }
+        }
+
+        return $embeds;
     }
 
     private function isAllowedNewsEmbedUrl(string $url): bool

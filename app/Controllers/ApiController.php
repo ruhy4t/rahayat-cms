@@ -236,7 +236,7 @@ class ApiController extends Controller
             $this->jsonError('Judul harus diisi', 422, ['title' => 'Judul harus diisi']);
         }
 
-        $content = $this->editorContent();
+        $content = $this->editorContent('content', (string) ($news['content'] ?? ''));
 
         // Helper to get category name
         $categoryId = $this->post('category_id');

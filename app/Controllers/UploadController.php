@@ -29,7 +29,7 @@ class UploadController extends Controller
 
         // Upload
         $uploadDir = 'uploads/news/' . date('Y/m');
-        $uploadPath = $this->uploadFile($file, $uploadDir, UPLOAD_ALLOWED_TYPES, 2 * 1024 * 1024);
+        $uploadPath = $this->uploadFile($file, $uploadDir, UPLOAD_ALLOWED_TYPES, UPLOAD_MAX_SIZE);
 
         if ($uploadPath) {
             $url = '/storage/' . $uploadPath;
