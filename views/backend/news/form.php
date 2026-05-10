@@ -251,6 +251,48 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
             }[char]));
         }
 
+        function normalizeEditorMediaUrl(url) {
+            if (!url) return '';
+
+            let normalized = String(url).trim();
+            try {
+                normalized = new URL(normalized, window.location.origin).pathname;
+            } catch (error) {
+                normalized = normalized.replace(/^(\.\/|\.\.\/)+/, '');
+            }
+
+            if (normalized.startsWith('/storage/uploads/news/')) return normalized;
+            if (normalized.startsWith('storage/uploads/news/')) return '/' + normalized;
+            if (normalized.startsWith('/uploads/news/')) return '/storage' + normalized;
+            if (normalized.startsWith('uploads/news/')) return '/storage/' + normalized;
+
+            return '';
+        }
+
+        function collectVisibleEditorMedia() {
+            document.querySelectorAll('.ck-editor__editable img').forEach((img) => {
+                const url = normalizeEditorMediaUrl(img.getAttribute('src') || img.currentSrc);
+                if (!url) return;
+
+                rememberEditorEmbed({
+                    type: 'image',
+                    url: url,
+                    title: img.getAttribute('alt') || 'Gambar berita'
+                });
+            });
+
+            document.querySelectorAll('.ck-editor__editable iframe').forEach((iframe) => {
+                const url = normalizeEditorMediaUrl(iframe.getAttribute('src'));
+                if (!url || !url.toLowerCase().endsWith('.pdf')) return;
+
+                rememberEditorEmbed({
+                    type: 'pdf',
+                    url: url,
+                    title: iframe.getAttribute('title') || 'Dokumen PDF'
+                });
+            });
+        }
+
         class MyUploadAdapter {
             constructor(loader) {
                 this.loader = loader;
@@ -521,6 +563,8 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
 
                 // Sync CKEditor data to textarea
                 let content = '';
+                collectVisibleEditorMedia();
+
                 if (window.editorInstance) {
                     content = window.editorInstance.getData();
                 } else {
