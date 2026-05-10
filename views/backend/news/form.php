@@ -13,6 +13,7 @@ $editorUploadBatch = Security::randomString(32);
     <form id="newsForm" enctype="multipart/form-data">
         <?= Security::csrfInput() ?>
         <input type="hidden" id="editorEmbedsJson" name="editor_embeds_json" value="[]">
+        <input type="hidden" id="removedEditorEmbedsJson" name="removed_editor_embeds_json" value="[]">
         <input type="hidden" id="editorUploadBatch" name="editor_upload_batch" value="<?= e($editorUploadBatch) ?>">
         <div class="flex flex-col lg:flex-row">
             <!-- Left Column: Main Content -->
@@ -52,6 +53,10 @@ $editorUploadBatch = Security::randomString(32);
                             Unggah PDF ke Isi Berita
                         </button>
                         <span id="pdfUploadStatus" class="text-xs text-slate-500">PDF maks. 10MB.</span>
+                    </div>
+                    <div id="pdfEmbedManager" class="hidden mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div class="text-xs font-semibold text-slate-600 mb-2">PDF di isi berita</div>
+                        <div id="pdfEmbedList" class="space-y-2"></div>
                     </div>
                 </div>
             </div>
@@ -233,15 +238,24 @@ $editorUploadBatch = Security::randomString(32);
 
         // Custom Upload Adapter
         const editorEmbeds = [];
+        const removedEditorEmbeds = new Set();
 
         function rememberEditorEmbed(embed) {
-            if (!embed?.url || editorEmbeds.some(item => item.url === embed.url)) {
+            if (!embed?.url || removedEditorEmbeds.has(embed.url) || editorEmbeds.some(item => item.url === embed.url)) {
                 return;
             }
 
             editorEmbeds.push(embed);
             const embedsInput = document.getElementById('editorEmbedsJson');
             if (embedsInput) embedsInput.value = JSON.stringify(editorEmbeds);
+        }
+
+        function rememberRemovedEditorEmbed(url) {
+            if (!url) return;
+
+            removedEditorEmbeds.add(url);
+            const removedInput = document.getElementById('removedEditorEmbedsJson');
+            if (removedInput) removedInput.value = JSON.stringify([...removedEditorEmbeds]);
         }
 
         function escapeHtml(value) {
@@ -293,6 +307,78 @@ $editorUploadBatch = Security::randomString(32);
                     url: url,
                     title: iframe.getAttribute('title') || 'Dokumen PDF'
                 });
+            });
+        }
+
+        function getEditorHtml() {
+            if (window.editorInstance) return window.editorInstance.getData();
+            return document.getElementById('content')?.value || '';
+        }
+
+        function setEditorHtml(html) {
+            if (window.editorInstance) {
+                window.editorInstance.setData(html);
+                return;
+            }
+
+            const textarea = document.getElementById('content');
+            if (textarea) textarea.value = html;
+        }
+
+        function extractPdfEmbeds(html) {
+            const pdfs = new Map();
+            const pattern = /\b(?:src|href)=["']([^"']+\.pdf(?:\?[^"']*)?)["'][^>]*?(?:title=["']([^"']*)["'])?/gi;
+            let match;
+
+            while ((match = pattern.exec(html)) !== null) {
+                const url = normalizeEditorMediaUrl(match[1]);
+                if (!url || removedEditorEmbeds.has(url)) continue;
+
+                const title = match[2] || decodeURIComponent((url.split('/').pop() || 'Dokumen PDF').replace(/\.pdf(?:\?.*)?$/i, ''));
+                pdfs.set(url, title);
+            }
+
+            return [...pdfs.entries()].map(([url, title]) => ({ url, title }));
+        }
+
+        function removePdfFromHtml(html, url) {
+            const escapedUrl = url.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const relativeUrl = escapedUrl.replace(/^\\\/storage\\\//, '\\/?storage/');
+            const urlPattern = `(?:${escapedUrl}|${relativeUrl})`;
+
+            html = html.replace(new RegExp(`<figure\\b[^>]*>[\\s\\S]*?${urlPattern}[\\s\\S]*?<\\/figure>`, 'gi'), '');
+            html = html.replace(new RegExp(`<p>\\s*<iframe\\b[^>]*(?:src=["']${urlPattern}["'])[^>]*>\\s*<\\/iframe>\\s*<\\/p>`, 'gi'), '');
+            html = html.replace(new RegExp(`<iframe\\b[^>]*(?:src=["']${urlPattern}["'])[^>]*>\\s*<\\/iframe>`, 'gi'), '');
+            html = html.replace(new RegExp(`<a\\b[^>]*(?:href=["']${urlPattern}["'])[^>]*>[\\s\\S]*?<\\/a>`, 'gi'), '');
+
+            return html;
+        }
+
+        function renderPdfEmbedManager() {
+            const manager = document.getElementById('pdfEmbedManager');
+            const list = document.getElementById('pdfEmbedList');
+            if (!manager || !list) return;
+
+            const pdfs = extractPdfEmbeds(getEditorHtml());
+            manager.classList.toggle('hidden', pdfs.length === 0);
+            list.innerHTML = '';
+
+            pdfs.forEach(pdf => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between gap-3 rounded-md bg-white border border-slate-200 px-3 py-2';
+                row.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-slate-700 truncate">${escapeHtml(pdf.title || 'Dokumen PDF')}</div>
+                        <div class="text-xs text-slate-400 truncate">${escapeHtml(pdf.url)}</div>
+                    </div>
+                    <button type="button" class="shrink-0 px-3 py-1.5 rounded-md bg-red-50 text-red-600 text-xs font-medium hover:bg-red-100">Hapus</button>
+                `;
+                row.querySelector('button').addEventListener('click', () => {
+                    rememberRemovedEditorEmbed(pdf.url);
+                    setEditorHtml(removePdfFromHtml(getEditorHtml(), pdf.url));
+                    renderPdfEmbedManager();
+                });
+                list.appendChild(row);
             });
         }
 
@@ -449,6 +535,12 @@ $editorUploadBatch = Security::randomString(32);
                     editor.editing.view.change(writer => {
                         writer.setStyle('min-height', '400px', editor.editing.view.document.getRoot());
                     });
+
+                    renderPdfEmbedManager();
+                    editor.model.document.on('change:data', () => {
+                        window.clearTimeout(window.__newsPdfRenderTimer);
+                        window.__newsPdfRenderTimer = window.setTimeout(renderPdfEmbedManager, 250);
+                    });
                 })
                 .catch(err => {
                     console.error('CKEditor Init Error:', err);
@@ -547,6 +639,7 @@ $editorUploadBatch = Security::randomString(32);
                         url: result.url,
                         title: file.name.replace(/\.pdf$/i, '')
                     });
+                    renderPdfEmbedManager();
                     showNotification('success', 'PDF berhasil ditambahkan ke isi berita.');
                     if (pdfStatus) pdfStatus.textContent = file.name;
                 } catch (error) {
@@ -576,7 +669,7 @@ $editorUploadBatch = Security::randomString(32);
                     content = document.getElementById('content').value;
                 }
                 editorEmbeds.forEach(embed => {
-                    if (embed.url && !content.includes(embed.url)) {
+                    if (embed.url && !removedEditorEmbeds.has(embed.url) && !content.includes(embed.url)) {
                         if (embed.type === 'pdf') {
                             const title = escapeHtml(embed.title || 'Dokumen PDF');
                             content += `<figure class="pdf-embed"><iframe src="${embed.url}" title="${title}" loading="lazy"></iframe><figcaption>${title}</figcaption></figure>`;
@@ -592,6 +685,7 @@ $editorUploadBatch = Security::randomString(32);
                 const formData = new FormData(this);
                 formData.set('content', content);
                 formData.set(csrfFieldName, csrfToken);
+                formData.set('removed_editor_embeds_json', JSON.stringify([...removedEditorEmbeds]));
 
                 // Setup Endpoint (API)
                 const isEdit = <?= $isEdit ? 'true' : 'false' ?>;

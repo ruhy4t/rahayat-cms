@@ -114,11 +114,12 @@ class DashboardController extends Controller
             return true;
         }
 
-        // Restrict SPMB routes to Swasta only
-        if (in_array($action, ['spmb', 'spmbDetail', 'spmbUpdateStatus', 'spmbSettings', 'spmbSettingsUpdate'])) {
+        // Registration management is only for Swasta. Settings remain available for
+        // Negeri too because they control the public Info SPMB redirect visibility.
+        if (in_array($action, ['spmb', 'spmbDetail', 'spmbUpdateStatus'])) {
             $spmbProfile = $this->profileModel->getProfile();
             if (empty($spmbProfile['school_type']) || $spmbProfile['school_type'] !== 'swasta') {
-                $this->flash('error', 'Fitur SPMB hanya tersedia untuk sekolah swasta');
+                $this->flash('error', 'Manajemen pendaftaran SPMB hanya tersedia untuk sekolah swasta. Untuk sekolah negeri, gunakan Pengaturan SPMB.');
                 $this->redirect('/admin');
                 return false;
             }
@@ -662,6 +663,7 @@ class DashboardController extends Controller
         $data = [
             'title' => 'Pengaturan SPMB',
             'user' => $this->currentUser(),
+            'profile' => $this->profileModel->getProfile(),
             'settings' => $this->settingModel->getAll(),
             'flash' => $this->getFlash(),
             'availableDocuments' => [
@@ -686,12 +688,17 @@ class DashboardController extends Controller
             $this->settingModel->set('spmb_enabled', $this->post('spmb_enabled') ? '1' : '0');
             $this->settingModel->set('spmb_start_date', $this->postSafe('spmb_start_date'));
             $this->settingModel->set('spmb_end_date', $this->postSafe('spmb_end_date'));
-            $this->settingModel->set('spmb_quota', (string) (int) $this->post('spmb_quota', 0));
 
-            $documents = $this->post('spmb_documents') ?? [];
-            if (!is_array($documents))
-                $documents = [];
-            $this->settingModel->set('spmb_documents', json_encode($documents));
+            if ($this->post('spmb_quota') !== null) {
+                $this->settingModel->set('spmb_quota', (string) (int) $this->post('spmb_quota', 0));
+            }
+
+            if ($this->post('spmb_documents_present') === '1') {
+                $documents = $this->post('spmb_documents') ?? [];
+                if (!is_array($documents))
+                    $documents = [];
+                $this->settingModel->set('spmb_documents', json_encode($documents));
+            }
 
             $this->json(['success' => true, 'message' => 'Pengaturan SPMB berhasil disimpan']);
         } catch (\Throwable $e) {

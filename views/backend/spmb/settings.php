@@ -4,6 +4,9 @@
  */
 $title = $data['title'] ?? 'Pengaturan SPMB';
 $settings = $data['settings'] ?? [];
+$profile = $data['profile'] ?? [];
+$schoolType = strtolower((string) ($profile['school_type'] ?? 'negeri'));
+$isSwasta = $schoolType === 'swasta';
 $availableDocuments = $data['availableDocuments'] ?? [];
 $flash = $data['flash'] ?? null;
 
@@ -20,7 +23,7 @@ if (!is_array($selectedDocuments)) {
     <div class="flex items-center justify-between">
         <div>
             <div class="flex items-center gap-3">
-                <a href="/admin/spmb" class="text-slate-400 hover:text-slate-600 transition-colors">
+                <a href="<?= $isSwasta ? '/admin/spmb' : '/admin' ?>" class="text-slate-400 hover:text-slate-600 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -30,9 +33,21 @@ if (!is_array($selectedDocuments)) {
                     <?= e($title) ?>
                 </h1>
             </div>
-            <p class="text-slate-500 mt-1 ml-9">Konfigurasi Sistem Penerimaan Murid Baru</p>
+            <p class="text-slate-500 mt-1 ml-9">
+                <?= $isSwasta
+                    ? 'Konfigurasi formulir dan periode Sistem Penerimaan Murid Baru'
+                    : 'Konfigurasi periode tampil Info SPMB dan redirect untuk sekolah negeri' ?>
+            </p>
         </div>
     </div>
+
+    <?php if (!$isSwasta): ?>
+        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+            Sekolah berstatus <strong>Negeri</strong>. Jika status aktif dan tanggal saat ini masuk periode,
+            menu public <strong>Info SPMB</strong> akan tampil lalu mengarah ke Link SPMB di
+            <a href="/admin/profil" class="font-semibold underline">Profil Sekolah</a>.
+        </div>
+    <?php endif; ?>
 
     <!-- SPMB Settings -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
@@ -68,36 +83,39 @@ if (!is_array($selectedDocuments)) {
                 </div>
             </div>
 
-            <!-- Quota Configuration -->
-            <div class="pt-4 border-t border-slate-100">
-                <div class="max-w-xs">
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Daya Tampung / Kuota Murid</label>
-                    <input type="number" name="spmb_quota" value="<?= e($settings['spmb_quota'] ?? '0') ?>" min="0"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
-                        placeholder="Misal: 100">
-                    <p class="text-xs text-slate-500 mt-1">Biarkan 0 jika tidak ada batasan kuota.</p>
+            <?php if ($isSwasta): ?>
+                <!-- Quota Configuration -->
+                <div class="pt-4 border-t border-slate-100">
+                    <div class="max-w-xs">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Daya Tampung / Kuota Murid</label>
+                        <input type="number" name="spmb_quota" value="<?= e($settings['spmb_quota'] ?? '0') ?>" min="0"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                            placeholder="Misal: 100">
+                        <p class="text-xs text-slate-500 mt-1">Biarkan 0 jika tidak ada batasan kuota.</p>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Documents Configuration -->
-            <div class="pt-4 border-t border-slate-100">
-                <h3 class="text-sm font-medium text-slate-700 mb-3">Dokumen Wajib/Persyaratan Pendaftaran</h3>
-                <p class="text-slate-500 text-sm mb-4">Pilih file apa saja yang diwajibkan untuk diunggah oleh pendaftar
-                    pada saat pengisian formulir.</p>
+                <!-- Documents Configuration -->
+                <div class="pt-4 border-t border-slate-100">
+                    <input type="hidden" name="spmb_documents_present" value="1">
+                    <h3 class="text-sm font-medium text-slate-700 mb-3">Dokumen Wajib/Persyaratan Pendaftaran</h3>
+                    <p class="text-slate-500 text-sm mb-4">Pilih file apa saja yang diwajibkan untuk diunggah oleh pendaftar
+                        pada saat pengisian formulir.</p>
 
-                <div class="grid sm:grid-cols-2 gap-3">
-                    <?php foreach ($availableDocuments as $key => $label): ?>
-                        <div class="flex items-center gap-3">
-                            <input type="checkbox" id="doc_<?= e($key) ?>" name="spmb_documents[]" value="<?= e($key) ?>"
-                                <?= in_array($key, $selectedDocuments) ? 'checked' : '' ?>
-                                class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500 cursor-pointer">
-                            <label for="doc_<?= e($key) ?>" class="text-slate-700 cursor-pointer">
-                                <?= e($label) ?>
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
+                    <div class="grid sm:grid-cols-2 gap-3">
+                        <?php foreach ($availableDocuments as $key => $label): ?>
+                            <div class="flex items-center gap-3">
+                                <input type="checkbox" id="doc_<?= e($key) ?>" name="spmb_documents[]" value="<?= e($key) ?>"
+                                    <?= in_array($key, $selectedDocuments) ? 'checked' : '' ?>
+                                    class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500 cursor-pointer">
+                                <label for="doc_<?= e($key) ?>" class="text-slate-700 cursor-pointer">
+                                    <?= e($label) ?>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
                 </div>
-            </div>
+            <?php endif; ?>
 
             <!-- Submission Setup -->
             <div class="pt-6 border-t border-slate-100 flex justify-end">

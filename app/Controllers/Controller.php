@@ -288,8 +288,10 @@ abstract class Controller
         $content = $this->persistEditorDataImages((string) $this->post($key, ''));
         $content = $this->normalizeEditorAssetUrls($content);
         $batchEmbeds = $this->editorUploadBatchEmbeds((string) $this->post('editor_upload_batch', ''));
+        $removedEmbeds = $this->editorRemovedEmbeds((string) $this->post('removed_editor_embeds_json', ''));
+        $content = $this->removeEditorEmbeds($content, $removedEmbeds);
 
-        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent, $batchEmbeds);
+        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent, $batchEmbeds, $removedEmbeds);
     }
 
     protected function persistEditorDataImages(string $content): string
@@ -433,12 +435,34 @@ abstract class Controller
         return is_array($uploads) ? $uploads : [];
     }
 
+    private function editorRemovedEmbeds(string $removedJson): array
+    {
+        if ($removedJson === '') {
+            return [];
+        }
+
+        $removed = json_decode($removedJson, true);
+        if (!is_array($removed)) {
+            return [];
+        }
+
+        $urls = [];
+        foreach ($removed as $url) {
+            $url = $this->normalizeEditorAssetUrl((string) $url);
+            if ($this->isAllowedNewsEmbedUrl($url)) {
+                $urls[] = $url;
+            }
+        }
+
+        return array_values(array_unique($urls));
+    }
+
     private function isValidEditorUploadBatch(string $batch): bool
     {
         return preg_match('/^[a-f0-9]{16,64}$/i', $batch) === 1;
     }
 
-    private function appendEditorEmbeds(string $content, string $embedsJson, string $existingContent = '', array $extraEmbeds = []): string
+    private function appendEditorEmbeds(string $content, string $embedsJson, string $existingContent = '', array $extraEmbeds = [], array $removedUrls = []): string
     {
         $embeds = array_merge($this->extractEditorEmbedsFromContent($existingContent), $extraEmbeds);
 
@@ -455,7 +479,7 @@ abstract class Controller
             }
 
             $url = $this->normalizeEditorAssetUrl((string) ($embed['url'] ?? ''));
-            if (!$this->isAllowedNewsEmbedUrl($url) || str_contains($content, $url)) {
+            if (!$this->isAllowedNewsEmbedUrl($url) || in_array($url, $removedUrls, true) || str_contains($content, $url)) {
                 continue;
             }
 
@@ -468,6 +492,19 @@ abstract class Controller
         }
 
         return $this->normalizeEditorAssetUrls($content);
+    }
+
+    private function removeEditorEmbeds(string $content, array $urls): string
+    {
+        foreach ($urls as $url) {
+            $quoted = preg_quote($url, '/');
+            $content = preg_replace('/<figure\b[^>]*>[\s\S]*?' . $quoted . '[\s\S]*?<\/figure>/i', '', $content) ?? $content;
+            $content = preg_replace('/<p>\s*<iframe\b[^>]*src=(["\'])' . $quoted . '\1[^>]*>\s*<\/iframe>\s*<\/p>/i', '', $content) ?? $content;
+            $content = preg_replace('/<iframe\b[^>]*src=(["\'])' . $quoted . '\1[^>]*>\s*<\/iframe>/i', '', $content) ?? $content;
+            $content = preg_replace('/<a\b[^>]*href=(["\'])' . $quoted . '\1[^>]*>[\s\S]*?<\/a>/i', '', $content) ?? $content;
+        }
+
+        return $content;
     }
 
     private function removeEmptyImageFigures(string $content): string
