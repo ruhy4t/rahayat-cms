@@ -60,18 +60,30 @@ class NewsController extends Controller
     {
         $news = $this->newsModel->findBySlug($slug);
 
-        if (!$news || $news['status'] !== 'published') {
+        if (!$news || ($news['status'] ?? '') !== 'published') {
             http_response_code(404);
             $this->view('errors.404', ['title' => 'Tidak Ditemukan'], 'frontend');
             return;
         }
 
-        // Increment view count
-        $this->newsModel->incrementViews($news['id']);
+        // Increment view count (fail silently if column missing on hosting)
+        try {
+            $this->newsModel->incrementViews($news['id']);
+        } catch (\Throwable $e) {
+            error_log('incrementViews failed: ' . $e->getMessage());
+        }
 
-        // Get related news
-        $related = $this->newsModel->getByCategory($news['category'], 4);
-        $related = array_filter($related, fn($item) => $item['id'] !== $news['id']);
+        // Get related news (handle null/empty category gracefully)
+        $related = [];
+        $category = $news['category'] ?? '';
+        if ($category !== '') {
+            try {
+                $related = $this->newsModel->getByCategory($category, 4);
+                $related = array_filter($related, fn($item) => $item['id'] !== $news['id']);
+            } catch (\Throwable $e) {
+                error_log('getByCategory failed: ' . $e->getMessage());
+            }
+        }
 
         $data = [
             'title' => $news['title'],

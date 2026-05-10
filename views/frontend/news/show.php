@@ -19,7 +19,7 @@
         <header class="mb-8">
             <div class="flex items-center gap-3 mb-4">
                 <span class="px-3 py-1 bg-primary-100 text-primary-700 text-sm font-medium rounded-full">
-                    <?= e(ucfirst($news['category'])) ?>
+                    <?= e(ucfirst($news['category'] ?? 'Umum')) ?>
                 </span>
                 <span class="text-slate-500 text-sm">
                     <?= e($news['views'] ?? 0) ?> views
