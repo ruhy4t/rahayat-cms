@@ -5,7 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="<?= e($settings['meta_description'] ?? (($profile['name'] ?? SCHOOL_NAME) . ' - Website Resmi')) ?>">
+        content="<?= e($news['meta_description'] ?? $settings['meta_description'] ?? (($profile['name'] ?? SCHOOL_NAME) . ' - Website Resmi')) ?>">
+    <?php if (!empty($news['meta_keywords'])): ?>
+        <meta name="keywords" content="<?= e($news['meta_keywords']) ?>">
+    <?php endif; ?>
     <?= Security::csrfMeta() ?>
 
     <title>

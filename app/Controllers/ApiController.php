@@ -149,7 +149,7 @@ class ApiController extends Controller
 
         // Validate input
         $title = $this->postSafe('title');
-        $content = $this->post('content', '');
+        $content = $this->editorContent();
 
         if (empty($title)) {
             $this->jsonError('Judul harus diisi', 422, ['title' => 'Judul harus diisi']);
@@ -174,7 +174,9 @@ class ApiController extends Controller
             'category' => $categoryName ?: 'Umum',
             'status' => $this->postSafe('status') ?: 'draft',
             'author_id' => $_SESSION['user_id'],
-            'slug' => $this->newsModel->generateSlug($title)
+            'slug' => $this->newsModel->generateSlug($title),
+            'meta_description' => $this->postSafe('meta_description'),
+            'meta_keywords' => $this->postSafe('meta_keywords'),
         ];
 
         // Set published_at if publishing
@@ -232,7 +234,7 @@ class ApiController extends Controller
             $this->jsonError('Judul harus diisi', 422, ['title' => 'Judul harus diisi']);
         }
 
-        $content = $this->post('content', '');
+        $content = $this->editorContent();
 
         // Helper to get category name
         $categoryId = $this->post('category_id');
@@ -251,7 +253,9 @@ class ApiController extends Controller
             'excerpt' => $this->postSafe('excerpt') ?: mb_substr(strip_tags($content), 0, 150) . '...',
             'category_id' => $categoryId ?: null,
             'category' => $categoryName ?: 'Umum',
-            'status' => $this->postSafe('status') ?: 'draft'
+            'status' => $this->postSafe('status') ?: 'draft',
+            'meta_description' => $this->postSafe('meta_description'),
+            'meta_keywords' => $this->postSafe('meta_keywords'),
         ];
 
         // Update slug if title changed

@@ -250,6 +250,8 @@ class SchemaRepairer
             'status' => "ENUM('draft', 'pending', 'published', 'archived') DEFAULT 'draft'",
             'views' => 'INT UNSIGNED DEFAULT 0',
             'published_at' => 'DATETIME NULL',
+            'meta_description' => 'TEXT NULL',
+            'meta_keywords' => 'VARCHAR(255) NULL',
         ];
 
         foreach ($columns as $column => $definition) {

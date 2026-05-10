@@ -283,6 +283,87 @@ abstract class Controller
         return $value !== null ? Security::sanitize($value) : '';
     }
 
+    protected function editorContent(string $key = 'content'): string
+    {
+        return $this->normalizeEditorAssetUrls((string) $this->post($key, ''));
+    }
+
+    protected function normalizeEditorAssetUrls(string $content): string
+    {
+        if ($content === '' || stripos($content, 'storage') === false) {
+            return $content;
+        }
+
+        return preg_replace_callback('/\b(src|srcset)=([\'"])(.*?)\2/i', function (array $matches): string {
+            $attribute = strtolower($matches[1]);
+            $quote = $matches[2];
+            $value = html_entity_decode($matches[3], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            if ($attribute === 'srcset') {
+                $value = $this->normalizeSrcsetValue($value);
+            } else {
+                $value = $this->normalizeEditorAssetUrl($value);
+            }
+
+            return $matches[1] . '=' . $quote . htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8') . $quote;
+        }, $content) ?? $content;
+    }
+
+    private function normalizeSrcsetValue(string $value): string
+    {
+        $items = array_map('trim', explode(',', $value));
+        $normalized = [];
+
+        foreach ($items as $item) {
+            if ($item === '') {
+                continue;
+            }
+
+            $parts = preg_split('/\s+/', $item, 2);
+            $url = $this->normalizeEditorAssetUrl($parts[0] ?? '');
+            $descriptor = $parts[1] ?? '';
+            $normalized[] = trim($url . ' ' . $descriptor);
+        }
+
+        return implode(', ', $normalized);
+    }
+
+    private function normalizeEditorAssetUrl(string $url): string
+    {
+        $url = trim($url);
+
+        if ($url === '' || str_starts_with($url, 'data:') || str_starts_with($url, 'blob:')) {
+            return $url;
+        }
+
+        $parsed = parse_url($url);
+        if (isset($parsed['path']) && str_starts_with($parsed['path'], '/storage/')) {
+            return $this->rebuildStorageUrl($parsed['path'], $parsed);
+        }
+
+        $normalized = preg_replace('#^(\./|\../)+#', '', $url) ?? $url;
+        if (str_starts_with($normalized, 'storage/')) {
+            return '/' . $normalized;
+        }
+
+        return $url;
+    }
+
+    private function rebuildStorageUrl(string $path, array $parsed): string
+    {
+        $url = $path;
+
+        if (!empty($parsed['query'])) {
+            $url .= '?' . $parsed['query'];
+        }
+
+        if (!empty($parsed['fragment'])) {
+            $url .= '#' . $parsed['fragment'];
+        }
+
+        return $url;
+    }
+
     /**
      * Validate CSRF token
      */

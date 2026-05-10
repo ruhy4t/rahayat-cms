@@ -283,13 +283,15 @@ class DashboardController extends Controller
 
         $data = [
             'title' => $this->postSafe('title'),
-            'content' => $this->post('content', ''),
+            'content' => $this->editorContent(),
             'excerpt' => $this->postSafe('excerpt'),
             'category_id' => $this->post('category_id') ?: null,
             'category' => $this->postSafe('category'),
             'status' => $this->postSafe('status') ?: 'draft',
             'author_id' => $_SESSION['user_id'],
-            'published_at' => $this->post('status') === 'published' ? date('Y-m-d H:i:s') : null
+            'published_at' => $this->post('status') === 'published' ? date('Y-m-d H:i:s') : null,
+            'meta_description' => $this->postSafe('meta_description'),
+            'meta_keywords' => $this->postSafe('meta_keywords'),
         ];
 
         // Murid/Ekskul: force draft status
@@ -356,11 +358,13 @@ class DashboardController extends Controller
 
         $data = [
             'title' => $this->postSafe('title'),
-            'content' => $this->post('content', ''),
+            'content' => $this->editorContent(),
             'excerpt' => $this->postSafe('excerpt'),
             'category_id' => $this->post('category_id') ?: null,
             'category' => $this->postSafe('category'),
-            'status' => $this->postSafe('status') ?: 'draft'
+            'status' => $this->postSafe('status') ?: 'draft',
+            'meta_description' => $this->postSafe('meta_description'),
+            'meta_keywords' => $this->postSafe('meta_keywords'),
         ];
 
         // Murid/Ekskul: force draft status

@@ -10,7 +10,20 @@ declare(strict_types=1);
 class News extends Model
 {
     protected string $table = 'news';
-    protected array $fillable = ['title', 'slug', 'excerpt', 'content', 'image', 'category', 'category_id', 'author_id', 'status', 'published_at'];
+    protected array $fillable = [
+        'title',
+        'slug',
+        'excerpt',
+        'content',
+        'image',
+        'category',
+        'category_id',
+        'author_id',
+        'status',
+        'published_at',
+        'meta_description',
+        'meta_keywords',
+    ];
 
     /**
      * Get published news

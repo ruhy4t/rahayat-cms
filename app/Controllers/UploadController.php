@@ -32,9 +32,12 @@ class UploadController extends Controller
         $uploadPath = $this->uploadFile($file, $uploadDir, UPLOAD_ALLOWED_TYPES, 2 * 1024 * 1024);
 
         if ($uploadPath) {
+            $url = '/storage/' . $uploadPath;
+
             // Return JSON response for CKEditor
             echo json_encode([
-                'url' => '/storage/' . $uploadPath
+                'url' => $url,
+                'default' => $url,
             ]);
         } else {
             http_response_code(400);

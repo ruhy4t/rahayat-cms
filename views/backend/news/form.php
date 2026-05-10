@@ -144,7 +144,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                                 class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20 resize-none"><?= e($item['meta_description'] ?? '') ?></textarea>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-700 mb-1">Meta Keywords</label>
+                            <label class="block text-xs font-medium text-slate-700 mb-1">Meta Keywords / Tag</label>
                             <input type="text" name="meta_keywords" value="<?= e($item['meta_keywords'] ?? '') ?>"
                                 class="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                                 placeholder="Komputer, Prestasi, dsb">

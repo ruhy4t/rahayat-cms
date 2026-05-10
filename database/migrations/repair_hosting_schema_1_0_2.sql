@@ -173,6 +173,8 @@ ALTER TABLE news ADD COLUMN IF NOT EXISTS category_id INT UNSIGNED NULL;
 ALTER TABLE news ADD COLUMN IF NOT EXISTS status ENUM('draft', 'pending', 'published', 'archived') DEFAULT 'draft';
 ALTER TABLE news ADD COLUMN IF NOT EXISTS views INT UNSIGNED DEFAULT 0;
 ALTER TABLE news ADD COLUMN IF NOT EXISTS published_at DATETIME NULL;
+ALTER TABLE news ADD COLUMN IF NOT EXISTS meta_description TEXT NULL;
+ALTER TABLE news ADD COLUMN IF NOT EXISTS meta_keywords VARCHAR(255) NULL;
 
 -- ============================================
 -- Reset schema version agar auto-repair jalan lagi
