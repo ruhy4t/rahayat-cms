@@ -435,7 +435,7 @@ $isRestricted = in_array($currentUser['role'] ?? '', ['murid', 'ekskul']);
                 },
 
                 // Remove premium/AI plugins to avoid license errors
-                removePlugins: ['CaseChange', 'ExportPdf', 'ExportWord', 'ImportWord', 'AIAssistant', 'CKBox', 'CKFinder', 'EasyImage', 'RealTimeCollaborativeComments', 'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory', 'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData', 'RevisionHistory', 'Pagination', 'WProofreader', 'MathType', 'SlashCommand', 'Template', 'DocumentOutline', 'FormatPainter', 'TableOfContents', 'PasteFromOfficeEnhanced'],
+                removePlugins: ['CaseChange', 'ExportPdf', 'ExportWord', 'ImportWord', 'AIAssistant', 'CKBox', 'CKFinder', 'EasyImage', 'Base64UploadAdapter', 'RealTimeCollaborativeComments', 'RealTimeCollaborativeTrackChanges', 'RealTimeCollaborativeRevisionHistory', 'PresenceList', 'Comments', 'TrackChanges', 'TrackChangesData', 'RevisionHistory', 'Pagination', 'WProofreader', 'MathType', 'SlashCommand', 'Template', 'DocumentOutline', 'FormatPainter', 'TableOfContents', 'PasteFromOfficeEnhanced'],
             })
                 .then(editor => {
                     window.editorInstance = editor;

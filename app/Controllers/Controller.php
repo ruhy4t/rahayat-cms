@@ -285,8 +285,25 @@ abstract class Controller
 
     protected function editorContent(string $key = 'content', string $existingContent = ''): string
     {
-        $content = $this->normalizeEditorAssetUrls((string) $this->post($key, ''));
+        $content = $this->persistEditorDataImages((string) $this->post($key, ''));
+        $content = $this->normalizeEditorAssetUrls($content);
         return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent);
+    }
+
+    protected function persistEditorDataImages(string $content): string
+    {
+        if ($content === '' || stripos($content, 'data:image/') === false) {
+            return $content;
+        }
+
+        return preg_replace_callback('/\bsrc=([\'"])(data:image\/(?:jpeg|pjpeg|png|x-png|gif|webp);base64,[^\'"]+)\1/i', function (array $matches): string {
+            $url = $this->storeEditorDataImage(html_entity_decode($matches[2], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+            if (!$url) {
+                return $matches[0];
+            }
+
+            return 'src=' . $matches[1] . Security::escape($url) . $matches[1];
+        }, $content) ?? $content;
     }
 
     protected function normalizeEditorAssetUrls(string $content): string
@@ -415,7 +432,11 @@ abstract class Controller
         $embeds = [];
         if (preg_match_all('/\b(src|href)=([\'"])(.*?)\2/i', $content, $matches, PREG_SET_ORDER)) {
             foreach ($matches as $match) {
-                $url = $this->normalizeEditorAssetUrl(html_entity_decode($match[3], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                $rawUrl = html_entity_decode($match[3], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $url = str_starts_with($rawUrl, 'data:image/')
+                    ? ($this->storeEditorDataImage($rawUrl) ?? '')
+                    : $this->normalizeEditorAssetUrl($rawUrl);
+
                 if (!$this->isAllowedNewsEmbedUrl($url)) {
                     continue;
                 }
@@ -461,6 +482,80 @@ abstract class Controller
         }
 
         return '';
+    }
+
+    private function storeEditorDataImage(string $dataUri): ?string
+    {
+        if (!preg_match('/^data:(image\/(?:jpeg|pjpeg|png|x-png|gif|webp));base64,(.+)$/is', $dataUri, $matches)) {
+            return null;
+        }
+
+        $mimeType = strtolower($matches[1]);
+        if (!in_array($mimeType, UPLOAD_ALLOWED_TYPES, true)) {
+            return null;
+        }
+
+        $binary = base64_decode(preg_replace('/\s+/', '', $matches[2]) ?? '', true);
+        if ($binary === false || $binary === '') {
+            return null;
+        }
+
+        if (strlen($binary) > UPLOAD_MAX_SIZE) {
+            $this->lastUploadError = 'Ukuran gambar di isi berita melebihi batas ' . number_format(UPLOAD_MAX_SIZE / 1024 / 1024, 0) . 'MB.';
+            return null;
+        }
+
+        $detectedMime = (new finfo(FILEINFO_MIME_TYPE))->buffer($binary);
+        if (!$detectedMime || !in_array($detectedMime, UPLOAD_ALLOWED_TYPES, true)) {
+            return null;
+        }
+
+        $extension = Security::extensionForMime((string) $detectedMime);
+        if (!$extension) {
+            return null;
+        }
+
+        $directory = 'uploads/news/' . date('Y/m');
+        $uploadDir = STORAGE_PATH . '/' . $directory;
+        if (!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) {
+            return null;
+        }
+
+        if (!is_writable($uploadDir)) {
+            return null;
+        }
+
+        if ($this->shouldOptimizeUpload($directory, (string) $detectedMime)) {
+            $extension = 'webp';
+        }
+
+        $filename = substr(hash('sha256', $binary), 0, 32) . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+        $publicUrl = '/storage/' . $directory . '/' . $filename;
+
+        if (is_file($filepath)) {
+            return $publicUrl;
+        }
+
+        if (file_put_contents($filepath, $binary, LOCK_EX) === false) {
+            return null;
+        }
+
+        if (function_exists('chmod')) {
+            @chmod($filepath, 0644);
+        }
+
+        if ($extension === 'webp') {
+            $optimized = $this->optimizeImage($filepath, (string) $detectedMime);
+            if ($optimized === false) {
+                @unlink($filepath);
+                return null;
+            }
+        }
+
+        $this->applyWatermark($filepath, $directory);
+
+        return $publicUrl;
     }
 
     /**
