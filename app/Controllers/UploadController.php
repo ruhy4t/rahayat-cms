@@ -19,6 +19,13 @@ class UploadController extends Controller
 
         header('Content-Type: application/json');
 
+        $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? $this->post(CSRF_TOKEN_NAME);
+        if (!Security::validateCsrfToken($token)) {
+            http_response_code(403);
+            echo json_encode(['error' => ['message' => 'Invalid CSRF token']]);
+            return;
+        }
+
         if (empty($_FILES['upload'])) {
             http_response_code(400);
             echo json_encode(['error' => ['message' => 'No file uploaded.']]);

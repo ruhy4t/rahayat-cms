@@ -114,6 +114,138 @@ class Security
     }
 
     /**
+     * Sanitize trusted-format rich text before storing or rendering it.
+     */
+    public static function sanitizeHtml(string $html): string
+    {
+        if ($html === '') {
+            return '';
+        }
+
+        $allowedTags = [
+            'a', 'abbr', 'b', 'blockquote', 'br', 'caption', 'code', 'col', 'colgroup',
+            'div', 'em', 'figcaption', 'figure', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+            'hr', 'i', 'iframe', 'img', 'li', 'ol', 'p', 'pre', 's', 'span', 'strong',
+            'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'u', 'ul',
+        ];
+        $allowedAttributes = [
+            'alt', 'class', 'colspan', 'height', 'href', 'loading', 'rel', 'rowspan',
+            'src', 'target', 'title', 'width',
+        ];
+
+        $document = new DOMDocument('1.0', 'UTF-8');
+        $previous = libxml_use_internal_errors(true);
+        $document->loadHTML(
+            '<?xml encoding="UTF-8"><div id="__sanitize_root__">' . $html . '</div>',
+            LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
+        );
+        libxml_clear_errors();
+        libxml_use_internal_errors($previous);
+
+        $root = $document->getElementById('__sanitize_root__');
+        if (!$root) {
+            return '';
+        }
+
+        self::sanitizeHtmlNode($root, $allowedTags, $allowedAttributes);
+
+        $output = '';
+        foreach ($root->childNodes as $child) {
+            $output .= $document->saveHTML($child);
+        }
+
+        return trim($output);
+    }
+
+    private static function sanitizeHtmlNode(DOMNode $node, array $allowedTags, array $allowedAttributes): void
+    {
+        for ($child = $node->firstChild; $child !== null; ) {
+            $next = $child->nextSibling;
+
+            if ($child instanceof DOMElement) {
+                $tag = strtolower($child->tagName);
+                if (!in_array($tag, $allowedTags, true)) {
+                    self::removeElementKeepText($child);
+                    $child = $next;
+                    continue;
+                }
+
+                self::sanitizeHtmlAttributes($child, $allowedAttributes);
+                self::sanitizeHtmlNode($child, $allowedTags, $allowedAttributes);
+            }
+
+            $child = $next;
+        }
+    }
+
+    private static function sanitizeHtmlAttributes(DOMElement $element, array $allowedAttributes): void
+    {
+        $tag = strtolower($element->tagName);
+        $remove = [];
+
+        foreach ($element->attributes as $attribute) {
+            $name = strtolower($attribute->name);
+            $value = trim($attribute->value);
+
+            if (str_starts_with($name, 'on') || !in_array($name, $allowedAttributes, true)) {
+                $remove[] = $attribute->name;
+                continue;
+            }
+
+            if (in_array($name, ['href', 'src'], true) && !self::isSafeHtmlUrl($value)) {
+                $remove[] = $attribute->name;
+            }
+        }
+
+        foreach ($remove as $name) {
+            $element->removeAttribute($name);
+        }
+
+        if ($tag === 'iframe' && !self::isAllowedIframeSrc($element->getAttribute('src'))) {
+            $element->parentNode?->removeChild($element);
+            return;
+        }
+
+        if ($tag === 'a' && $element->getAttribute('target') === '_blank') {
+            $element->setAttribute('rel', 'noopener noreferrer');
+        }
+
+        if ($tag === 'img' && !$element->hasAttribute('alt')) {
+            $element->setAttribute('alt', '');
+        }
+    }
+
+    private static function removeElementKeepText(DOMElement $element): void
+    {
+        $parent = $element->parentNode;
+        if (!$parent) {
+            return;
+        }
+
+        while ($element->firstChild) {
+            $parent->insertBefore($element->firstChild, $element);
+        }
+        $parent->removeChild($element);
+    }
+
+    private static function isSafeHtmlUrl(string $url): bool
+    {
+        if ($url === '' || str_starts_with($url, '#') || str_starts_with($url, '/')) {
+            return true;
+        }
+
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+        return in_array($scheme, ['http', 'https', 'mailto', 'tel'], true);
+    }
+
+    private static function isAllowedIframeSrc(string $url): bool
+    {
+        $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
+        return str_starts_with($path, '/storage/uploads/news/')
+            && strtolower(pathinfo($path, PATHINFO_EXTENSION)) === 'pdf';
+    }
+
+    /**
      * Validate and sanitize email
      */
     public static function sanitizeEmail(string $email): string|false

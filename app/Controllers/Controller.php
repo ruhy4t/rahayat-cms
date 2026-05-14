@@ -291,7 +291,9 @@ abstract class Controller
         $removedEmbeds = $this->editorRemovedEmbeds((string) $this->post('removed_editor_embeds_json', ''));
         $content = $this->removeEditorEmbeds($content, $removedEmbeds);
 
-        return $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent, $batchEmbeds, $removedEmbeds);
+        return Security::sanitizeHtml(
+            $this->appendEditorEmbeds($content, (string) $this->post('editor_embeds_json', ''), $existingContent, $batchEmbeds, $removedEmbeds)
+        );
     }
 
     protected function persistEditorDataImages(string $content): string
@@ -315,7 +317,7 @@ abstract class Controller
         $content = $this->persistEditorDataImages($content);
         $content = $this->normalizeEditorAssetUrls($content);
 
-        return $this->removeEmptyImageFigures($content);
+        return Security::sanitizeHtml($this->removeEmptyImageFigures($content));
     }
 
     protected function normalizeEditorAssetUrls(string $content): string
@@ -683,13 +685,46 @@ abstract class Controller
             $this->flash('error', 'Sesi Anda telah berakhir. Silahkan coba lagi.');
 
             // Redirect back to referring page or admin dashboard
-            $referer = $_SERVER['HTTP_REFERER'] ?? null;
-            if ($referer && strpos($referer, '/admin') !== false) {
+            $referer = $this->safeLocalAdminReferer($_SERVER['HTTP_REFERER'] ?? null);
+            if ($referer !== null) {
                 $this->redirect($referer);
             } else {
                 $this->redirect('/admin');
             }
         }
+    }
+
+    private function safeLocalAdminReferer(?string $referer): ?string
+    {
+        if (!$referer) {
+            return null;
+        }
+
+        $parts = parse_url($referer);
+        if (!is_array($parts)) {
+            return null;
+        }
+
+        $path = $parts['path'] ?? '';
+        if (!is_string($path) || !str_starts_with($path, '/admin')) {
+            return null;
+        }
+
+        $host = $parts['host'] ?? null;
+        if ($host !== null) {
+            $currentHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+            $currentHost = preg_replace('/:\d+$/', '', $currentHost) ?? $currentHost;
+            if (strtolower((string) $host) !== $currentHost) {
+                return null;
+            }
+        }
+
+        $url = $path;
+        if (!empty($parts['query'])) {
+            $url .= '?' . $parts['query'];
+        }
+
+        return $url;
     }
 
     /**

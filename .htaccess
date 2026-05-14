@@ -5,6 +5,7 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    RewriteRule ^(\.git|\.sixth)(/|$) - [F,L]
     RewriteRule ^(app|config|database|views)(/|$) - [F,L]
     RewriteRule ^storage/spmb(/|$) - [F,L]
 
@@ -18,10 +19,18 @@ Options -Indexes
     RewriteRule ^(.*)$ public/index.php?url=$1 [QSA,L]
 </IfModule>
 
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
+</IfModule>
+
 <FilesMatch "^(user\.txt|README\.md)$">
     Require all denied
 </FilesMatch>
 
-<FilesMatch "\.(env|log|ini|sql|bak|config)$">
+<FilesMatch "\.(env|log|ini|sql|bak|config|dist|lock)$">
     Require all denied
 </FilesMatch>

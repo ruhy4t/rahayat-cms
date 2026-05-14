@@ -148,9 +148,18 @@ if (APP_DEBUG) {
     ini_set('display_errors', '0');
 }
 
-ini_set('session.use_strict_mode', '1');
 $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: SAMEORIGIN');
+header('Referrer-Policy: strict-origin-when-cross-origin');
+header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+if ($isHttps) {
+    header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
+}
+
+ini_set('session.use_strict_mode', '1');
 
 session_start([
     'cookie_secure' => $isHttps,

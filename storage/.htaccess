@@ -24,8 +24,8 @@ Options -Indexes
     ExpiresByType video/mp4 "access plus 30 days"
 </IfModule>
 
-# Security - Block access to .php files
-<FilesMatch "\.php$">
+# Security - Block executable/script files even if upload validation changes later.
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
