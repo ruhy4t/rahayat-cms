@@ -443,12 +443,6 @@
                     }
                     ?>
                 </p>
-                <?php
-                $appDisclaimerClass = 'mt-3 text-xs text-slate-500';
-                $appDisclaimerLabelClass = 'font-semibold text-slate-300';
-                $appDisclaimerHighlightClass = 'font-semibold text-slate-300';
-                include __DIR__ . '/partials/app-disclaimer.php';
-                ?>
             </div>
         </div>
     </footer>

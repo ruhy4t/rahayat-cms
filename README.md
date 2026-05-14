@@ -2,6 +2,10 @@
 
 PHP 8.3/8.4 Native MVC dengan MariaDB/MySQL.
 
+## Disclaimer Aplikasi
+
+Aplikasi ini dibangun dengan cara VIBE CODING, full dengan bantuan AI.
+
 Repository publik yang disarankan:
 
 ```text

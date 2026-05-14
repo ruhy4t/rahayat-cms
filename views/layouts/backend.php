@@ -557,15 +557,6 @@
                 <?php endif; ?>
 
                 <?= $content ?>
-
-                <div class="mt-8 border-t border-slate-200 pt-4">
-                    <?php
-                    $appDisclaimerClass = 'text-xs leading-relaxed text-slate-500';
-                    $appDisclaimerLabelClass = 'font-semibold text-slate-700';
-                    $appDisclaimerHighlightClass = 'font-semibold text-primary-700';
-                    include __DIR__ . '/partials/app-disclaimer.php';
-                    ?>
-                </div>
             </main>
         </div>
     </div>

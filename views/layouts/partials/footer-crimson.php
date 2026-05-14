@@ -151,13 +151,5 @@
                 <span class="text-primary-500">Theme: Crimson Bold</span>
             </div>
         </div>
-        <div class="mt-4 text-center md:text-left">
-            <?php
-            $appDisclaimerClass = 'text-xs normal-case tracking-normal font-normal text-slate-500';
-            $appDisclaimerLabelClass = 'font-semibold text-slate-300';
-            $appDisclaimerHighlightClass = 'font-semibold text-primary-400';
-            include __DIR__ . '/app-disclaimer.php';
-            ?>
-        </div>
     </div>
 </footer>
