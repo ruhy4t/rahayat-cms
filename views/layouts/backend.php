@@ -209,9 +209,9 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <aside id="sidebar"
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out">
+            class="fixed inset-y-0 left-0 z-50 flex h-screen w-64 flex-col overflow-hidden bg-slate-900 transform -translate-x-full lg:translate-x-0 lg:static transition-transform duration-300 ease-in-out">
             <!-- Logo -->
-            <div class="flex items-center justify-between h-16 px-6 bg-slate-800/50">
+            <div class="flex h-16 shrink-0 items-center justify-between px-6 bg-slate-800/50">
                 <a href="/admin" class="flex items-center space-x-3">
                     <div
                         class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
@@ -228,7 +228,7 @@
             </div>
 
             <!-- Navigation -->
-            <nav class="mt-6 px-4">
+            <nav class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-8 pt-6">
                 <?php
                 // Parse user permissions for sidebar visibility
                 $userRole = $user['role'] ?? '';
