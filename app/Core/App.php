@@ -45,6 +45,7 @@ class App
 
         // Auth routes
         $this->router->add('login', ['controller' => 'Auth', 'action' => 'login']);
+        $this->router->add('login/captcha', ['controller' => 'Auth', 'action' => 'captcha']);
         $this->router->add('logout', ['controller' => 'Auth', 'action' => 'logout']);
 
         // Admin - Dashboard
