@@ -105,6 +105,12 @@ class App
         $this->router->add('admin/slides/update/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'slideUpdate']);
         $this->router->add('admin/slides/delete/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'slideDelete']);
 
+        // Admin - Public Information (scheduled popup and text slider)
+        $this->router->add('admin/informasi', ['controller' => 'Dashboard', 'action' => 'announcements']);
+        $this->router->add('admin/informasi/store', ['controller' => 'Dashboard', 'action' => 'announcementStore']);
+        $this->router->add('admin/informasi/update/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'announcementUpdate']);
+        $this->router->add('admin/informasi/delete/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'announcementDelete']);
+
         // Admin - Menu Management
         $this->router->add('admin/menu', ['controller' => 'Dashboard', 'action' => 'menus']);
         $this->router->add('admin/menu/store', ['controller' => 'Dashboard', 'action' => 'menuStore']);

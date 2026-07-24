@@ -17,7 +17,7 @@ if ($startDate && $endDate) {
 ?>
 
 <div class="bg-primary-600 pb-24 pt-12 sm:pb-32 sm:pt-16 lg:pb-32 lg:pt-20">
-    <div class="mx-auto max-w-7xl px-6 lg:px-8">
+    <div class="mx-auto max-w-[1440px] px-6 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
             <h1 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
                 Sistem Penerimaan Murid Baru
@@ -33,7 +33,7 @@ if ($startDate && $endDate) {
     </div>
 </div>
 
-<div class="-mt-16 sm:-mt-24 mx-auto max-w-7xl px-6 lg:px-8 pb-12">
+<div class="-mt-16 sm:-mt-24 mx-auto max-w-[1440px] px-6 lg:px-8 pb-12">
     <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:gap-12">
         <!-- Informasi Pendaftaran -->
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden ring-1 ring-slate-200">

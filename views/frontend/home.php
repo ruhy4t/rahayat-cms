@@ -41,7 +41,7 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
         </div>
 
         <!-- Content -->
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-white">
+        <div class="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-white">
             <div class="grid lg:grid-cols-2 gap-12 items-center">
                 <!-- Left Column: Content & Buttons -->
                 <div class="space-y-8">
@@ -180,7 +180,7 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
     <?php include __DIR__ . '/home/partials/news-crimson.php'; ?>
 <?php else: ?>
     <section class="py-16 lg:py-24 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                 <div>
                     <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Informasi Terkini</span>
@@ -283,7 +283,7 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
                 </svg>
             </div>
 
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="text-center max-w-3xl mx-auto mb-16">
                     <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Infrastruktur</span>
                     <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2 mb-4">Fasilitas Sekolah</h2>
@@ -350,7 +350,7 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
     <!-- Ekstrakurikuler Section (Default Theme) -->
     <?php if (!empty($ekskul)): ?>
         <section class="py-16 lg:py-24 bg-slate-50 relative border-t border-slate-200/60">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                     <div>
                         <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Pengembangan Diri</span>
@@ -422,7 +422,7 @@ if (!empty($spmbPublic['active'])) {
 
 <!-- CTA Section -->
 <section class="py-16 lg:py-24 bg-gradient-to-r from-primary-600 to-primary-800">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">Bergabunglah Bersama Kami</h2>
         <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">Daftarkan putra-putri Anda untuk mendapatkan
             pendidikan berkualitas dan masa depan yang cerah.</p>

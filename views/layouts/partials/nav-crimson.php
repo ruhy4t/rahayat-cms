@@ -2,7 +2,7 @@
 // nav-crimson.php
 ?>
 <nav class="bg-slate-900 border-b-4 border-primary-600 sticky top-0 z-50 shadow-xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             <!-- Logo -->
             <a href="/" class="flex items-center space-x-4 group">

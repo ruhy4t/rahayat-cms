@@ -321,6 +321,15 @@
                             </svg>
                             Slider Hero
                         </a>
+                        <a href="/admin/informasi"
+                            class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group <?= str_starts_with($_SERVER['REQUEST_URI'], '/admin/informasi') ? 'bg-slate-800 text-white' : '' ?>">
+                            <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-primary-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M11 5h2m-1 0v14m-7-7h14M5 7h14a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" />
+                            </svg>
+                            Informasi Publik
+                        </a>
                     <?php endif; ?>
 
                     <?php if (in_array('profil', $userPerms) || in_array('fasilitas', $userPerms) || in_array('staff', $userPerms)): ?>

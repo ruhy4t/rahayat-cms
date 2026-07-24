@@ -119,7 +119,7 @@
 <!-- Related News -->
 <?php if (!empty($related)): ?>
     <section class="py-12 bg-slate-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-bold text-slate-800 mb-8">Berita Terkait</h2>
             <div class="grid md:grid-cols-3 gap-6">
                 <?php foreach ($related as $item): ?>

@@ -10,7 +10,7 @@ $publishedNews = array_values($publishedNews);
         style="background-image: linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000); background-size: 20px 20px; background-position: 0 0, 10px 10px;">
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div
             class="flex flex-col md:flex-row md:items-end justify-between mb-16 border-l-[6px] border-primary-600 pl-6 bg-white py-4 pr-6 shadow-sm border-r border-t border-b border-slate-100">
             <div>

@@ -1,5 +1,5 @@
 <section class="py-12 lg:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Contact Info -->
         <div class="mb-12">
             <h1 class="text-3xl lg:text-4xl font-bold text-slate-800 mb-6">Hubungi Kami</h1>

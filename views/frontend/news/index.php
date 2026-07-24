@@ -1,5 +1,5 @@
 <section class="py-12 lg:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-8">
             <nav class="flex items-center text-sm text-slate-500 mb-4">

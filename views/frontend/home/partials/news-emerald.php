@@ -4,7 +4,7 @@ $publishedNews = array_filter($news, function($item) { return $item['status'] ==
 $publishedNews = array_values($publishedNews);
 ?>
 <section class="py-16 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 border-b border-slate-200 pb-4">
             <div>
                 <h2 class="text-3xl font-bold text-slate-800">Berita & Informasi</h2>

@@ -70,6 +70,20 @@ abstract class Controller
             $this->data['footerMenus'] = $footerMenus;
         }
 
+        if ($layout === 'frontend' && !isset($this->data['activePopup'])) {
+            try {
+                require_once APP_PATH . '/Models/Announcement.php';
+                $announcementModel = new Announcement();
+                $activePopups = $announcementModel->getActiveByType('popup');
+                $this->data['activePopup'] = $activePopups[0] ?? null;
+                $this->data['activeTextSlides'] = $announcementModel->getActiveByType('text_slider');
+            } catch (\Throwable $e) {
+                error_log('Frontend announcement load failed: ' . $e->getMessage());
+                $this->data['activePopup'] = null;
+                $this->data['activeTextSlides'] = [];
+            }
+        }
+
         // Ensure theme configuration is injected
         if (!$isInstallView && !isset($this->data['themeConfig'])) {
             try {

@@ -202,6 +202,40 @@
             box-shadow: 2px 2px 0px rgba(var(--color-primary-900) / 0.1) !important;
         }
         <?php endif; ?>
+
+        .public-text-slider__track {
+            display: flex;
+            width: max-content;
+            animation: publicTextSlider 32s linear infinite;
+            will-change: transform;
+        }
+
+        .public-text-slider__group {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .public-text-slider:hover .public-text-slider__track {
+            animation-play-state: paused;
+        }
+
+        @keyframes publicTextSlider {
+            from { transform: translateX(0); }
+            to { transform: translateX(-50%); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .public-text-slider {
+                overflow-x: auto;
+            }
+            .public-text-slider__track {
+                animation: none;
+            }
+            .public-text-slider__group[aria-hidden="true"] {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -213,7 +247,7 @@
         <?php include __DIR__ . '/partials/nav-crimson.php'; ?>
     <?php else: ?>
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <!-- Logo -->
                 <div class="flex items-center">
@@ -317,10 +351,74 @@
     </nav>
     <?php endif; ?>
 
+    <?php if (!empty($activeTextSlides)): ?>
+        <section class="public-text-slider bg-primary-700 text-white border-b border-primary-800 overflow-hidden"
+            aria-label="Informasi terbaru">
+            <div class="public-text-slider__track py-2.5">
+                <?php for ($repeat = 0; $repeat < 2; $repeat++): ?>
+                    <div class="public-text-slider__group" <?= $repeat === 1 ? 'aria-hidden="true"' : '' ?>>
+                        <?php foreach ($activeTextSlides as $textSlide): ?>
+                            <span class="inline-flex items-center gap-2 px-7 sm:px-10 whitespace-nowrap text-sm font-medium">
+                                <span class="w-2 h-2 rounded-full bg-amber-300 shrink-0"></span>
+                                <?php if (!empty($textSlide['title'])): ?>
+                                    <strong><?= e($textSlide['title']) ?>:</strong>
+                                <?php endif; ?>
+                                <?= e($textSlide['content']) ?>
+                            </span>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endfor; ?>
+            </div>
+        </section>
+    <?php endif; ?>
+
     <!-- Main Content -->
     <main class="flex-1">
         <?= $content ?>
     </main>
+
+    <?php
+    $currentPublicPath = (string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+    $showPopupOnHomepage = rtrim($currentPublicPath, '/') === '';
+    ?>
+    <?php if (!empty($activePopup) && $showPopupOnHomepage): ?>
+        <div id="publicAnnouncementPopup"
+            data-announcement-id="<?= (int) $activePopup['id'] ?>"
+            class="fixed inset-0 z-[100] hidden items-center justify-center p-3 sm:p-6"
+            role="dialog" aria-modal="true" aria-labelledby="publicAnnouncementTitle">
+            <button type="button" data-popup-close aria-label="Tutup popup"
+                class="absolute inset-0 bg-slate-950/65 backdrop-blur-sm"></button>
+            <article class="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto bg-white rounded-2xl sm:rounded-3xl shadow-2xl">
+                <button type="button" data-popup-close aria-label="Tutup"
+                    class="absolute top-3 right-3 z-10 w-10 h-10 rounded-full bg-white/95 text-slate-600 shadow flex items-center justify-center hover:text-slate-900">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+                <?php if (!empty($activePopup['image'])): ?>
+                    <img src="/storage/<?= e($activePopup['image']) ?>"
+                        alt="<?= e($activePopup['title'] ?? 'Informasi') ?>"
+                        class="w-full max-h-[45vh] object-cover">
+                <?php endif; ?>
+                <div class="p-5 sm:p-8">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold uppercase tracking-wide">
+                        <span class="w-1.5 h-1.5 rounded-full bg-primary-500"></span>
+                        Informasi
+                    </div>
+                    <?php if (!empty($activePopup['title'])): ?>
+                        <h2 id="publicAnnouncementTitle" class="text-2xl sm:text-3xl font-bold text-slate-900">
+                            <?= e($activePopup['title']) ?>
+                        </h2>
+                    <?php else: ?>
+                        <h2 id="publicAnnouncementTitle" class="sr-only">Informasi</h2>
+                    <?php endif; ?>
+                    <div class="mt-4 text-sm sm:text-base text-slate-600 leading-relaxed">
+                        <?= nl2br(e($activePopup['content'])) ?>
+                    </div>
+                </div>
+            </article>
+        </div>
+    <?php endif; ?>
 
     <!-- Footer -->
     <?php if ($themeName === 'emerald-campus'): ?>
@@ -329,7 +427,7 @@
         <?php include __DIR__ . '/partials/footer-crimson.php'; ?>
     <?php else: ?>
     <footer class="bg-slate-900 text-slate-400">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="grid grid-cols-1 md:grid-cols-12 gap-8">
                 <!-- About -->
                 <div class="md:col-span-6">
@@ -455,6 +553,34 @@
             const menu = document.getElementById('mobileMenu');
             menu.classList.toggle('hidden');
         }
+
+        (() => {
+            const popup = document.getElementById('publicAnnouncementPopup');
+            if (!popup) return;
+
+            const closePopup = () => {
+                popup.classList.add('hidden');
+                popup.classList.remove('flex');
+                document.body.classList.remove('overflow-hidden');
+            };
+
+            popup.querySelectorAll('[data-popup-close]').forEach(button => {
+                button.addEventListener('click', closePopup);
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape' && !popup.classList.contains('hidden')) {
+                    closePopup();
+                }
+            });
+
+            window.setTimeout(() => {
+                popup.classList.remove('hidden');
+                popup.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+                popup.querySelector('[data-popup-close]')?.focus();
+            }, 450);
+        })();
     </script>
 
     <!-- ======================= CONTENT PROTECTION ======================= -->

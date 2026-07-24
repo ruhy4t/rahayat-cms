@@ -19,6 +19,7 @@ class DashboardController extends Controller
     private GalleryAlbum $albumModel;
     private GalleryItem $galleryModel;
     private HeroSlide $slideModel;
+    private Announcement $announcementModel;
     private Staff $staffModel;
     private SiteVisit $visitModel;
 
@@ -34,6 +35,7 @@ class DashboardController extends Controller
         $this->albumModel = new GalleryAlbum();
         $this->galleryModel = new GalleryItem();
         $this->slideModel = new HeroSlide();
+        $this->announcementModel = new Announcement();
         $this->staffModel = new Staff();
         $this->visitModel = new SiteVisit();
     }
@@ -71,6 +73,10 @@ class DashboardController extends Controller
             'galleryVideos' => 'galeri',
             // Slider
             'heroSlides' => 'slider',
+            'announcements' => 'slider',
+            'announcementStore' => 'slider',
+            'announcementUpdate' => 'slider',
+            'announcementDelete' => 'slider',
             // Profil
             'profile' => 'profil',
             'profileUpdate' => 'profil',
@@ -825,6 +831,157 @@ class DashboardController extends Controller
         ];
 
         $this->view('backend.slides.index', $data, 'backend');
+    }
+
+    // ===================================================
+    // SCHEDULED POPUP & TEXT SLIDER
+    // ===================================================
+
+    public function announcements(): void
+    {
+        $data = [
+            'title' => 'Informasi Publik',
+            'user' => $this->currentUser(),
+            'announcements' => $this->announcementModel->getAllForAdmin(),
+            'flash' => $this->getFlash(),
+        ];
+
+        $this->view('backend.announcements.index', $data, 'backend');
+    }
+
+    public function announcementStore(): void
+    {
+        $this->requireCsrf();
+
+        try {
+            $data = $this->announcementInput();
+            if (!empty($_FILES['image']['name']) && $data['type'] === 'popup') {
+                $image = $this->uploadFile($_FILES['image'], 'announcements');
+                if (!$image) {
+                    throw new RuntimeException($this->uploadErrorMessage('Foto popup gagal diunggah'));
+                }
+                $data['image'] = $image;
+            }
+
+            $this->announcementModel->create($data);
+            $this->flash('success', 'Informasi berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            $this->flash('error', $e->getMessage());
+        }
+
+        $this->redirect('/admin/informasi');
+    }
+
+    public function announcementUpdate(string $id): void
+    {
+        $this->requireCsrf();
+        $announcement = $this->announcementModel->find((int) $id);
+
+        if (!$announcement) {
+            $this->flash('error', 'Informasi tidak ditemukan.');
+            $this->redirect('/admin/informasi');
+        }
+
+        try {
+            $data = $this->announcementInput();
+            $removeImage = $data['type'] === 'text_slider' || $this->post('remove_image') === '1';
+
+            if ($removeImage && !empty($announcement['image'])) {
+                $this->removeAnnouncementImage((string) $announcement['image']);
+                $data['image'] = null;
+            }
+
+            if (!empty($_FILES['image']['name']) && $data['type'] === 'popup') {
+                $image = $this->uploadFile($_FILES['image'], 'announcements');
+                if (!$image) {
+                    throw new RuntimeException($this->uploadErrorMessage('Foto popup gagal diunggah'));
+                }
+                if (!empty($announcement['image'])) {
+                    $this->removeAnnouncementImage((string) $announcement['image']);
+                }
+                $data['image'] = $image;
+            }
+
+            $this->announcementModel->update((int) $id, $data);
+            $this->flash('success', 'Informasi berhasil diperbarui.');
+        } catch (\Throwable $e) {
+            $this->flash('error', $e->getMessage());
+        }
+
+        $this->redirect('/admin/informasi');
+    }
+
+    public function announcementDelete(string $id): void
+    {
+        $this->requireCsrf();
+        $announcement = $this->announcementModel->find((int) $id);
+
+        if ($announcement) {
+            if (!empty($announcement['image'])) {
+                $this->removeAnnouncementImage((string) $announcement['image']);
+            }
+            $this->announcementModel->delete((int) $id);
+            $this->flash('success', 'Informasi berhasil dihapus.');
+        }
+
+        $this->redirect('/admin/informasi');
+    }
+
+    private function announcementInput(): array
+    {
+        $type = (string) $this->post('type', 'popup');
+        if (!in_array($type, ['popup', 'text_slider'], true)) {
+            throw new InvalidArgumentException('Jenis informasi tidak valid.');
+        }
+
+        $content = trim((string) $this->post('content', ''));
+        if ($content === '') {
+            throw new InvalidArgumentException('Isi informasi wajib diisi.');
+        }
+
+        $startAt = $this->normalizeAnnouncementDate($this->post('start_at'));
+        $endAt = $this->normalizeAnnouncementDate($this->post('end_at'));
+        if ($startAt !== null && $endAt !== null && strtotime($endAt) < strtotime($startAt)) {
+            throw new InvalidArgumentException('Tanggal selesai tidak boleh lebih awal dari tanggal mulai.');
+        }
+
+        return [
+            'type' => $type,
+            'title' => trim((string) $this->post('title', '')),
+            'content' => $content,
+            'start_at' => $startAt,
+            'end_at' => $endAt,
+            'sort_order' => max(0, (int) $this->post('sort_order', 0)),
+            'is_active' => $this->post('is_active') ? 1 : 0,
+        ];
+    }
+
+    private function normalizeAnnouncementDate(mixed $value): ?string
+    {
+        $value = trim((string) $value);
+        if ($value === '') {
+            return null;
+        }
+
+        $date = DateTime::createFromFormat('Y-m-d\TH:i', $value);
+        if (!$date || $date->format('Y-m-d\TH:i') !== $value) {
+            throw new InvalidArgumentException('Format tanggal informasi tidak valid.');
+        }
+
+        return $date->format('Y-m-d H:i:s');
+    }
+
+    private function removeAnnouncementImage(string $relativePath): void
+    {
+        $normalized = str_replace('\\', '/', $relativePath);
+        if (!str_starts_with($normalized, 'announcements/')) {
+            return;
+        }
+
+        $file = STORAGE_PATH . '/' . $normalized;
+        if (is_file($file)) {
+            @unlink($file);
+        }
     }
 
     // ===================================================

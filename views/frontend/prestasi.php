@@ -15,7 +15,7 @@ $currentCategory = $data['current_category'] ?? '';
         class="absolute bottom-0 left-0 w-64 h-64 bg-primary-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2">
     </div>
 
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 text-center">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 text-center">
         <h1 class="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Prestasi & Penghargaan</h1>
         <p class="text-lg md:text-xl text-primary-100 max-w-2xl mx-auto leading-relaxed">
             Mencetak generasi unggul dengan berbagai pencapaian membanggakan di bidang akademik dan non-akademik.
@@ -25,7 +25,7 @@ $currentCategory = $data['current_category'] ?? '';
 
 <!-- Main Content -->
 <div class="py-16 md:py-24 bg-slate-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
 
         <!-- Filter Categories -->
         <div class="mb-12 flex flex-wrap items-center justify-center gap-4">

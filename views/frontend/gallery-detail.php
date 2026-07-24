@@ -3,7 +3,7 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
 ?>
 
 <section class="py-12 lg:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Header -->
         <div class="mb-12">
             <a href="/galeri"

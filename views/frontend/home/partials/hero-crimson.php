@@ -39,7 +39,7 @@ $spmbButtonTarget = $spmbPublic['target'] ?? '_self';
     </div>
 
     <div
-        class="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col md:flex-row items-center">
+        class="relative z-10 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col md:flex-row items-center">
         <!-- Content Left -->
         <div class="w-full md:w-[55%] lg:w-[45%] text-white pr-4 md:pr-12">
             <?php if ($showSpmbButton): ?>
@@ -94,7 +94,7 @@ $spmbButtonTarget = $spmbPublic['target'] ?? '_self';
 <!-- Stats Strip -->
 <div
     class="bg-primary-900 border-t-2 border-primary-800 border-b-4 border-b-primary-600 py-10 relative z-20 shadow-2xl">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center divide-x-0 lg:divide-x divide-primary-800/50">
             <?php if (!empty($profile['total_students'])): ?>
                 <div class="px-4 group">

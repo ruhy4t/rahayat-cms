@@ -2,7 +2,7 @@
 // nav-emerald.php
 ?>
 <div class="bg-primary-700 text-white text-sm py-2 px-4 shadow-sm z-50 relative">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
+    <div class="max-w-[1440px] mx-auto flex justify-between items-center">
         <div class="flex items-center gap-4">
             <span class="flex items-center"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor"
                     viewBox="0 0 24 24">
@@ -24,7 +24,7 @@
     </div>
 </div>
 <nav class="bg-white shadow-md sticky top-0 z-40 border-b border-primary-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
             <a href="/" class="flex items-center space-x-3">
                 <?php if (!empty($profile['logo'])): ?>
