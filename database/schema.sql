@@ -1,15 +1,16 @@
 -- ============================================
 -- SchoolWeb CMS Database Schema
--- MariaDB/MySQL
--- Updated: 2026-01-15
+-- MariaDB/MySQL - Shared Hosting Friendly
+-- Updated: 2026-07-24
 -- ============================================
-
--- Create database
-CREATE DATABASE IF NOT EXISTS schoolweb_db 
-CHARACTER SET utf8mb4 
-COLLATE utf8mb4_unicode_ci;
-
-USE schoolweb_db;
+--
+-- PETUNJUK IMPORT:
+-- 1. Buat database melalui cPanel/Plesk/panel hosting.
+-- 2. Pilih database tersebut di phpMyAdmin.
+-- 3. Import file ini ke database yang sudah dipilih.
+--
+-- File ini sengaja TIDAK menjalankan CREATE DATABASE atau USE sehingga nama
+-- database sepenuhnya mengikuti nama yang diberikan oleh penyedia hosting.
 
 -- ============================================
 -- Users Table (Updated with new roles)

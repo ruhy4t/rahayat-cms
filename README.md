@@ -1,6 +1,6 @@
 # Rahayat CMS
 
-PHP 8.3/8.4 Native MVC dengan MariaDB/MySQL.
+PHP 8.5 Native MVC dengan MariaDB/MySQL.
 
 ## Disclaimer Aplikasi
 
@@ -22,6 +22,9 @@ https://github.com/ruhy4t/rahayat-cms
 ## Instalasi / Deployment
 
 ### 1. Setup Database
+
+Untuk development lokal:
+
 ```sql
 CREATE DATABASE schoolweb_db;
 CREATE USER 'schoolweb_user'@'localhost' IDENTIFIED BY 'password-kuat-anda';
@@ -33,6 +36,16 @@ Import schema:
 ```bash
 mysql -u root -p schoolweb_db < database/schema.sql
 ```
+
+Untuk shared hosting/cPanel:
+
+1. Buat database dan pengguna database melalui panel hosting.
+2. Hubungkan pengguna tersebut ke database dengan hak akses yang diperlukan.
+3. Buka phpMyAdmin dan pilih nama database yang diberikan hosting.
+4. Import `database/schema.sql` ke database yang sudah dipilih.
+
+`schema.sql` tidak membuat atau memilih nama database tertentu, sehingga aman
+digunakan pada nama seperti `akunhosting_namadatabase`.
 
 ### 2. Konfigurasi Produksi
 Set environment variable di virtual host / hosting panel:

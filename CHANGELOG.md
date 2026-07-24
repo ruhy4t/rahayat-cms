@@ -7,6 +7,15 @@ mengikuti [Semantic Versioning](https://semver.org/):
 - `MINOR`: fitur baru yang tetap kompatibel.
 - `PATCH`: perbaikan bug atau keamanan tanpa fitur besar.
 
+## [1.1.1] - 2026-07-24
+
+### Diperbaiki
+
+- `database/schema.sql` tidak lagi memaksa membuat database `schoolweb_db`.
+- Perintah `USE schoolweb_db` dihapus agar schema dapat diimpor ke nama
+  database apa pun yang diberikan oleh shared hosting.
+- Petunjuk instalasi cPanel/phpMyAdmin diperjelas.
+
 ## [1.1.0] - 2026-07-24
 
 ### Ditambahkan
