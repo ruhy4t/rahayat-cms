@@ -1,8 +1,10 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.0.2",
+  "version": "1.1.0",
+  "released_at": "2026-07-24",
+  "summary": "Informasi publik terjadwal, CAPTCHA adaptif, dan penguatan keamanan login.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",
-  "notes_url": "https://github.com/ruhy4t/rahayat-cms/commits/main"
+  "notes_url": "https://github.com/ruhy4t/rahayat-cms/blob/main/CHANGELOG.md"
 }
