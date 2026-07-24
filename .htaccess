@@ -8,6 +8,7 @@ Options -Indexes
     RewriteRule ^(\.git|\.sixth)(/|$) - [F,L]
     RewriteRule ^(app|config|database|views)(/|$) - [F,L]
     RewriteRule ^storage/spmb(/|$) - [F,L]
+    RewriteRule ^storage/.*\.svg$ - [F,L,NC]
 
     # Otomatis mencari file statis di folder public jika tidak ditemukan di root
     RewriteCond %{REQUEST_URI} !^/public/

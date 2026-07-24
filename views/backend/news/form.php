@@ -40,7 +40,7 @@ $editorUploadBatch = Security::randomString(32);
                 <div>
                     <label for="content" class="block text-sm font-medium text-slate-700 mb-2">Isi Berita</label>
                     <div class="prose max-w-none">
-                        <textarea id="content" name="content"><?= $item['content'] ?? '' ?></textarea>
+                        <textarea id="content" name="content"><?= e($item['content'] ?? '') ?></textarea>
                     </div>
                     <div class="mt-3 flex flex-col sm:flex-row sm:items-center gap-3">
                         <input type="file" id="pdfUpload" accept="application/pdf" class="hidden">

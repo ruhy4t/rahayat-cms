@@ -155,6 +155,7 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+header_remove('X-Powered-By');
 if ($isHttps) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
 }
@@ -196,7 +197,13 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
         $realPath = realpath($storagePath);
         $storageDirReal = realpath(dirname(__DIR__) . '/storage');
 
-        if ($realPath && strpos($realPath, $storageDirReal) === 0 && file_exists($realPath)) {
+        $storagePrefix = $storageDirReal ? rtrim($storageDirReal, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR : '';
+        if (
+            $realPath
+            && $storagePrefix !== ''
+            && str_starts_with($realPath, $storagePrefix)
+            && is_file($realPath)
+        ) {
             // Determine content type
             $ext = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
             $types = [
@@ -222,6 +229,12 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
                 header('Cache-Control: private, no-store');
             }
             header('Content-Type: ' . $contentType);
+            if ($ext === 'svg') {
+                // Uploaded SVG is active XML content. Force download so it
+                // cannot execute script in the application's origin.
+                header('Content-Disposition: attachment; filename="' . basename($realPath) . '"');
+                header("Content-Security-Policy: default-src 'none'; sandbox");
+            }
             header('Content-Length: ' . filesize($realPath));
 
             // Stream file

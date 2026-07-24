@@ -9,11 +9,10 @@ $groupedStaff = $data['groupedStaff'] ?? [];
 
 <style>
     /* =========================================
-   ARTISTIC & GLASSMORPHISM DESIGN
+    ARTISTIC & GLASSMORPHISM DESIGN
    ========================================= */
     .glass-header {
-        background: linear-gradient(135deg, rgba(30, 58, 138, 0.9), rgba(17, 24, 39, 0.9)), url('<?= isset($profile['logo']) ? "/storage/" . e($profile['logo']) : "" ?>') center/cover;
-        background-blend-mode: overlay;
+        background: var(--theme-gradient, linear-gradient(135deg, var(--primary-600), var(--primary-800)));
     }
 
     .glass-card {
@@ -97,20 +96,20 @@ $groupedStaff = $data['groupedStaff'] ?? [];
 
 <!-- ======================= HEADER ======================= -->
 <section class="glass-header relative pt-32 pb-24 lg:pt-40 lg:pb-32 overflow-hidden protected-content">
-    <div class="absolute inset-0 bg-indigo-900/50"></div>
+    <div class="absolute inset-0 bg-primary-900/20"></div>
     <!-- Decorative Elements -->
     <div
         class="absolute top-0 right-0 w-64 h-64 bg-primary-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2">
     </div>
     <div
-        class="absolute bottom-0 left-0 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2">
+        class="absolute bottom-0 left-0 w-80 h-80 bg-primary-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2">
     </div>
 
     <div class="container mx-auto px-4 relative z-10 text-center">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight">
             Guru & Tenaga Kependidikan
         </h1>
-        <p class="text-lg md:text-xl text-indigo-100 max-w-2xl mx-auto font-light">
+        <p class="text-lg md:text-xl text-primary-100 max-w-2xl mx-auto font-light">
             Mengenal lebih dekat para pendidik dan tenaga kependidikan berdedikasi di
             <?= e($profile['name'] ?? 'Sekolah Kami') ?>.
         </p>
@@ -178,4 +177,4 @@ $groupedStaff = $data['groupedStaff'] ?? [];
         <?php endif; ?>
 
     </div>
-</section>
+</section>

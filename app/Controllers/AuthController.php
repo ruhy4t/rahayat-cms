@@ -282,6 +282,14 @@ class AuthController extends Controller
      */
     public function logout(): void
     {
+        if (!Security::isPost()) {
+            http_response_code(405);
+            header('Allow: POST');
+            exit('Method Not Allowed');
+        }
+
+        $this->requireCsrf();
+
         // Clear session
         $_SESSION = [];
 

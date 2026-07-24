@@ -120,7 +120,18 @@
             // Intercept link clicks for SPA navigation
             document.addEventListener('click', (e) => {
                 const link = e.target.closest('a[href^="/"]');
-                if (link && !link.hasAttribute('target') && !link.hasAttribute('download')) {
+                if (
+                    link
+                    && !e.defaultPrevented
+                    && e.button === 0
+                    && !e.ctrlKey
+                    && !e.metaKey
+                    && !e.shiftKey
+                    && !e.altKey
+                    && !link.hasAttribute('target')
+                    && !link.hasAttribute('download')
+                    && link.dataset.noSpa === undefined
+                ) {
                     const href = link.getAttribute('href');
                     // Skip admin and login routes
                     if (href.startsWith('/admin') || href === '/login' || href === '/logout') {
@@ -165,11 +176,16 @@
                 const response = await fetch(url, {
                     headers: {
                         'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': csrfToken
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'text/html'
                     }
                 });
 
                 if (!response.ok) throw new Error('Failed to load page');
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return;
+                }
 
                 const html = await response.text();
                 
@@ -179,9 +195,22 @@
                 const newContent = doc.querySelector('main');
                 const newTitle = doc.querySelector('title')?.textContent;
 
+                if (!newContent) {
+                    throw new Error('Page content was not found');
+                }
+
+                // Page-level inline scripts are not safely re-entrant. Use a
+                // normal navigation for those modules so their widgets,
+                // forms, sliders, and modals always initialize exactly once.
+                if (newContent.querySelector('script')) {
+                    window.location.href = url;
+                    return;
+                }
+
                 if (newContent) {
                     // Fade out old content
                     this.contentContainer.style.opacity = '0';
+                    this.contentContainer.setAttribute('aria-busy', 'true');
                     
                     await this.sleep(150);
                     
@@ -195,6 +224,7 @@
                     
                     // Fade in new content
                     this.contentContainer.style.opacity = '1';
+                    this.contentContainer.removeAttribute('aria-busy');
                     
                     // Scroll to top
                     window.scrollTo({ top: 0, behavior: 'smooth' });

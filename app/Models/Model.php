@@ -127,6 +127,7 @@ abstract class Model
      */
     public function countWhere(string $column, mixed $value): int
     {
+        $column = $this->safeIdentifier($column, $this->primaryKey);
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE {$column} = ?";
         return (int) $this->db->fetchColumn($sql, [$value]);
     }

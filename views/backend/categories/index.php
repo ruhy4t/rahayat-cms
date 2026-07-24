@@ -34,8 +34,8 @@ $flash = $data['flash'] ?? null;
     <?php endif; ?>
 
     <!-- Categories Table -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <table class="w-full">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+        <table class="w-full min-w-[760px]">
             <thead class="bg-slate-50 border-b border-slate-200">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Nama

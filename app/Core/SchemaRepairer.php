@@ -29,15 +29,14 @@ class SchemaRepairer
 
     private function run(): void
     {
-        $this->ensureCoreTables();
-
-        // Only skip if version matches AND the database actually has all
-        // required columns and default data.  A partially-imported hosting
-        // database may have the version flag set while columns are missing.
-        if ($this->schemaVersion() === APP_VERSION && $this->hasRequiredSchema()) {
+        // A matching version is only written after the required schema has
+        // been verified below. Avoid repeated CREATE/INFORMATION_SCHEMA work
+        // on every normal page request once that verification has succeeded.
+        if ($this->schemaVersion() === APP_VERSION) {
             return;
         }
 
+        $this->ensureCoreTables();
         $this->ensureMenusColumns();
         $this->ensureSiteSettingsColumns();
         $this->ensureUsersColumns();

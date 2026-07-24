@@ -525,15 +525,17 @@
                                     </div>
                                 </button>
                                 <div class="border-t border-slate-100 my-1"></div>
-                                <a href="/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                                    <div class="flex items-center">
+                                <form action="/logout" method="POST">
+                                    <?= Security::csrfInput() ?>
+                                    <button type="submit"
+                                        class="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
                                         Logout
-                                    </div>
-                                </a>
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -541,16 +543,16 @@
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6">
                 <!-- Flash Messages -->
                 <!-- Flash Messages -->
                 <?php if (isset($flash) && $flash): ?>
                     <script>
                         document.addEventListener('DOMContentLoaded', function () {
                             Swal.fire({
-                                icon: '<?= $flash['type'] ?>',
-                                title: '<?= $flash['type'] === 'success' ? 'Berhasil!' : 'Gagal!' ?>',
-                                text: '<?= e($flash['message']) ?>',
+                                icon: <?= json_encode($flash['type'] === 'success' ? 'success' : 'error') ?>,
+                                title: <?= json_encode($flash['type'] === 'success' ? 'Berhasil!' : 'Gagal!') ?>,
+                                text: <?= json_encode((string) ($flash['message'] ?? ''), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>,
                                 toast: true,
                                 position: 'top-end',
                                 showConfirmButton: false,

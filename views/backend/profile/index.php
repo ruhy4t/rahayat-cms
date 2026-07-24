@@ -253,14 +253,14 @@ $flash = $data['flash'] ?? [];
                                 <label for="welcome_message" class="block text-sm font-medium text-slate-700 mb-1">Kata
                                     Sambutan Kepala Sekolah</label>
                                 <textarea id="welcome_message" name="welcome_message" rows="6"
-                                    class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['welcome_message'] ?? '' ?></textarea>
+                                    class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['welcome_message'] ?? '') ?></textarea>
                             </div>
                             <div>
                                 <label for="principal_quote"
                                     class="block text-sm font-medium text-slate-700 mb-1">Kutipan (Quote) Kepala
                                     Sekolah</label>
                                 <textarea id="principal_quote" name="principal_quote" rows="2"
-                                    class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['principal_quote'] ?? '' ?></textarea>
+                                    class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['principal_quote'] ?? '') ?></textarea>
                                 <p class="text-xs text-slate-500 mt-1">Akan ditampilkan di halaman profil di bawah foto
                                     Kepala Sekolah.</p>
                             </div>
@@ -272,23 +272,23 @@ $flash = $data['flash'] ?? [];
                     <div>
                         <label for="vision" class="block text-sm font-medium text-slate-700 mb-1">Visi</label>
                         <textarea id="vision" name="vision" rows="4"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['vision'] ?? '' ?></textarea>
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['vision'] ?? '') ?></textarea>
                     </div>
                     <div>
                         <label for="mission" class="block text-sm font-medium text-slate-700 mb-1">Misi</label>
                         <textarea id="mission" name="mission" rows="6"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['mission'] ?? '' ?></textarea>
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['mission'] ?? '') ?></textarea>
                     </div>
                     <div>
                         <label for="motto" class="block text-sm font-medium text-slate-700 mb-1">Motto Sekolah</label>
                         <textarea id="motto" name="motto" rows="3"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['motto'] ?? '' ?></textarea>
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['motto'] ?? '') ?></textarea>
                     </div>
                     <div>
                         <label for="history" class="block text-sm font-medium text-slate-700 mb-1">Sejarah
                             Sekolah</label>
                         <textarea id="history" name="history" rows="6"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= $profile['history'] ?? '' ?></textarea>
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['history'] ?? '') ?></textarea>
                     </div>
                 </div>
             </div>

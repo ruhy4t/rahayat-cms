@@ -396,9 +396,11 @@
                     </svg>
                 </button>
                 <?php if (!empty($activePopup['image'])): ?>
-                    <img src="/storage/<?= e($activePopup['image']) ?>"
-                        alt="<?= e($activePopup['title'] ?? 'Informasi') ?>"
-                        class="w-full max-h-[45vh] object-cover">
+                    <div class="w-full h-[36vh] sm:h-[45vh] bg-slate-100 flex items-center justify-center overflow-hidden">
+                        <img src="/storage/<?= e($activePopup['image']) ?>"
+                            alt="<?= e($activePopup['title'] ?? 'Informasi') ?>"
+                            class="w-full h-full object-contain">
+                    </div>
                 <?php endif; ?>
                 <div class="p-5 sm:p-8">
                     <div class="inline-flex items-center gap-2 px-3 py-1 mb-4 rounded-full bg-primary-50 text-primary-700 text-xs font-semibold uppercase tracking-wide">
