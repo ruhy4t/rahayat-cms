@@ -802,6 +802,124 @@ abstract class Controller
     }
 
     /**
+     * Read the server-side login throttle without adding an attempt.
+     *
+     * @return array{attempts:int, remaining:int, retry_after:int, locked:bool}
+     */
+    protected function loginRateLimitStatus(string $username, int $maxAttempts, int $lockSeconds): array
+    {
+        return $this->updateLoginRateLimit($username, $maxAttempts, $lockSeconds, false);
+    }
+
+    /**
+     * Record one failed login attempt on the server.
+     *
+     * @return array{attempts:int, remaining:int, retry_after:int, locked:bool}
+     */
+    protected function recordFailedLogin(string $username, int $maxAttempts, int $lockSeconds): array
+    {
+        return $this->updateLoginRateLimit($username, $maxAttempts, $lockSeconds, true);
+    }
+
+    protected function clearLoginRateLimit(string $username): void
+    {
+        $file = $this->loginRateLimitFile($username);
+        if (is_file($file)) {
+            @unlink($file);
+        }
+    }
+
+    /**
+     * File-based throttling cannot be bypassed by clearing the browser session.
+     *
+     * @return array{attempts:int, remaining:int, retry_after:int, locked:bool}
+     */
+    private function updateLoginRateLimit(
+        string $username,
+        int $maxAttempts,
+        int $lockSeconds,
+        bool $recordFailure
+    ): array {
+        $file = $this->loginRateLimitFile($username);
+        $handle = fopen($file, 'c+');
+
+        if ($handle === false) {
+            // Fail open if storage is temporarily unavailable, so legitimate
+            // administrators are not permanently locked out.
+            return [
+                'attempts' => 0,
+                'remaining' => $maxAttempts,
+                'retry_after' => 0,
+                'locked' => false,
+            ];
+        }
+
+        flock($handle, LOCK_EX);
+        rewind($handle);
+        $data = json_decode(stream_get_contents($handle) ?: '', true);
+        $data = is_array($data) ? $data : [];
+
+        $now = time();
+        $attempts = (int) ($data['attempts'] ?? 0);
+        $lastFailure = (int) ($data['last_failure'] ?? 0);
+        $lockedUntil = (int) ($data['locked_until'] ?? 0);
+
+        // Start fresh after the lock expires or after 10 quiet minutes.
+        if (($lockedUntil > 0 && $lockedUntil <= $now)
+            || ($lockedUntil === 0 && $lastFailure > 0 && ($now - $lastFailure) >= 600)) {
+            $attempts = 0;
+            $lastFailure = 0;
+            $lockedUntil = 0;
+        }
+
+        if ($lockedUntil <= $now && $recordFailure) {
+            $attempts++;
+            $lastFailure = $now;
+
+            if ($attempts >= $maxAttempts) {
+                $lockedUntil = $now + $lockSeconds;
+            }
+        }
+
+        $state = [
+            'attempts' => $attempts,
+            'last_failure' => $lastFailure,
+            'locked_until' => $lockedUntil,
+        ];
+
+        ftruncate($handle, 0);
+        rewind($handle);
+        fwrite($handle, json_encode($state, JSON_THROW_ON_ERROR));
+        fflush($handle);
+        flock($handle, LOCK_UN);
+        fclose($handle);
+
+        $retryAfter = max(0, $lockedUntil - $now);
+
+        return [
+            'attempts' => $attempts,
+            'remaining' => max(0, $maxAttempts - $attempts),
+            'retry_after' => $retryAfter,
+            'locked' => $retryAfter > 0,
+        ];
+    }
+
+    private function loginRateLimitFile(string $username): string
+    {
+        $directory = STORAGE_PATH . '/rate_limits';
+        if (!is_dir($directory)) {
+            mkdir($directory, 0750, true);
+        }
+
+        // REMOTE_ADDR is server-controlled, unlike a freely spoofable
+        // X-Forwarded-For header.
+        $ip = (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $key = hash('sha256', strtolower(trim($username)) . '|' . trim($ip));
+
+        return $directory . '/login_' . $key . '.json';
+    }
+
+    /**
      * Set flash message
      */
     protected function flash(string $type, string $message): void

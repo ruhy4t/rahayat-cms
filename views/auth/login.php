@@ -236,6 +236,7 @@
                             </svg>
                         </div>
                         <input type="text" id="username" name="username" required autofocus
+                            value="<?= e($lastUsername ?? '') ?>" autocomplete="username"
                             class="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                             placeholder="Masukkan username">
                     </div>
@@ -250,7 +251,7 @@
                                     d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                             </svg>
                         </div>
-                        <input type="password" id="password" name="password" required
+                        <input type="password" id="password" name="password" required autocomplete="current-password"
                             class="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                             placeholder="Masukkan password">
                         <button type="button" onclick="togglePassword()"
@@ -265,6 +266,39 @@
                         </button>
                     </div>
                 </div>
+
+                <div class="hidden" aria-hidden="true">
+                    <label for="website">Website</label>
+                    <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+                </div>
+
+                <?php if (!empty($captchaRequired)): ?>
+                    <div>
+                        <label for="captcha" class="block text-sm font-medium text-slate-700 mb-2">
+                            Kode keamanan
+                        </label>
+                        <div class="flex items-center gap-3 mb-3">
+                            <img id="captchaImage"
+                                src="/login/captcha?t=<?= time() ?>"
+                                alt="Kode CAPTCHA"
+                                width="210"
+                                height="70"
+                                class="h-[70px] flex-1 min-w-0 rounded-lg border border-slate-300 object-cover">
+                            <button type="button" onclick="refreshCaptcha()"
+                                class="shrink-0 px-3 py-3 text-sm font-medium text-primary-700 bg-primary-50 border border-primary-200 rounded-lg hover:bg-primary-100"
+                                aria-label="Muat kode CAPTCHA baru">
+                                Muat ulang
+                            </button>
+                        </div>
+                        <input type="text" id="captcha" name="captcha" required maxlength="5"
+                            inputmode="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                            class="w-full px-4 py-3 uppercase tracking-[0.35em] border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                            placeholder="Masukkan 5 karakter">
+                        <p class="mt-2 text-xs text-slate-500">
+                            Kode berlaku selama 2 menit dan hanya dapat digunakan satu kali.
+                        </p>
+                    </div>
+                <?php endif; ?>
 
                 <div class="flex items-center justify-between">
                     <label class="flex items-center">
@@ -302,6 +336,18 @@
             } else {
                 input.type = 'password';
                 icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>';
+            }
+        }
+
+        function refreshCaptcha() {
+            const image = document.getElementById('captchaImage');
+            const input = document.getElementById('captcha');
+            if (image) {
+                image.src = '/login/captcha?t=' + Date.now();
+            }
+            if (input) {
+                input.value = '';
+                input.focus();
             }
         }
     </script>
