@@ -181,6 +181,7 @@ $flash = $data['flash'] ?? [];
         <form id="staffForm" action="/admin/gtk/store" method="POST" enctype="multipart/form-data" class="p-6">
             <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
             <input type="hidden" id="staffId" name="id">
+            <input type="hidden" id="croppedPhoto" name="cropped_photo">
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <!-- Kolom Kiri -->
@@ -276,7 +277,37 @@ $flash = $data['flash'] ?? [];
                                         accept="image/jpeg,image/png,image/gif,image/webp">
                                     Pilih Foto
                                 </label>
-                                <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, GIF, WebP. Maks: 5MB</p>
+                                <p class="text-xs text-slate-500 mt-1">Ukuran/dimensi bebas. Format JPG, PNG, GIF, atau WebP, maks. 5MB.</p>
+                            </div>
+                        </div>
+
+                        <div id="cropEditor" class="hidden mt-4 pt-4 border-t border-slate-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,280px)_1fr] gap-4 items-start">
+                                <div>
+                                    <canvas id="cropCanvas" width="400" height="500"
+                                        class="block w-full max-w-[280px] mx-auto bg-slate-900 rounded-xl shadow-inner cursor-move touch-none"
+                                        aria-label="Area crop foto GTK"></canvas>
+                                    <p class="mt-2 text-center text-xs text-slate-500">
+                                        Geser foto sampai wajah berada di tengah bingkai.
+                                    </p>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex items-center justify-between gap-3 mb-2">
+                                            <label for="cropZoom" class="text-sm font-medium text-slate-700">Perbesar wajah</label>
+                                            <span id="cropZoomValue" class="text-xs font-semibold text-indigo-600">100%</span>
+                                        </div>
+                                        <input type="range" id="cropZoom" min="1" max="3" step="0.01" value="1"
+                                            class="w-full accent-indigo-600">
+                                    </div>
+                                    <button type="button" id="resetCrop"
+                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-white">
+                                        Atur Ulang Posisi
+                                    </button>
+                                    <div class="rounded-lg bg-indigo-50 border border-indigo-100 p-3 text-xs leading-relaxed text-indigo-800">
+                                        Hasil akhir otomatis dibuat dalam rasio portrait 4:5 dan ukuran 800×1000 piksel.
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -307,7 +338,68 @@ $flash = $data['flash'] ?? [];
         const btnAdd = document.getElementById('btnAddStaff');
         const photoInput = document.getElementById('photoInput');
         const photoPreview = document.getElementById('photoPreview');
+        const croppedPhoto = document.getElementById('croppedPhoto');
+        const cropEditor = document.getElementById('cropEditor');
+        const cropCanvas = document.getElementById('cropCanvas');
+        const cropContext = cropCanvas?.getContext('2d');
+        const cropZoom = document.getElementById('cropZoom');
+        const cropZoomValue = document.getElementById('cropZoomValue');
+        const resetCropButton = document.getElementById('resetCrop');
         const defaultPhotoHtml = '<svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>';
+        let cropImage = null;
+        let cropBaseScale = 1;
+        let cropScale = 1;
+        let cropOffsetX = 0;
+        let cropOffsetY = 0;
+        let cropDragging = false;
+        let cropPointerX = 0;
+        let cropPointerY = 0;
+
+        const constrainCrop = () => {
+            if (!cropImage) return;
+            const scaledWidth = cropImage.naturalWidth * cropScale;
+            const scaledHeight = cropImage.naturalHeight * cropScale;
+            cropOffsetX = Math.min(0, Math.max(cropCanvas.width - scaledWidth, cropOffsetX));
+            cropOffsetY = Math.min(0, Math.max(cropCanvas.height - scaledHeight, cropOffsetY));
+        };
+
+        const drawCrop = () => {
+            if (!cropImage || !cropContext) return;
+            constrainCrop();
+            cropContext.fillStyle = '#0f172a';
+            cropContext.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+            cropContext.drawImage(
+                cropImage,
+                cropOffsetX,
+                cropOffsetY,
+                cropImage.naturalWidth * cropScale,
+                cropImage.naturalHeight * cropScale
+            );
+            photoPreview.innerHTML = '<img src="' + cropCanvas.toDataURL('image/jpeg', 0.82) + '" class="w-full h-full object-cover">';
+        };
+
+        const fitCropImage = () => {
+            if (!cropImage) return;
+            cropBaseScale = Math.max(
+                cropCanvas.width / cropImage.naturalWidth,
+                cropCanvas.height / cropImage.naturalHeight
+            );
+            cropScale = cropBaseScale;
+            cropOffsetX = (cropCanvas.width - (cropImage.naturalWidth * cropScale)) / 2;
+            cropOffsetY = (cropCanvas.height - (cropImage.naturalHeight * cropScale)) / 2;
+            cropZoom.value = '1';
+            cropZoomValue.textContent = '100%';
+            drawCrop();
+        };
+
+        const clearCrop = () => {
+            cropImage = null;
+            croppedPhoto.value = '';
+            cropEditor.classList.add('hidden');
+            if (cropContext) {
+                cropContext.clearRect(0, 0, cropCanvas.width, cropCanvas.height);
+            }
+        };
 
         // Toggle subject input based on teacher/staff radio
         const radios = document.querySelectorAll('input[name="is_teacher"]');
@@ -333,6 +425,7 @@ $flash = $data['flash'] ?? [];
             document.getElementById('modalTitle').textContent = 'Tambah GTK';
             document.getElementById('staffId').value = '';
             photoPreview.innerHTML = defaultPhotoHtml;
+            clearCrop();
             document.getElementById('staffOrder').value = '0';
             document.getElementById('subjectGroup').style.opacity = '1';
             document.getElementById('subjectGroup').querySelectorAll('input').forEach(i => i.disabled = false);
@@ -424,12 +517,92 @@ $flash = $data['flash'] ?? [];
         // Photo Preview
         photoInput?.addEventListener('change', function () {
             if (this.files && this.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function (e) {
-                    photoPreview.innerHTML = '<img src="' + e.target.result + '" class="w-full h-full object-cover">';
+                const file = this.files[0];
+                if (file.size > <?= (int) UPLOAD_MAX_SIZE ?>) {
+                    alert('Ukuran foto melebihi batas <?= (int) (UPLOAD_MAX_SIZE / 1024 / 1024) ?>MB.');
+                    this.value = '';
+                    clearCrop();
+                    return;
                 }
-                reader.readAsDataURL(this.files[0]);
+
+                const objectUrl = URL.createObjectURL(file);
+                const image = new Image();
+                image.onload = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    cropImage = image;
+                    croppedPhoto.value = '';
+                    cropEditor.classList.remove('hidden');
+                    fitCropImage();
+                };
+                image.onerror = () => {
+                    URL.revokeObjectURL(objectUrl);
+                    alert('Foto tidak dapat dibaca. Gunakan JPG, PNG, GIF, atau WebP.');
+                    this.value = '';
+                    clearCrop();
+                };
+                image.src = objectUrl;
             }
+        });
+
+        cropZoom?.addEventListener('input', () => {
+            if (!cropImage) return;
+            const oldScale = cropScale;
+            const centerImageX = (cropCanvas.width / 2 - cropOffsetX) / oldScale;
+            const centerImageY = (cropCanvas.height / 2 - cropOffsetY) / oldScale;
+            cropScale = cropBaseScale * Number(cropZoom.value);
+            cropOffsetX = cropCanvas.width / 2 - centerImageX * cropScale;
+            cropOffsetY = cropCanvas.height / 2 - centerImageY * cropScale;
+            cropZoomValue.textContent = Math.round(Number(cropZoom.value) * 100) + '%';
+            drawCrop();
+        });
+
+        resetCropButton?.addEventListener('click', fitCropImage);
+
+        cropCanvas?.addEventListener('pointerdown', event => {
+            if (!cropImage) return;
+            cropDragging = true;
+            cropPointerX = event.clientX;
+            cropPointerY = event.clientY;
+            cropCanvas.setPointerCapture(event.pointerId);
+        });
+
+        cropCanvas?.addEventListener('pointermove', event => {
+            if (!cropDragging || !cropImage) return;
+            const rect = cropCanvas.getBoundingClientRect();
+            const ratioX = cropCanvas.width / rect.width;
+            const ratioY = cropCanvas.height / rect.height;
+            cropOffsetX += (event.clientX - cropPointerX) * ratioX;
+            cropOffsetY += (event.clientY - cropPointerY) * ratioY;
+            cropPointerX = event.clientX;
+            cropPointerY = event.clientY;
+            drawCrop();
+        });
+
+        const stopCropDragging = event => {
+            cropDragging = false;
+            if (event?.pointerId !== undefined && cropCanvas?.hasPointerCapture(event.pointerId)) {
+                cropCanvas.releasePointerCapture(event.pointerId);
+            }
+        };
+        cropCanvas?.addEventListener('pointerup', stopCropDragging);
+        cropCanvas?.addEventListener('pointercancel', stopCropDragging);
+
+        form?.addEventListener('submit', () => {
+            if (!cropImage) return;
+            const output = document.createElement('canvas');
+            output.width = 800;
+            output.height = 1000;
+            const outputContext = output.getContext('2d');
+            outputContext.fillStyle = '#ffffff';
+            outputContext.fillRect(0, 0, output.width, output.height);
+            outputContext.drawImage(
+                cropImage,
+                cropOffsetX * 2,
+                cropOffsetY * 2,
+                cropImage.naturalWidth * cropScale * 2,
+                cropImage.naturalHeight * cropScale * 2
+            );
+            croppedPhoto.value = output.toDataURL('image/jpeg', 0.9);
         });
     });
 </script>

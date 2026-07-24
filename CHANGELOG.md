@@ -7,6 +7,20 @@ mengikuti [Semantic Versioning](https://semver.org/):
 - `MINOR`: fitur baru yang tetap kompatibel.
 - `PATCH`: perbaikan bug atau keamanan tanpa fitur besar.
 
+## [1.2.0] - 2026-07-24
+
+### Ditambahkan
+
+- Editor crop foto GTK dengan drag, zoom, reset posisi, dan preview.
+- Normalisasi foto GTK menjadi portrait rasio 4:5 berukuran 800×1000 piksel.
+- Validasi hasil crop kembali di server sebelum gambar disimpan.
+
+### Diubah
+
+- Kartu GTK menampilkan foto close-up secara konsisten dengan fokus area wajah.
+- Foto GTK dikecualikan dari watermark agar wajah tetap terlihat jelas.
+- Foto lama GTK dibersihkan setelah pembaruan atau penghapusan data berhasil.
+
 ## [1.1.1] - 2026-07-24
 
 ### Diperbaiki

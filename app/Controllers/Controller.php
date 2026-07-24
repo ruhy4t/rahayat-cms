@@ -1018,6 +1018,81 @@ abstract class Controller
         return $this->lastUploadError !== '' ? $fallback . ': ' . $this->lastUploadError : $fallback;
     }
 
+    /**
+     * Validate and store a client-cropped portrait as a normalized 4:5 image.
+     */
+    protected function saveCroppedPortrait(string $dataUrl, string $directory = 'staff'): string|false
+    {
+        $this->lastUploadError = '';
+
+        if (!preg_match('#^data:image/(?:jpeg|png|webp);base64,([A-Za-z0-9+/=\r\n]+)$#', $dataUrl, $matches)) {
+            $this->lastUploadError = 'Data hasil crop foto tidak valid.';
+            return false;
+        }
+
+        $binary = base64_decode(preg_replace('/\s+/', '', $matches[1]), true);
+        if ($binary === false || strlen($binary) > UPLOAD_MAX_SIZE) {
+            $this->lastUploadError = 'Hasil crop foto tidak valid atau melebihi batas '
+                . number_format(UPLOAD_MAX_SIZE / 1024 / 1024, 0) . 'MB.';
+            return false;
+        }
+
+        $source = @imagecreatefromstring($binary);
+        if (!$source instanceof \GdImage) {
+            $this->lastUploadError = 'Hasil crop tidak dapat diproses. Pastikan ekstensi GD aktif.';
+            return false;
+        }
+
+        $sourceWidth = imagesx($source);
+        $sourceHeight = imagesy($source);
+        if ($sourceWidth < 1 || $sourceHeight < 1) {
+            imagedestroy($source);
+            $this->lastUploadError = 'Dimensi hasil crop tidak valid.';
+            return false;
+        }
+
+        $uploadDir = STORAGE_PATH . '/' . trim($directory, '/');
+        if ((!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) || !is_writable($uploadDir)) {
+            imagedestroy($source);
+            $this->lastUploadError = 'Folder foto GTK tidak dapat ditulis. Periksa permission storage.';
+            return false;
+        }
+
+        $target = imagecreatetruecolor(800, 1000);
+        $background = imagecolorallocate($target, 255, 255, 255);
+        imagefilledrectangle($target, 0, 0, 799, 999, $background);
+        imagecopyresampled(
+            $target,
+            $source,
+            0,
+            0,
+            0,
+            0,
+            800,
+            1000,
+            $sourceWidth,
+            $sourceHeight
+        );
+
+        $useWebp = function_exists('imagewebp');
+        $extension = $useWebp ? 'webp' : 'jpg';
+        $filename = Security::randomString(16) . '.' . $extension;
+        $filepath = $uploadDir . '/' . $filename;
+        $saved = $useWebp
+            ? imagewebp($target, $filepath, 86)
+            : imagejpeg($target, $filepath, 90);
+
+        imagedestroy($source);
+        imagedestroy($target);
+
+        if (!$saved) {
+            $this->lastUploadError = 'Hasil crop foto gagal disimpan.';
+            return false;
+        }
+
+        return trim($directory, '/') . '/' . $filename;
+    }
+
     private function shouldOptimizeUpload(string $directory, string $mimeType): bool
     {
         if (!function_exists('imagewebp') || !in_array($mimeType, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'], true)) {
@@ -1083,7 +1158,7 @@ abstract class Controller
         }
 
         // Directories excluded from watermark
-        $excludedDirs = ['logos', 'photos', 'spmb', 'avatars'];
+        $excludedDirs = ['logos', 'photos', 'staff', 'spmb', 'avatars'];
         $dirBase = explode('/', $directory)[0]; // Get first segment (e.g. 'uploads/news/2026/02' => 'uploads')
         if (in_array($dirBase, $excludedDirs)) {
             return;

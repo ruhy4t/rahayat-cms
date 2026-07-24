@@ -1182,8 +1182,11 @@ class DashboardController extends Controller
             'sort_order' => (int) $this->post('sort_order', 0)
         ];
 
-        if (!empty($_FILES['photo']['name'])) {
-            $photoPath = $this->uploadFile($_FILES['photo'], 'staff');
+        $croppedPhoto = trim((string) $this->post('cropped_photo', ''));
+        if ($croppedPhoto !== '' || !empty($_FILES['photo']['name'])) {
+            $photoPath = $croppedPhoto !== ''
+                ? $this->saveCroppedPortrait($croppedPhoto, 'staff')
+                : $this->uploadFile($_FILES['photo'], 'staff');
             if (!$photoPath) {
                 $this->flash('error', $this->uploadErrorMessage('Foto GTK gagal diunggah'));
                 $this->redirect('/admin/gtk');
@@ -1222,16 +1225,24 @@ class DashboardController extends Controller
             'sort_order' => (int) $this->post('sort_order', 0)
         ];
 
-        if (!empty($_FILES['photo']['name'])) {
-            $photoPath = $this->uploadFile($_FILES['photo'], 'staff');
+        $oldPhotoToRemove = null;
+        $croppedPhoto = trim((string) $this->post('cropped_photo', ''));
+        if ($croppedPhoto !== '' || !empty($_FILES['photo']['name'])) {
+            $photoPath = $croppedPhoto !== ''
+                ? $this->saveCroppedPortrait($croppedPhoto, 'staff')
+                : $this->uploadFile($_FILES['photo'], 'staff');
             if (!$photoPath) {
                 $this->flash('error', $this->uploadErrorMessage('Foto GTK gagal diunggah'));
                 $this->redirect('/admin/gtk');
             }
             $data['photo'] = $photoPath;
+            $oldPhotoToRemove = (string) ($staff['photo'] ?? '');
         }
 
         $this->staffModel->update($staffId, $data);
+        if ($oldPhotoToRemove !== null && $oldPhotoToRemove !== $data['photo']) {
+            $this->removeStaffPhoto($oldPhotoToRemove);
+        }
 
         $this->flash('success', 'Data GTK berhasil diperbarui');
         $this->redirect('/admin/gtk');
@@ -1242,10 +1253,27 @@ class DashboardController extends Controller
         $this->requireCsrf();
 
         $staffId = (int) $id;
-        $this->staffModel->delete($staffId);
+        $staff = $this->staffModel->find($staffId);
+        $deleted = $this->staffModel->delete($staffId);
+        if ($deleted && $staff && !empty($staff['photo'])) {
+            $this->removeStaffPhoto((string) $staff['photo']);
+        }
 
         $this->flash('success', 'Data GTK berhasil dihapus');
         $this->redirect('/admin/gtk');
+    }
+
+    private function removeStaffPhoto(string $relativePath): void
+    {
+        $normalized = str_replace('\\', '/', $relativePath);
+        if (!str_starts_with($normalized, 'staff/')) {
+            return;
+        }
+
+        $file = STORAGE_PATH . '/' . $normalized;
+        if (is_file($file)) {
+            @unlink($file);
+        }
     }
 
     // ===================================================

@@ -79,21 +79,18 @@ $groupedStaff = $data['groupedStaff'] ?? [];
 
     .photo-el {
         position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        height: 95%;
-        width: auto;
-        max-width: 95%;
+        inset: 0;
+        height: 100%;
+        width: 100%;
+        max-width: none;
         object-fit: cover;
-        object-position: bottom;
+        object-position: center 22%;
         z-index: 1;
         transition: transform 0.5s ease;
-        filter: drop-shadow(0px 10px 10px rgba(0, 0, 0, 0.15));
     }
 
     .glass-card:hover .photo-el {
-        transform: translateX(-50%) scale(1.08);
+        transform: scale(1.05);
     }
 
 </style>
