@@ -7,6 +7,18 @@ mengikuti [Semantic Versioning](https://semver.org/):
 - `MINOR`: fitur baru yang tetap kompatibel.
 - `PATCH`: perbaikan bug atau keamanan tanpa fitur besar.
 
+## [1.3.0] - 2026-07-25
+
+### Ditambahkan
+
+- Editor crop foto kepala sekolah dengan drag, zoom, reset posisi, dan preview.
+- Normalisasi foto kepala sekolah menjadi portrait rasio 4:5 berukuran 800 x 1000 piksel.
+
+### Diperbaiki
+
+- Daftar menu sidebar admin kini dapat di-scroll pada layar pendek.
+- Preview foto lokal pada editor crop tidak lagi diblokir oleh Content Security Policy.
+
 ## [1.2.0] - 2026-07-24
 
 ### Ditambahkan

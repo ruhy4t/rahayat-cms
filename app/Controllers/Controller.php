@@ -1054,7 +1054,7 @@ abstract class Controller
         $uploadDir = STORAGE_PATH . '/' . trim($directory, '/');
         if ((!is_dir($uploadDir) && !mkdir($uploadDir, 0755, true)) || !is_writable($uploadDir)) {
             imagedestroy($source);
-            $this->lastUploadError = 'Folder foto GTK tidak dapat ditulis. Periksa permission storage.';
+            $this->lastUploadError = 'Folder penyimpanan foto tidak dapat ditulis. Periksa permission storage.';
             return false;
         }
 

@@ -8,7 +8,7 @@
         default-src 'self';
         script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdn.ckeditor.com 'unsafe-inline';
         style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
-        img-src 'self' data: https://*;
+        img-src 'self' data: blob: https://*;
         connect-src 'self' https://cdn.ckeditor.com https://*.ckeditor.com;
         frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com;
         font-src 'self' https://fonts.gstatic.com;

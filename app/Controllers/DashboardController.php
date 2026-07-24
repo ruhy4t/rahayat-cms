@@ -1054,9 +1054,12 @@ class DashboardController extends Controller
                 $data['logo'] = $logoPath;
             }
 
-            // Handle principal photo upload
-            if (!empty($_FILES['principal_photo']['name'])) {
-                $photoPath = $this->uploadFile($_FILES['principal_photo'], 'photos');
+            // Handle the normalized 4:5 principal portrait, with direct upload as fallback.
+            $croppedPrincipalPhoto = trim((string) $this->post('cropped_principal_photo', ''));
+            if ($croppedPrincipalPhoto !== '' || !empty($_FILES['principal_photo']['name'])) {
+                $photoPath = $croppedPrincipalPhoto !== ''
+                    ? $this->saveCroppedPortrait($croppedPrincipalPhoto, 'photos')
+                    : $this->uploadFile($_FILES['principal_photo'], 'photos');
                 if (!$photoPath) {
                     throw new RuntimeException($this->uploadErrorMessage('Foto kepala sekolah gagal diunggah'));
                 }

@@ -178,9 +178,10 @@ $flash = $data['flash'] ?? [];
                     <div class="md:col-span-2">
                         <label for="principal_photo" class="block text-sm font-medium text-slate-700 mb-1">Foto Kepala
                             Sekolah</label>
+                        <input type="hidden" id="cropped_principal_photo" name="cropped_principal_photo">
                         <div class="flex items-center gap-4">
-                            <div
-                                class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center overflow-hidden border border-slate-200 flex-shrink-0">
+                            <div id="principalPhotoPreview"
+                                class="w-16 h-20 bg-slate-100 rounded-xl flex items-center justify-center overflow-hidden border border-slate-200 flex-shrink-0">
                                 <?php if (!empty($profile['principal_photo'])): ?>
                                     <img src="/storage/<?= e($profile['principal_photo']) ?>" alt="Kepala Sekolah"
                                         class="w-full h-full object-cover">
@@ -194,6 +195,34 @@ $flash = $data['flash'] ?? [];
                             </div>
                             <input type="file" id="principal_photo" name="principal_photo" accept="image/jpeg,image/png,image/gif,image/webp"
                                 class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+                        </div>
+                        <p class="mt-2 text-xs text-slate-500">Ukuran/dimensi bebas. Atur posisi wajah setelah memilih foto. Maks. <?= (int) (UPLOAD_MAX_SIZE / 1024 / 1024) ?>MB.</p>
+
+                        <div id="principalCropEditor" class="hidden mt-4 border-t border-slate-200 pt-4">
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,280px)_1fr] items-start">
+                                <div>
+                                    <canvas id="principalCropCanvas" width="400" height="500"
+                                        class="block w-full max-w-[280px] mx-auto bg-slate-900 rounded-xl shadow-inner cursor-move touch-none"
+                                        aria-label="Area crop foto kepala sekolah"></canvas>
+                                    <p class="mt-2 text-center text-xs text-slate-500">
+                                        Geser foto sampai wajah berada di tengah bingkai.
+                                    </p>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="mb-2 flex items-center justify-between gap-3">
+                                            <label for="principalCropZoom" class="text-sm font-medium text-slate-700">Perbesar wajah</label>
+                                            <span id="principalCropZoomValue" class="text-xs font-semibold text-indigo-600">100%</span>
+                                        </div>
+                                        <input type="range" id="principalCropZoom" min="1" max="3" step="0.01" value="1"
+                                            class="w-full accent-indigo-600">
+                                    </div>
+                                    <button type="button" id="resetPrincipalCrop"
+                                        class="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-white">
+                                        Atur Ulang Posisi
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="md:col-span-2 mt-2">
@@ -646,6 +675,139 @@ $flash = $data['flash'] ?? [];
             }
         });
 
+        // Principal photo crop (normalized to a portrait 4:5 ratio)
+        const principalPhotoInput = document.getElementById('principal_photo');
+        const principalPhotoPreview = document.getElementById('principalPhotoPreview');
+        const croppedPrincipalPhoto = document.getElementById('cropped_principal_photo');
+        const principalCropEditor = document.getElementById('principalCropEditor');
+        const principalCropCanvas = document.getElementById('principalCropCanvas');
+        const principalCropContext = principalCropCanvas?.getContext('2d');
+        const principalCropZoom = document.getElementById('principalCropZoom');
+        const principalCropZoomValue = document.getElementById('principalCropZoomValue');
+        const resetPrincipalCrop = document.getElementById('resetPrincipalCrop');
+        let principalCropImage = null;
+        let principalCropBaseScale = 1;
+        let principalCropScale = 1;
+        let principalCropOffsetX = 0;
+        let principalCropOffsetY = 0;
+        let principalCropDragging = false;
+        let principalCropPointerX = 0;
+        let principalCropPointerY = 0;
+
+        const constrainPrincipalCrop = () => {
+            if (!principalCropImage) return;
+            const scaledWidth = principalCropImage.naturalWidth * principalCropScale;
+            const scaledHeight = principalCropImage.naturalHeight * principalCropScale;
+            principalCropOffsetX = Math.min(0, Math.max(principalCropCanvas.width - scaledWidth, principalCropOffsetX));
+            principalCropOffsetY = Math.min(0, Math.max(principalCropCanvas.height - scaledHeight, principalCropOffsetY));
+        };
+
+        const drawPrincipalCrop = () => {
+            if (!principalCropImage || !principalCropContext) return;
+            constrainPrincipalCrop();
+            principalCropContext.fillStyle = '#0f172a';
+            principalCropContext.fillRect(0, 0, principalCropCanvas.width, principalCropCanvas.height);
+            principalCropContext.drawImage(
+                principalCropImage,
+                principalCropOffsetX,
+                principalCropOffsetY,
+                principalCropImage.naturalWidth * principalCropScale,
+                principalCropImage.naturalHeight * principalCropScale
+            );
+            principalPhotoPreview.innerHTML = '<img src="' + principalCropCanvas.toDataURL('image/jpeg', 0.82)
+                + '" alt="Pratinjau foto kepala sekolah" class="w-full h-full object-cover">';
+        };
+
+        const fitPrincipalCrop = () => {
+            if (!principalCropImage) return;
+            principalCropBaseScale = Math.max(
+                principalCropCanvas.width / principalCropImage.naturalWidth,
+                principalCropCanvas.height / principalCropImage.naturalHeight
+            );
+            principalCropScale = principalCropBaseScale;
+            principalCropOffsetX = (principalCropCanvas.width - (principalCropImage.naturalWidth * principalCropScale)) / 2;
+            principalCropOffsetY = (principalCropCanvas.height - (principalCropImage.naturalHeight * principalCropScale)) / 2;
+            principalCropZoom.value = '1';
+            principalCropZoomValue.textContent = '100%';
+            drawPrincipalCrop();
+        };
+
+        const clearPrincipalCrop = () => {
+            principalCropImage = null;
+            croppedPrincipalPhoto.value = '';
+            principalCropEditor.classList.add('hidden');
+            principalCropContext?.clearRect(0, 0, principalCropCanvas.width, principalCropCanvas.height);
+        };
+
+        principalPhotoInput?.addEventListener('change', function () {
+            if (!this.files?.[0]) return;
+            const file = this.files[0];
+            if (file.size > <?= (int) UPLOAD_MAX_SIZE ?>) {
+                alert('Ukuran foto melebihi batas <?= (int) (UPLOAD_MAX_SIZE / 1024 / 1024) ?>MB.');
+                this.value = '';
+                clearPrincipalCrop();
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(file);
+            const image = new Image();
+            image.onload = () => {
+                URL.revokeObjectURL(objectUrl);
+                principalCropImage = image;
+                croppedPrincipalPhoto.value = '';
+                principalCropEditor.classList.remove('hidden');
+                fitPrincipalCrop();
+            };
+            image.onerror = () => {
+                URL.revokeObjectURL(objectUrl);
+                alert('Foto tidak dapat dibaca. Gunakan JPG, PNG, GIF, atau WebP.');
+                this.value = '';
+                clearPrincipalCrop();
+            };
+            image.src = objectUrl;
+        });
+
+        principalCropZoom?.addEventListener('input', () => {
+            if (!principalCropImage) return;
+            const oldScale = principalCropScale;
+            const centerImageX = (principalCropCanvas.width / 2 - principalCropOffsetX) / oldScale;
+            const centerImageY = (principalCropCanvas.height / 2 - principalCropOffsetY) / oldScale;
+            principalCropScale = principalCropBaseScale * Number(principalCropZoom.value);
+            principalCropOffsetX = principalCropCanvas.width / 2 - centerImageX * principalCropScale;
+            principalCropOffsetY = principalCropCanvas.height / 2 - centerImageY * principalCropScale;
+            principalCropZoomValue.textContent = Math.round(Number(principalCropZoom.value) * 100) + '%';
+            drawPrincipalCrop();
+        });
+
+        resetPrincipalCrop?.addEventListener('click', fitPrincipalCrop);
+
+        principalCropCanvas?.addEventListener('pointerdown', event => {
+            if (!principalCropImage) return;
+            principalCropDragging = true;
+            principalCropPointerX = event.clientX;
+            principalCropPointerY = event.clientY;
+            principalCropCanvas.setPointerCapture(event.pointerId);
+        });
+
+        principalCropCanvas?.addEventListener('pointermove', event => {
+            if (!principalCropDragging || !principalCropImage) return;
+            const rect = principalCropCanvas.getBoundingClientRect();
+            principalCropOffsetX += (event.clientX - principalCropPointerX) * (principalCropCanvas.width / rect.width);
+            principalCropOffsetY += (event.clientY - principalCropPointerY) * (principalCropCanvas.height / rect.height);
+            principalCropPointerX = event.clientX;
+            principalCropPointerY = event.clientY;
+            drawPrincipalCrop();
+        });
+
+        const stopPrincipalCropDragging = event => {
+            principalCropDragging = false;
+            if (event?.pointerId !== undefined && principalCropCanvas?.hasPointerCapture(event.pointerId)) {
+                principalCropCanvas.releasePointerCapture(event.pointerId);
+            }
+        };
+        principalCropCanvas?.addEventListener('pointerup', stopPrincipalCropDragging);
+        principalCropCanvas?.addEventListener('pointercancel', stopPrincipalCropDragging);
+
         // Handle form submission
         const form = document.getElementById('profileForm');
         form.addEventListener('submit', function (e) {
@@ -656,6 +818,23 @@ $flash = $data['flash'] ?? [];
                     document.getElementById(id).value = data;
                 }
             });
+
+            if (principalCropImage) {
+                const output = document.createElement('canvas');
+                output.width = 800;
+                output.height = 1000;
+                const outputContext = output.getContext('2d');
+                outputContext.fillStyle = '#ffffff';
+                outputContext.fillRect(0, 0, output.width, output.height);
+                outputContext.drawImage(
+                    principalCropImage,
+                    principalCropOffsetX * 2,
+                    principalCropOffsetY * 2,
+                    principalCropImage.naturalWidth * principalCropScale * 2,
+                    principalCropImage.naturalHeight * principalCropScale * 2
+                );
+                croppedPrincipalPhoto.value = output.toDataURL('image/jpeg', 0.9);
+            }
         });
 
         // Toggle SPMB Link visibility
