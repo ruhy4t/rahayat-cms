@@ -38,9 +38,17 @@ class AuthController extends Controller
         }
 
         require_once APP_PATH . '/Models/SiteSetting.php';
+        require_once APP_PATH . '/Models/SchoolProfile.php';
         $settingModel = new SiteSetting();
+        $profileModel = new SchoolProfile();
         $themeName = $settingModel->getTheme();
         $availableThemes = $settingModel->getAvailableThemes();
+        $profile = $profileModel->getProfile() ?: [];
+        $schoolName = trim((string) ($profile['name'] ?? ''));
+
+        if ($schoolName === '') {
+            $schoolName = trim((string) $settingModel->get('site_title', SCHOOL_NAME));
+        }
 
         $data = [
             'title' => 'Login',
@@ -48,7 +56,9 @@ class AuthController extends Controller
             'captchaRequired' => (bool) ($_SESSION['_login_captcha_required'] ?? false),
             'lastUsername' => (string) ($_SESSION['_login_username'] ?? ''),
             'themeName' => $themeName,
-            'themeConfig' => $availableThemes[$themeName] ?? $availableThemes['indigo-modern']
+            'themeConfig' => $availableThemes[$themeName] ?? $availableThemes['indigo-modern'],
+            'schoolName' => $schoolName !== '' ? $schoolName : SCHOOL_NAME,
+            'schoolLogo' => trim((string) ($profile['logo'] ?? '')),
         ];
 
         $this->view('auth.login', $data);

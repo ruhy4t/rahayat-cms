@@ -7,7 +7,7 @@
     <?= Security::csrfMeta() ?>
 
     <title>Login |
-        <?= e(SCHOOL_NAME) ?>
+        <?= e($schoolName ?? SCHOOL_NAME) ?>
     </title>
 
     <!-- Tailwind CSS via CDN -->
@@ -198,12 +198,20 @@
         <!-- Logo -->
         <div class="text-center mb-8">
             <a href="/" class="inline-flex items-center justify-center space-x-3">
-                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl">
-                    <span class="text-primary-600 font-bold text-2xl">R</span>
+                <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-xl overflow-hidden">
+                    <?php if (!empty($schoolLogo)): ?>
+                        <img src="/storage/<?= e($schoolLogo) ?>"
+                            alt="Logo <?= e($schoolName ?? SCHOOL_NAME) ?>"
+                            class="w-full h-full object-contain p-1">
+                    <?php else: ?>
+                        <span class="text-primary-600 font-bold text-2xl">
+                            <?= e(strtoupper(substr(trim((string) ($schoolName ?? SCHOOL_NAME)), 0, 1))) ?>
+                        </span>
+                    <?php endif; ?>
                 </div>
             </a>
             <h1 class="text-white text-2xl font-bold mt-4">
-                <?= e(SCHOOL_NAME) ?>
+                <?= e($schoolName ?? SCHOOL_NAME) ?>
             </h1>
             <p class="text-primary-200 mt-1">Admin Panel</p>
         </div>
