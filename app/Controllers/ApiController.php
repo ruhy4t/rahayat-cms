@@ -973,15 +973,22 @@ class ApiController extends Controller
         } elseif ($type === 'video') {
             $videoSource = strtolower($this->postSafe('video_source') ?: 'youtube');
             $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
-            if (!in_array($videoSource, ['youtube', 'vimeo', 'direct'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
+            if (!in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok', 'facebook', 'direct', 'other'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
                 $this->jsonError('Sumber atau URL video tidak valid', 422);
                 return;
             }
-            $videoId = $videoSource === 'youtube'
-                ? GalleryItem::extractYouTubeId($videoUrl)
-                : ($videoSource === 'vimeo' ? GalleryItem::extractVimeoId($videoUrl) : null);
-            if ($videoSource !== 'direct' && !$videoId) {
-                $this->jsonError('URL tidak cocok dengan sumber video yang dipilih', 422);
+            $videoId = match ($videoSource) {
+                'youtube' => GalleryItem::extractYouTubeId($videoUrl),
+                'vimeo' => GalleryItem::extractVimeoId($videoUrl),
+                'instagram' => GalleryItem::extractInstagramId($videoUrl),
+                'tiktok' => GalleryItem::extractTikTokId($videoUrl),
+                default => null,
+            };
+            if (in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok'], true) && !$videoId) {
+                $message = $videoSource === 'tiktok'
+                    ? 'Gunakan URL TikTok lengkap yang memuat /@pengguna/video/ID. Tautan pendek vm.tiktok.com atau vt.tiktok.com belum dapat diputar langsung.'
+                    : 'URL tidak cocok dengan sumber video yang dipilih';
+                $this->jsonError($message, 422);
                 return;
             }
             $youtubeUrl = $videoSource === 'youtube' ? $videoUrl : null;
@@ -1044,15 +1051,22 @@ class ApiController extends Controller
         if ($type === 'video') {
             $videoSource = strtolower($this->postSafe('video_source') ?: ($item['video_source'] ?? 'youtube'));
             $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
-            if (!in_array($videoSource, ['youtube', 'vimeo', 'direct'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
+            if (!in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok', 'facebook', 'direct', 'other'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
                 $this->jsonError('Sumber atau URL video tidak valid', 422);
                 return;
             }
-            $videoId = $videoSource === 'youtube'
-                ? GalleryItem::extractYouTubeId($videoUrl)
-                : ($videoSource === 'vimeo' ? GalleryItem::extractVimeoId($videoUrl) : null);
-            if ($videoSource !== 'direct' && !$videoId) {
-                $this->jsonError('URL tidak cocok dengan sumber video yang dipilih', 422);
+            $videoId = match ($videoSource) {
+                'youtube' => GalleryItem::extractYouTubeId($videoUrl),
+                'vimeo' => GalleryItem::extractVimeoId($videoUrl),
+                'instagram' => GalleryItem::extractInstagramId($videoUrl),
+                'tiktok' => GalleryItem::extractTikTokId($videoUrl),
+                default => null,
+            };
+            if (in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok'], true) && !$videoId) {
+                $message = $videoSource === 'tiktok'
+                    ? 'Gunakan URL TikTok lengkap yang memuat /@pengguna/video/ID. Tautan pendek vm.tiktok.com atau vt.tiktok.com belum dapat diputar langsung.'
+                    : 'URL tidak cocok dengan sumber video yang dipilih';
+                $this->jsonError($message, 422);
                 return;
             }
             $data['video_source'] = $videoSource;

@@ -205,7 +205,11 @@ $isVideo = $albumType === 'video';
                         class="w-full px-3 py-2 mb-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500">
                         <option value="youtube">YouTube</option>
                         <option value="vimeo">Vimeo</option>
+                        <option value="instagram">Instagram Reel/Video</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="facebook">Facebook Video</option>
                         <option value="direct">Link video langsung (MP4/WebM)</option>
+                        <option value="other">Media sosial lainnya</option>
                     </select>
                     <label for="videoUrl" class="block text-sm font-medium text-slate-700 mb-1">Link Video</label>
                     <div class="relative">
@@ -214,7 +218,7 @@ $isVideo = $albumType === 'video';
                             placeholder="https://..."
                             required>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1.5">Pilih asal video agar informasinya tampil jelas di admin.</p>
+                    <p id="videoUrlHelp" class="text-xs text-slate-500 mt-1.5">Gunakan link video YouTube lengkap.</p>
                     
                     <!-- YouTube Preview -->
                     <div id="youtubePreview" class="mt-3 hidden rounded-lg overflow-hidden border border-slate-200">
@@ -341,18 +345,35 @@ $isVideo = $albumType === 'video';
     <?php if ($isVideo): ?>
     // YouTube URL Preview
     const youtubeInput = document.getElementById('videoUrl');
+    const videoSourceInput = document.getElementById('videoSource');
     let debounceTimer;
 
-    youtubeInput.addEventListener('input', function () {
+    function refreshVideoPreview() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            const videoId = document.getElementById('videoSource').value === 'youtube' ? extractYouTubeId(this.value) : null;
+            const videoId = videoSourceInput.value === 'youtube' ? extractYouTubeId(youtubeInput.value) : null;
             if (videoId) {
                 showYouTubePreview(videoId);
             } else {
                 document.getElementById('youtubePreview').classList.add('hidden');
             }
-        }, 500);
+        }, 300);
+    }
+
+    youtubeInput.addEventListener('input', refreshVideoPreview);
+    videoSourceInput.addEventListener('change', function () {
+        const help = document.getElementById('videoUrlHelp');
+        const hints = {
+            youtube: 'Gunakan link video YouTube lengkap.',
+            vimeo: 'Gunakan link video Vimeo lengkap.',
+            instagram: 'Gunakan link posting /p/, /reel/, atau /tv/ yang dapat dilihat publik.',
+            tiktok: 'Gunakan URL lengkap: https://www.tiktok.com/@pengguna/video/123.... Jangan memakai link pendek vm.tiktok.com atau vt.tiktok.com.',
+            facebook: 'Gunakan link video Facebook yang dapat dilihat publik.',
+            direct: 'Gunakan URL file video publik berformat MP4 atau WebM.',
+            other: 'Video akan ditampilkan sebagai tautan menuju media sosial asal.'
+        };
+        help.textContent = hints[this.value] || hints.other;
+        refreshVideoPreview();
     });
 
     function extractYouTubeId(url) {

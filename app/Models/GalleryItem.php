@@ -17,6 +17,16 @@ class GalleryItem extends Model
         return preg_match('~vimeo\.com/(?:video/)?([0-9]+)~i', $url, $matches) ? $matches[1] : null;
     }
 
+    public static function extractInstagramId(string $url): ?string
+    {
+        return preg_match('~instagram\.com/(?:p|reel|tv)/([A-Za-z0-9_-]+)~i', $url, $matches) ? $matches[1] : null;
+    }
+
+    public static function extractTikTokId(string $url): ?string
+    {
+        return preg_match('~tiktok\.com/.*/video/([0-9]+)~i', $url, $matches) ? $matches[1] : null;
+    }
+
     /**
      * Get items by album
      */

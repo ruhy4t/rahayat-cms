@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.2 - 2026-07-25
+
+- Galeri video mendukung Instagram Reel/Video, TikTok, Facebook Video, dan tautan media sosial lainnya.
+- Instagram, TikTok, dan Facebook ditampilkan sebagai embed ketika URL dapat dikenali.
+- Sumber lain ditampilkan sebagai kartu tautan aman menuju platform asal.
+
 ## 1.3.1 - 2026-07-25
 
 - Penetapan Kepala Sekolah langsung dari data GTK dan sinkronisasi nama, NIP, serta foto ke laman Profil.

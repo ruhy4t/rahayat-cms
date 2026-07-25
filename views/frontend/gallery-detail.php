@@ -58,7 +58,7 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
                         <?php if ($videoUrl !== '' || $videoId !== ''): ?>
                             <div
                                 class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-200">
-                                <div class="aspect-[16/10]">
+                                <div class="<?= in_array($videoSource, ['tiktok', 'instagram'], true) ? 'aspect-[9/16] max-w-sm mx-auto' : 'aspect-[16/10]' ?>">
                                     <?php if ($videoSource === 'youtube'): ?>
                                     <iframe src="https://www.youtube.com/embed/<?= e($videoId) ?>"
                                         class="w-full h-full" frameborder="0"
@@ -68,19 +68,48 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
                                     <iframe src="https://player.vimeo.com/video/<?= e($videoId) ?>"
                                         class="w-full h-full" frameborder="0"
                                         allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
-                                    <?php else: ?>
+                                    <?php elseif ($videoSource === 'instagram'): ?>
+                                    <iframe src="<?= e(rtrim($videoUrl, '/') . '/embed/') ?>"
+                                        class="w-full h-full bg-white" frameborder="0"
+                                        allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                                    <?php elseif ($videoSource === 'tiktok'): ?>
+                                    <iframe src="https://www.tiktok.com/player/v1/<?= e($videoId) ?>"
+                                        class="w-full h-full bg-black" frameborder="0"
+                                        allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                                    <?php elseif ($videoSource === 'facebook'): ?>
+                                    <iframe src="https://www.facebook.com/plugins/video.php?href=<?= e(rawurlencode($videoUrl)) ?>&show_text=false"
+                                        class="w-full h-full bg-black" frameborder="0"
+                                        allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                                        allowfullscreen></iframe>
+                                    <?php elseif ($videoSource === 'direct'): ?>
                                     <video src="<?= e($videoUrl) ?>" class="w-full h-full bg-black" controls preload="metadata"></video>
+                                    <?php else: ?>
+                                    <a href="<?= e($videoUrl) ?>" target="_blank" rel="noopener noreferrer"
+                                        class="w-full h-full flex flex-col items-center justify-center gap-3 bg-slate-900 text-white hover:bg-slate-800 transition-colors">
+                                        <svg class="w-12 h-12 text-indigo-300" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                                        <span class="font-medium">Tonton di media sosial asal</span>
+                                        <span class="text-xs text-slate-400">Tautan dibuka di tab baru</span>
+                                    </a>
                                     <?php endif; ?>
                                 </div>
-                                <?php if (!empty($item['title'])): ?>
+                                <?php if (!empty($item['title']) || !empty($item['description']) || (in_array($videoSource, ['instagram', 'tiktok', 'facebook', 'other'], true) && $videoUrl !== '')): ?>
                                     <div class="p-4">
+                                        <?php if (!empty($item['title'])): ?>
                                         <h3 class="font-medium text-slate-800 text-sm line-clamp-2">
                                             <?= e($item['title']) ?>
                                         </h3>
+                                        <?php endif; ?>
                                         <?php if (!empty($item['description'])): ?>
                                             <p class="text-slate-500 text-xs mt-1 line-clamp-2">
                                                 <?= e($item['description']) ?>
                                             </p>
+                                        <?php endif; ?>
+                                        <?php if (in_array($videoSource, ['instagram', 'tiktok', 'facebook', 'other'], true) && $videoUrl !== ''): ?>
+                                            <a href="<?= e($videoUrl) ?>" target="_blank" rel="noopener noreferrer"
+                                                class="inline-flex items-center gap-1 mt-3 text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                                                Buka video di <?= e($videoSource === 'other' ? 'media sosial asal' : ucfirst($videoSource)) ?>
+                                                <span aria-hidden="true">↗</span>
+                                            </a>
                                         <?php endif; ?>
                                     </div>
                                 <?php endif; ?>

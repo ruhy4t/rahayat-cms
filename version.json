@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "released_at": "2026-07-25",
-  "summary": "Sinkronisasi Kepala Sekolah dari GTK dan dukungan sumber video selain YouTube.",
+  "summary": "Dukungan video galeri dari Instagram, TikTok, Facebook, dan media sosial lainnya.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",
