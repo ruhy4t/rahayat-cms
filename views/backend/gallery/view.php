@@ -108,11 +108,12 @@ $isVideo = $albumType === 'video';
                                 <div class="text-sm text-slate-500 mt-1 line-clamp-2">
                                     <?= e($item['description'] ?? '-') ?>
                                 </div>
-                                <?php if ($isVideo && !empty($item['youtube_url'])): ?>
-                                    <a href="<?= e($item['youtube_url']) ?>" target="_blank" 
-                                        class="inline-flex items-center gap-1 text-xs text-red-600 hover:text-red-700 mt-1">
+                                <?php if ($isVideo && !empty($item['video_url'] ?? $item['youtube_url'])): ?>
+                                    <?php $sourceLabel = ucfirst((string) (($item['video_source'] ?? '') ?: 'youtube')); ?>
+                                    <a href="<?= e($item['video_url'] ?? $item['youtube_url']) ?>" target="_blank" rel="noopener noreferrer"
+                                        class="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 mt-1">
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        YouTube
+                                        Sumber: <?= e($sourceLabel === 'Direct' ? 'Link langsung' : $sourceLabel) ?>
                                     </a>
                                 <?php endif; ?>
                             </td>
@@ -198,21 +199,22 @@ $isVideo = $albumType === 'video';
             </div>
 
             <?php if ($isVideo): ?>
-                <!-- YouTube URL Input -->
                 <div class="mb-4">
-                    <label for="youtubeUrl" class="block text-sm font-medium text-slate-700 mb-1">Link YouTube</label>
+                    <label for="videoSource" class="block text-sm font-medium text-slate-700 mb-1">Sumber Video</label>
+                    <select id="videoSource" name="video_source"
+                        class="w-full px-3 py-2 mb-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        <option value="youtube">YouTube</option>
+                        <option value="vimeo">Vimeo</option>
+                        <option value="direct">Link video langsung (MP4/WebM)</option>
+                    </select>
+                    <label for="videoUrl" class="block text-sm font-medium text-slate-700 mb-1">Link Video</label>
                     <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="w-5 h-5 text-red-500" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                        </div>
-                        <input type="url" id="youtubeUrl" name="youtube_url"
-                            class="w-full pl-10 pr-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
-                            placeholder="https://www.youtube.com/watch?v=..."
+                        <input type="url" id="videoUrl" name="video_url"
+                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 transition-colors"
+                            placeholder="https://..."
                             required>
                     </div>
-                    <p class="text-xs text-slate-500 mt-1.5">Paste link YouTube biasa. Contoh: https://www.youtube.com/watch?v=xxx atau https://youtu.be/xxx</p>
+                    <p class="text-xs text-slate-500 mt-1.5">Pilih asal video agar informasinya tampil jelas di admin.</p>
                     
                     <!-- YouTube Preview -->
                     <div id="youtubePreview" class="mt-3 hidden rounded-lg overflow-hidden border border-slate-200">
@@ -289,7 +291,8 @@ $isVideo = $albumType === 'video';
         document.getElementById('modalTitle').textContent = 'Tambah <?= $isVideo ? 'Video' : 'Foto' ?>';
 
         <?php if ($isVideo): ?>
-        document.getElementById('youtubeUrl').value = '';
+        document.getElementById('videoSource').value = 'youtube';
+        document.getElementById('videoUrl').value = '';
         document.getElementById('youtubePreview').classList.add('hidden');
         <?php else: ?>
         fileInput.value = '';
@@ -308,7 +311,8 @@ $isVideo = $albumType === 'video';
         document.getElementById('modalTitle').textContent = 'Edit <?= $isVideo ? 'Video' : 'Foto' ?>';
 
         <?php if ($isVideo): ?>
-        document.getElementById('youtubeUrl').value = item.youtube_url || '';
+        document.getElementById('videoSource').value = item.video_source || 'youtube';
+        document.getElementById('videoUrl').value = item.video_url || item.youtube_url || '';
         if (item.youtube_video_id) {
             showYouTubePreview(item.youtube_video_id);
         }
@@ -336,13 +340,13 @@ $isVideo = $albumType === 'video';
 
     <?php if ($isVideo): ?>
     // YouTube URL Preview
-    const youtubeInput = document.getElementById('youtubeUrl');
+    const youtubeInput = document.getElementById('videoUrl');
     let debounceTimer;
 
     youtubeInput.addEventListener('input', function () {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(() => {
-            const videoId = extractYouTubeId(this.value);
+            const videoId = document.getElementById('videoSource').value === 'youtube' ? extractYouTubeId(this.value) : null;
             if (videoId) {
                 showYouTubePreview(videoId);
             } else {

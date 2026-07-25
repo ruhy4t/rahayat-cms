@@ -50,16 +50,27 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>
-                        <?php if (!empty($item['youtube_video_id'])): ?>
+                        <?php
+                        $videoSource = $item['video_source'] ?? (!empty($item['youtube_video_id']) ? 'youtube' : '');
+                        $videoId = $item['video_id'] ?? $item['youtube_video_id'] ?? '';
+                        $videoUrl = $item['video_url'] ?? $item['youtube_url'] ?? '';
+                        ?>
+                        <?php if ($videoUrl !== '' || $videoId !== ''): ?>
                             <div
                                 class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 border border-slate-200">
-                                <!-- YouTube Embed -->
                                 <div class="aspect-[16/10]">
-                                    <iframe src="https://www.youtube.com/embed/<?= e($item['youtube_video_id']) ?>"
+                                    <?php if ($videoSource === 'youtube'): ?>
+                                    <iframe src="https://www.youtube.com/embed/<?= e($videoId) ?>"
                                         class="w-full h-full" frameborder="0"
                                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen>
-                                    </iframe>
+                                        allowfullscreen></iframe>
+                                    <?php elseif ($videoSource === 'vimeo'): ?>
+                                    <iframe src="https://player.vimeo.com/video/<?= e($videoId) ?>"
+                                        class="w-full h-full" frameborder="0"
+                                        allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>
+                                    <?php else: ?>
+                                    <video src="<?= e($videoUrl) ?>" class="w-full h-full bg-black" controls preload="metadata"></video>
+                                    <?php endif; ?>
                                 </div>
                                 <?php if (!empty($item['title'])): ?>
                                     <div class="p-4">

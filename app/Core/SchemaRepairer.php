@@ -40,6 +40,7 @@ class SchemaRepairer
         $this->ensureMenusColumns();
         $this->ensureSiteSettingsColumns();
         $this->ensureUsersColumns();
+        $this->ensureStaffColumns();
         $this->ensureSchoolProfileColumns();
         $this->ensureNewsColumns();
         $this->ensureGalleryTablesAndColumns();
@@ -177,6 +178,13 @@ class SchemaRepairer
         $this->addColumn('users', 'permissions', 'LONGTEXT NULL');
     }
 
+    private function ensureStaffColumns(): void
+    {
+        if ($this->tableExists('staff')) {
+            $this->addColumn('staff', 'is_principal', 'TINYINT(1) DEFAULT 0');
+        }
+    }
+
     private function ensureMenusColumns(): void
     {
         if (!$this->tableExists('menus')) {
@@ -300,6 +308,9 @@ class SchemaRepairer
             file_path VARCHAR(255) NULL,
             youtube_url VARCHAR(255) NULL,
             youtube_video_id VARCHAR(50) NULL,
+            video_source VARCHAR(30) NULL,
+            video_url VARCHAR(500) NULL,
+            video_id VARCHAR(100) NULL,
             is_active TINYINT(1) DEFAULT 1,
             sort_order INT DEFAULT 0,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -336,6 +347,9 @@ class SchemaRepairer
                 'file_path' => 'VARCHAR(255) NULL',
                 'youtube_url' => 'VARCHAR(255) NULL',
                 'youtube_video_id' => 'VARCHAR(50) NULL',
+                'video_source' => 'VARCHAR(30) NULL',
+                'video_url' => 'VARCHAR(500) NULL',
+                'video_id' => 'VARCHAR(100) NULL',
                 'is_active' => 'TINYINT(1) DEFAULT 1',
                 'sort_order' => 'INT DEFAULT 0',
                 'created_at' => 'DATETIME DEFAULT CURRENT_TIMESTAMP',
@@ -510,9 +524,10 @@ class SchemaRepairer
             ],
             'site_settings' => ['setting_key', 'setting_value', 'setting_type'],
             'users' => ['permissions', 'is_spmb_committee', 'editor_id'],
+            'staff' => ['is_principal'],
             'news' => ['slug', 'category', 'status', 'views', 'published_at', 'meta_description', 'meta_keywords'],
             'gallery_albums' => ['slug', 'type', 'cover_image', 'is_active', 'sort_order'],
-            'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'is_active', 'sort_order'],
+            'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'video_source', 'video_url', 'video_id', 'is_active', 'sort_order'],
             'announcements' => ['type', 'content', 'image', 'start_at', 'end_at', 'is_active', 'sort_order'],
         ];
 

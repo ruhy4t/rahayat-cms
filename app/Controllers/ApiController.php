@@ -971,19 +971,21 @@ class ApiController extends Controller
                 return;
             }
         } elseif ($type === 'video') {
-            $youtubeUrl = $this->postSafe('youtube_url');
-            if (!$youtubeUrl) {
-                $this->jsonError('URL YouTube harus diisi', 422);
+            $videoSource = strtolower($this->postSafe('video_source') ?: 'youtube');
+            $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
+            if (!in_array($videoSource, ['youtube', 'vimeo', 'direct'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
+                $this->jsonError('Sumber atau URL video tidak valid', 422);
                 return;
             }
-
-            // Extract video ID from YouTube URL
-            if (preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $youtubeUrl, $matches)) {
-                $youtubeVideoId = $matches[1];
-            } else {
-                $this->jsonError('URL YouTube tidak valid', 422);
+            $videoId = $videoSource === 'youtube'
+                ? GalleryItem::extractYouTubeId($videoUrl)
+                : ($videoSource === 'vimeo' ? GalleryItem::extractVimeoId($videoUrl) : null);
+            if ($videoSource !== 'direct' && !$videoId) {
+                $this->jsonError('URL tidak cocok dengan sumber video yang dipilih', 422);
                 return;
             }
+            $youtubeUrl = $videoSource === 'youtube' ? $videoUrl : null;
+            $youtubeVideoId = $videoSource === 'youtube' ? $videoId : null;
         }
 
         $data = [
@@ -994,6 +996,9 @@ class ApiController extends Controller
             'file_path' => $filePath,
             'youtube_url' => $youtubeUrl,
             'youtube_video_id' => $youtubeVideoId,
+            'video_source' => $type === 'video' ? $videoSource : null,
+            'video_url' => $type === 'video' ? $videoUrl : null,
+            'video_id' => $type === 'video' ? $videoId : null,
             'is_active' => 1,
             'sort_order' => (int) $this->post('sort_order', 0)
         ];
@@ -1037,17 +1042,24 @@ class ApiController extends Controller
 
         // Handle video (YouTube URL) update
         if ($type === 'video') {
-            $youtubeUrl = $this->postSafe('youtube_url');
-            if ($youtubeUrl && $youtubeUrl !== ($item['youtube_url'] ?? '')) {
-                // Extract video ID
-                $videoId = GalleryItem::extractYouTubeId($youtubeUrl);
-                if (!$videoId) {
-                    $this->jsonError('URL YouTube tidak valid', 422);
-                    return;
-                }
-                $data['youtube_url'] = $youtubeUrl;
-                $data['youtube_video_id'] = $videoId;
+            $videoSource = strtolower($this->postSafe('video_source') ?: ($item['video_source'] ?? 'youtube'));
+            $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
+            if (!in_array($videoSource, ['youtube', 'vimeo', 'direct'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
+                $this->jsonError('Sumber atau URL video tidak valid', 422);
+                return;
             }
+            $videoId = $videoSource === 'youtube'
+                ? GalleryItem::extractYouTubeId($videoUrl)
+                : ($videoSource === 'vimeo' ? GalleryItem::extractVimeoId($videoUrl) : null);
+            if ($videoSource !== 'direct' && !$videoId) {
+                $this->jsonError('URL tidak cocok dengan sumber video yang dipilih', 422);
+                return;
+            }
+            $data['video_source'] = $videoSource;
+            $data['video_url'] = $videoUrl;
+            $data['video_id'] = $videoId;
+            $data['youtube_url'] = $videoSource === 'youtube' ? $videoUrl : null;
+            $data['youtube_video_id'] = $videoSource === 'youtube' ? $videoId : null;
         }
 
         // Handle file replacement if new file uploaded (for image items)

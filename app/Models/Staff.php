@@ -10,7 +10,13 @@ declare(strict_types=1);
 class Staff extends Model
 {
     protected string $table = 'staff';
-    protected array $fillable = ['name', 'nip', 'position', 'subject', 'photo', 'email', 'phone', 'is_teacher', 'is_active', 'sort_order'];
+    protected array $fillable = ['name', 'nip', 'position', 'subject', 'photo', 'email', 'phone', 'is_teacher', 'is_principal', 'is_active', 'sort_order'];
+
+    public function designatePrincipal(int $staffId): void
+    {
+        $this->db->query("UPDATE {$this->table} SET is_principal = 0 WHERE is_principal = 1");
+        $this->update($staffId, ['is_principal' => 1]);
+    }
 
     /**
      * Get all active staff

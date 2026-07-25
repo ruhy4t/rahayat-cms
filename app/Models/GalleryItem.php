@@ -10,7 +10,12 @@ declare(strict_types=1);
 class GalleryItem extends Model
 {
     protected string $table = 'gallery_items';
-    protected array $fillable = ['album_id', 'title', 'description', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'is_active', 'sort_order'];
+    protected array $fillable = ['album_id', 'title', 'description', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'video_source', 'video_url', 'video_id', 'is_active', 'sort_order'];
+
+    public static function extractVimeoId(string $url): ?string
+    {
+        return preg_match('~vimeo\.com/(?:video/)?([0-9]+)~i', $url, $matches) ? $matches[1] : null;
+    }
 
     /**
      * Get items by album

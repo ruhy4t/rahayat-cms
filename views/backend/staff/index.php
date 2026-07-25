@@ -83,6 +83,9 @@ $flash = $data['flash'] ?? [];
                                                 <span
                                                     class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-800 ml-2">Tendik</span>
                                             <?php endif; ?>
+                                            <?php if (!empty($s['is_principal'])): ?>
+                                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800 ml-1">Kepala Sekolah</span>
+                                            <?php endif; ?>
                                         </div>
                                         <div class="text-xs text-slate-500 font-mono mt-0.5">
                                             NIP:
@@ -140,6 +143,7 @@ $flash = $data['flash'] ?? [];
                                         data-nip="<?= e($s['nip']) ?>" data-position="<?= e($s['position']) ?>"
                                         data-subject="<?= e($s['subject']) ?>" data-email="<?= e($s['email']) ?>"
                                         data-phone="<?= e($s['phone']) ?>" data-isteacher="<?= $s['is_teacher'] ? '1' : '0' ?>"
+                                        data-isprincipal="<?= !empty($s['is_principal']) ? '1' : '0' ?>"
                                         data-active="<?= $s['is_active'] ? '1' : '0' ?>" data-order="<?= $s['sort_order'] ?>"
                                         data-photo="<?= $s['photo'] ? '/storage/' . e($s['photo']) : '' ?>">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,10 +171,10 @@ $flash = $data['flash'] ?? [];
 
 <!-- Add/Edit Staff Modal -->
 <div id="staffModal"
-    class="fixed inset-0 bg-black/50 z-50 hidden items-start pt-10 pb-10 sm:pt-20 sm:items-center justify-center overflow-y-auto">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-4 my-auto relative shrink-0">
+    class="fixed inset-0 bg-black/50 z-50 hidden items-center justify-center p-3 sm:p-5 overflow-hidden">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[calc(100vh-1.5rem)] sm:max-h-[calc(100vh-2.5rem)] mx-auto relative flex flex-col overflow-hidden">
         <div
-            class="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10 rounded-t-xl">
+            class="px-5 sm:px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-white z-10 rounded-t-xl shrink-0">
             <h3 id="modalTitle" class="text-lg font-semibold text-slate-800">Tambah GTK</h3>
             <button id="closeModal" class="text-slate-400 hover:text-slate-600 transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,14 +182,15 @@ $flash = $data['flash'] ?? [];
                 </svg>
             </button>
         </div>
-        <form id="staffForm" action="/admin/gtk/store" method="POST" enctype="multipart/form-data" class="p-6">
+        <form id="staffForm" action="/admin/gtk/store" method="POST" enctype="multipart/form-data"
+            class="p-4 sm:p-5 overflow-y-auto overscroll-contain">
             <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
             <input type="hidden" id="staffId" name="id">
             <input type="hidden" id="croppedPhoto" name="cropped_photo">
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5">
                 <!-- Kolom Kiri -->
-                <div class="space-y-4">
+                <div class="space-y-3.5">
                     <div>
                         <label for="staffName" class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap &
                             Gelar</label>
@@ -235,7 +240,7 @@ $flash = $data['flash'] ?? [];
                 </div>
 
                 <!-- Kolom Kanan -->
-                <div class="space-y-4">
+                <div class="space-y-3.5">
                     <div>
                         <label for="staffPosition" class="block text-sm font-medium text-slate-700 mb-1">Jabatan /
                             Posisi</label>
@@ -257,7 +262,7 @@ $flash = $data['flash'] ?? [];
                         <p class="text-[10px] text-slate-500 mt-1">Angka lebih kecil tampil lebih awal</p>
                     </div>
 
-                    <div class="p-4 bg-slate-50 border border-slate-100 rounded-xl mt-2">
+                    <div class="p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
                         <div class="flex items-center justify-between mb-2">
                             <label class="block text-sm font-medium text-slate-700">Foto Profil</label>
                         </div>
@@ -281,17 +286,17 @@ $flash = $data['flash'] ?? [];
                             </div>
                         </div>
 
-                        <div id="cropEditor" class="hidden mt-4 pt-4 border-t border-slate-200">
-                            <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,280px)_1fr] gap-4 items-start">
+                        <div id="cropEditor" class="hidden mt-3 pt-3 border-t border-slate-200">
+                            <div class="grid grid-cols-1 sm:grid-cols-[minmax(0,190px)_1fr] gap-3 items-start">
                                 <div>
                                     <canvas id="cropCanvas" width="400" height="500"
-                                        class="block w-full max-w-[280px] mx-auto bg-slate-900 rounded-xl shadow-inner cursor-move touch-none"
+                                        class="block w-full max-w-[190px] mx-auto bg-slate-900 rounded-lg shadow-inner cursor-move touch-none"
                                         aria-label="Area crop foto GTK"></canvas>
                                     <p class="mt-2 text-center text-xs text-slate-500">
                                         Geser foto sampai wajah berada di tengah bingkai.
                                     </p>
                                 </div>
-                                <div class="space-y-4">
+                                <div class="space-y-3">
                                     <div>
                                         <div class="flex items-center justify-between gap-3 mb-2">
                                             <label for="cropZoom" class="text-sm font-medium text-slate-700">Perbesar wajah</label>
@@ -317,10 +322,18 @@ $flash = $data['flash'] ?? [];
                             class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
                         <label for="staffActive" class="text-sm font-medium text-slate-700">Status Aktif</label>
                     </div>
+                    <label class="flex items-start gap-3 p-3 rounded-lg border border-emerald-200 bg-emerald-50 cursor-pointer">
+                        <input type="checkbox" id="staffPrincipal" name="is_principal" value="1"
+                            class="mt-0.5 w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300">
+                        <span>
+                            <span class="block text-sm font-semibold text-emerald-900">Tetapkan sebagai Kepala Sekolah</span>
+                            <span class="block text-xs text-emerald-700 mt-0.5">Nama, NIP, dan foto di laman Profil akan mengikuti data GTK ini. Hanya satu GTK yang dapat ditetapkan.</span>
+                        </span>
+                    </label>
                 </div>
             </div>
 
-            <div class="flex justify-end gap-3 mt-8 pt-4 border-t border-slate-100">
+            <div class="sticky bottom-0 -mx-4 sm:-mx-5 -mb-4 sm:-mb-5 px-4 sm:px-5 py-3 mt-5 border-t border-slate-200 bg-white/95 backdrop-blur flex justify-end gap-3">
                 <button type="button" id="cancelBtn"
                     class="px-5 py-2 border border-slate-200 text-slate-700 rounded-lg hover:bg-slate-50 font-medium transition-colors">Batal</button>
                 <button type="submit"
@@ -427,6 +440,7 @@ $flash = $data['flash'] ?? [];
             photoPreview.innerHTML = defaultPhotoHtml;
             clearCrop();
             document.getElementById('staffOrder').value = '0';
+            document.getElementById('staffPrincipal').checked = false;
             document.getElementById('subjectGroup').style.opacity = '1';
             document.getElementById('subjectGroup').querySelectorAll('input').forEach(i => i.disabled = false);
         };
@@ -466,6 +480,7 @@ $flash = $data['flash'] ?? [];
                 document.getElementById('staffEmail').value = d.email;
                 document.getElementById('staffPhone').value = d.phone;
                 document.getElementById('staffOrder').value = d.order;
+                document.getElementById('staffPrincipal').checked = d.isprincipal === '1';
                 document.getElementById('staffActive').checked = d.active === '1';
 
                 const radioNode = document.querySelector(`input[name="is_teacher"][value="${d.isteacher}"]`);

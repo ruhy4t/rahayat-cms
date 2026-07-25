@@ -66,7 +66,23 @@ class SchoolProfile extends Model
     public function getProfile(): array|false
     {
         $sql = "SELECT * FROM {$this->table} LIMIT 1";
-        return $this->db->fetch($sql);
+        $profile = $this->db->fetch($sql);
+        if (!$profile) {
+            return false;
+        }
+
+        try {
+            $principal = $this->db->fetch("SELECT name, nip, photo FROM staff WHERE is_principal = 1 LIMIT 1");
+            if ($principal) {
+                $profile['principal_name'] = $principal['name'] ?? null;
+                $profile['principal_nip'] = $principal['nip'] ?? null;
+                $profile['principal_photo'] = $principal['photo'] ?? null;
+            }
+        } catch (\Throwable) {
+            // Older schemas are repaired automatically; keep the saved profile as fallback.
+        }
+
+        return $profile;
     }
 
     /**

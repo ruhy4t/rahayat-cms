@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1 - 2026-07-25
+
+- Penetapan Kepala Sekolah langsung dari data GTK dan sinkronisasi nama, NIP, serta foto ke laman Profil.
+- Galeri video mendukung YouTube, Vimeo, dan tautan video langsung (MP4/WebM).
+- Sumber setiap video ditampilkan pada halaman pengelolaan admin.
+- Upload gambar web tetap dioptimalkan otomatis ke WebP dengan dimensi dan kualitas yang menjaga kejelasan.
+
 Semua perubahan penting Rahayat CMS dicatat di file ini. Penomoran versi
 mengikuti [Semantic Versioning](https://semver.org/):
 

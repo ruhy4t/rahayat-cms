@@ -1181,6 +1181,7 @@ class DashboardController extends Controller
             'email' => $this->postSafe('email'),
             'phone' => $this->postSafe('phone'),
             'is_teacher' => $this->post('is_teacher') ? 1 : 0,
+            'is_principal' => $this->post('is_principal') ? 1 : 0,
             'is_active' => $this->post('is_active') ? 1 : 0,
             'sort_order' => (int) $this->post('sort_order', 0)
         ];
@@ -1197,7 +1198,11 @@ class DashboardController extends Controller
             $data['photo'] = $photoPath;
         }
 
-        $this->staffModel->create($data);
+        $staffId = (int) $this->staffModel->create($data);
+        if ($data['is_principal']) {
+            $this->staffModel->designatePrincipal($staffId);
+            $this->syncPrincipalFromStaff($staffId);
+        }
 
         $this->flash('success', 'Data GTK berhasil ditambahkan');
         $this->redirect('/admin/gtk');
@@ -1224,6 +1229,7 @@ class DashboardController extends Controller
             'email' => $this->postSafe('email'),
             'phone' => $this->postSafe('phone'),
             'is_teacher' => $this->post('is_teacher') ? 1 : 0,
+            'is_principal' => $this->post('is_principal') ? 1 : 0,
             'is_active' => $this->post('is_active') ? 1 : 0,
             'sort_order' => (int) $this->post('sort_order', 0)
         ];
@@ -1243,6 +1249,10 @@ class DashboardController extends Controller
         }
 
         $this->staffModel->update($staffId, $data);
+        if ($data['is_principal']) {
+            $this->staffModel->designatePrincipal($staffId);
+            $this->syncPrincipalFromStaff($staffId);
+        }
         if ($oldPhotoToRemove !== null && $oldPhotoToRemove !== $data['photo']) {
             $this->removeStaffPhoto($oldPhotoToRemove);
         }
@@ -1277,6 +1287,20 @@ class DashboardController extends Controller
         if (is_file($file)) {
             @unlink($file);
         }
+    }
+
+    private function syncPrincipalFromStaff(int $staffId): void
+    {
+        $principal = $this->staffModel->find($staffId);
+        if (!$principal) {
+            return;
+        }
+
+        $this->profileModel->saveProfile([
+            'principal_name' => $principal['name'] ?? null,
+            'principal_nip' => $principal['nip'] ?? null,
+            'principal_photo' => $principal['photo'] ?? null,
+        ]);
     }
 
     // ===================================================
