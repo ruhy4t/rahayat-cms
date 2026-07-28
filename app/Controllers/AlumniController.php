@@ -75,6 +75,14 @@ class AlumniController extends Controller
             $this->flash('success', 'Data alumni telah dikirim untuk diverifikasi.');
             $this->redirect('/alumni');
         }
+        if (!Security::validatePublicCaptcha(
+            'alumni',
+            (string) $this->post('captcha_token', ''),
+            $this->post('captcha_answer', '')
+        )) {
+            $this->flash('error', 'Jawaban verifikasi keamanan tidak tepat. Silakan coba kembali.');
+            $this->redirect('/alumni#daftar-alumni');
+        }
 
         $ipHash = (string) DataCipher::blindIndex('ip:' . trim((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown')));
         if ((time() - (int) ($_SESSION['_alumni_last_submit'] ?? 0)) < 90
@@ -110,6 +118,7 @@ class AlumniController extends Controller
             $data['photo'] = $photo;
         }
 
+        Security::consumePublicCaptcha('alumni', (string) $this->post('captcha_token', ''));
         $this->alumniModel->create($data);
         $_SESSION['_alumni_last_submit'] = time();
         $this->flash('success', 'Terima kasih. Data alumni akan tampil setelah diverifikasi admin.');

@@ -355,6 +355,10 @@
 
             <!-- Submit -->
             <div class="p-8 sm:p-10 bg-slate-50">
+                <div class="mb-8">
+                    <?= Security::publicCaptchaInput('spmb') ?>
+                </div>
+
                 <div class="flex items-start mb-8">
                     <div class="flex h-6 items-center">
                         <input id="agreement" name="agreement" type="checkbox" required

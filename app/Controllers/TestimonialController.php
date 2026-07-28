@@ -56,6 +56,14 @@ class TestimonialController extends Controller
             $this->flash('success', 'Terima kasih. Testimoni Anda telah dikirim untuk ditinjau.');
             $this->redirect('/testimoni');
         }
+        if (!Security::validatePublicCaptcha(
+            'testimonial',
+            (string) $this->post('captcha_token', ''),
+            $this->post('captcha_answer', '')
+        )) {
+            $this->flash('error', 'Jawaban verifikasi keamanan tidak tepat. Silakan coba kembali.');
+            $this->redirect('/testimoni#kirim-testimoni');
+        }
 
         $ip = trim((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
         $ipHash = (string) DataCipher::blindIndex('ip:' . $ip);
@@ -83,6 +91,7 @@ class TestimonialController extends Controller
             $data['photo'] = $photo;
         }
 
+        Security::consumePublicCaptcha('testimonial', (string) $this->post('captcha_token', ''));
         $this->testimonialModel->create($data);
         $_SESSION['_testimonial_last_submit'] = time();
         $this->flash('success', 'Terima kasih. Testimoni Anda telah dikirim dan akan tampil setelah disetujui admin.');

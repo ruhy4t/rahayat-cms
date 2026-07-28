@@ -174,17 +174,32 @@
             });
 
             // Save initial state
-            history.replaceState({ url: window.location.pathname }, '', window.location.pathname);
+            const initialUrl = this.currentLocation();
+            history.replaceState({ url: initialUrl }, '', initialUrl);
         },
 
         async navigate(url) {
-            if (this.isLoading || url === window.location.pathname) return;
+            if (this.isLoading) return;
+
+            const targetUrl = new URL(url, window.location.origin);
+            const targetLocation = targetUrl.pathname + targetUrl.search + targetUrl.hash;
+            const currentPathAndQuery = window.location.pathname + window.location.search;
+            const targetPathAndQuery = targetUrl.pathname + targetUrl.search;
+
+            if (targetLocation === this.currentLocation()) return;
+
+            // Hash-only changes on the same filtered page do not require a fetch.
+            if (targetPathAndQuery === currentPathAndQuery) {
+                history.pushState({ url: targetLocation }, '', targetLocation);
+                this.scrollToTarget(targetUrl.hash);
+                return;
+            }
             
             // Update URL
-            history.pushState({ url }, '', url);
+            history.pushState({ url: targetLocation }, '', targetLocation);
             
             // Load content
-            await this.loadContent(url, true);
+            await this.loadContent(targetLocation, true);
         },
 
         async loadContent(url, showLoader = true) {
@@ -250,8 +265,9 @@
                     this.contentContainer.style.opacity = '1';
                     this.contentContainer.removeAttribute('aria-busy');
                     
-                    // Scroll to top
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Respect anchors while still resetting ordinary page/filter navigation.
+                    const targetHash = new URL(url, window.location.origin).hash;
+                    this.scrollToTarget(targetHash);
                     
                     // Re-initialize lazy loading
                     this.initLazyLoading();
@@ -287,6 +303,25 @@
 
         sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
+        },
+
+        currentLocation() {
+            return window.location.pathname + window.location.search + window.location.hash;
+        },
+
+        scrollToTarget(hash) {
+            if (hash) {
+                const target = document.getElementById(decodeURIComponent(hash.slice(1)));
+                if (target) {
+                    const disclosure = target.matches('details') ? target : target.closest('details');
+                    if (disclosure) {
+                        disclosure.open = true;
+                    }
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    return;
+                }
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         },
 
         initLazyLoading() {
@@ -419,6 +454,10 @@
             e.preventDefault();
             const target = document.querySelector(this.getAttribute('href'));
             if (target) {
+                const disclosure = target.matches('details') ? target : target.closest('details');
+                if (disclosure) {
+                    disclosure.open = true;
+                }
                 target.scrollIntoView({ behavior: 'smooth' });
             }
         });
@@ -431,6 +470,9 @@
         ContentProtection.init();
         SPANavigator.init();
         SPANavigator.initLazyLoading();
+        if (window.location.hash) {
+            SPANavigator.scrollToTarget(window.location.hash);
+        }
     });
 
     // Expose to global scope

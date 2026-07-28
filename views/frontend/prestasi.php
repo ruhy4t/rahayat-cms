@@ -30,18 +30,22 @@ $currentCategory = $data['current_category'] ?? '';
         <!-- Filter Categories -->
         <div class="mb-12 flex flex-wrap items-center justify-center gap-4">
             <a href="/prestasi"
+                <?= empty($currentCategory) ? 'aria-current="page"' : '' ?>
                 class="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 <?= empty($currentCategory) ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200' ?>">
                 Semua Kategori
             </a>
             <a href="/prestasi?kategori=Sekolah"
+                <?= $currentCategory === 'Sekolah' ? 'aria-current="page"' : '' ?>
                 class="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 <?= $currentCategory === 'Sekolah' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200' ?>">
                 Prestasi Sekolah
             </a>
             <a href="/prestasi?kategori=Guru"
+                <?= $currentCategory === 'Guru' ? 'aria-current="page"' : '' ?>
                 class="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 <?= $currentCategory === 'Guru' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200' ?>">
                 Prestasi Guru
             </a>
             <a href="/prestasi?kategori=Murid"
+                <?= $currentCategory === 'Murid' ? 'aria-current="page"' : '' ?>
                 class="px-6 py-2.5 rounded-full text-sm font-semibold transition-all duration-300 <?= $currentCategory === 'Murid' ? 'bg-primary-600 text-white shadow-lg shadow-primary-500/30' : 'bg-white text-slate-600 hover:bg-slate-100 shadow-sm border border-slate-200' ?>">
                 Prestasi Murid
             </a>

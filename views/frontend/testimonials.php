@@ -82,16 +82,32 @@ $flash = $data['flash'] ?? null;
     </div>
 </section>
 
-<section id="kirim-testimoni" class="py-14 lg:py-20 bg-white scroll-mt-20">
+<section class="py-14 lg:py-20 bg-white">
     <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-9">
-            <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Bagikan Pengalaman</span>
-            <h2 class="text-3xl font-bold text-slate-900 mt-2">Kirim Testimoni Anda</h2>
-            <p class="text-slate-600 mt-3">Testimoni akan ditinjau admin sebelum ditampilkan di website.</p>
-        </div>
+        <details id="kirim-testimoni" class="group scroll-mt-24">
+            <summary
+                class="list-none cursor-pointer rounded-2xl border border-primary-200 bg-primary-50 p-5 sm:p-6 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 [&::-webkit-details-marker]:hidden">
+                <span class="flex items-center justify-between gap-4">
+                    <span>
+                        <span class="block text-primary-600 font-semibold text-sm uppercase tracking-wider">Bagikan Pengalaman</span>
+                        <span class="block text-xl sm:text-2xl font-bold text-slate-900 mt-1">Isi Testimoni</span>
+                        <span class="block text-sm sm:text-base text-slate-600 mt-1">Klik untuk membuka formulir testimoni.</span>
+                    </span>
+                    <span
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white transition-transform group-open:rotate-180"
+                        aria-hidden="true">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m6 9 6 6 6-6" />
+                        </svg>
+                    </span>
+                </span>
+            </summary>
 
-        <form action="/testimoni/kirim" method="POST" enctype="multipart/form-data"
-            class="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-5">
+            <div class="pt-6">
+                <p class="text-slate-600 text-center mb-6">Testimoni akan ditinjau admin sebelum ditampilkan di website.</p>
+                <form action="/testimoni/kirim" method="POST" enctype="multipart/form-data"
+                    class="bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200 space-y-5">
             <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
             <div class="absolute -left-[10000px]" aria-hidden="true">
                 <label for="website">Website</label>
@@ -171,10 +187,14 @@ $flash = $data['flash'] ?? null;
                 </span>
             </label>
 
-            <button type="submit"
-                class="w-full sm:w-auto px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors">
-                Kirim untuk Ditinjau
-            </button>
-        </form>
+                    <?= Security::publicCaptchaInput('testimonial') ?>
+
+                    <button type="submit"
+                        class="w-full sm:w-auto px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors">
+                        Kirim untuk Ditinjau
+                    </button>
+                </form>
+            </div>
+        </details>
     </div>
 </section>

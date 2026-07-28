@@ -8,6 +8,62 @@
    Base Styles
    ======================================== */
 
+.required-asterisk {
+    margin-left: 0.2rem;
+    color: #dc2626;
+    font-weight: 800;
+}
+
+/* Keep every text field visually discoverable, including optional fields.
+   Tailwind Forms resets border width, so relying on border-color utilities
+   alone can make controls look like blank white space. */
+form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]),
+form select,
+form textarea {
+    width: 100%;
+    min-height: 2.75rem;
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: #94a3b8 !important;
+    border-radius: 0.65rem;
+    background-color: #ffffff !important;
+    color: #0f172a;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), inset 0 0 0 1px rgba(148, 163, 184, 0.08);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+form textarea {
+    min-height: 7rem;
+}
+
+form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):hover,
+form select:hover,
+form textarea:hover {
+    border-color: #64748b !important;
+}
+
+form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):focus,
+form select:focus,
+form textarea:focus {
+    border-color: rgb(var(--color-primary-600, 79 70 229)) !important;
+    box-shadow: 0 0 0 3px rgba(var(--color-primary-500, 79 70 229) / 0.16) !important;
+    outline: none;
+}
+
+form input:disabled,
+form select:disabled,
+form textarea:disabled {
+    background-color: #f1f5f9 !important;
+    color: #64748b;
+    cursor: not-allowed;
+}
+
+form input::placeholder,
+form textarea::placeholder {
+    color: #94a3b8;
+    opacity: 1;
+}
+
 /* Line Clamp Utility */
 .line-clamp-2 {
     display: -webkit-box;

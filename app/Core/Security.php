@@ -69,6 +69,117 @@ class Security
     }
 
     /**
+     * Render a lightweight arithmetic CAPTCHA for a public submission form.
+     * Multiple tokens are retained briefly so separate browser tabs do not
+     * invalidate one another.
+     */
+    public static function publicCaptchaInput(string $scope): string
+    {
+        $scope = preg_replace('/[^a-z0-9_-]/i', '', $scope) ?: 'public';
+        $token = bin2hex(random_bytes(16));
+        $left = random_int(2, 9);
+        $right = random_int(1, 9);
+        $answer = $left + $right;
+        $secret = bin2hex(random_bytes(16));
+
+        self::prunePublicCaptchas($scope);
+        $_SESSION['_public_captchas'][$scope][$token] = [
+            'hash' => hash_hmac('sha256', (string) $answer, $secret),
+            'secret' => $secret,
+            'expires_at' => time() + 900,
+            'attempts' => 0,
+        ];
+
+        // Keep session storage bounded when a page is repeatedly refreshed.
+        if (count($_SESSION['_public_captchas'][$scope]) > 5) {
+            $_SESSION['_public_captchas'][$scope] = array_slice(
+                $_SESSION['_public_captchas'][$scope],
+                -5,
+                null,
+                true
+            );
+        }
+
+        $id = 'captcha-' . $scope;
+        return '<div class="public-captcha rounded-xl border border-slate-200 bg-white p-4">'
+            . '<label for="' . self::escape($id) . '" class="block text-sm font-semibold text-slate-700">'
+            . 'Verifikasi keamanan <span class="text-red-600" aria-hidden="true">*</span>'
+            . '</label>'
+            . '<p class="mt-1 text-sm text-slate-600">Berapa hasil dari <strong>'
+            . $left . ' + ' . $right . '</strong>?</p>'
+            . '<input type="hidden" name="captcha_token" value="' . self::escape($token) . '">'
+            . '<input id="' . self::escape($id) . '" type="number" name="captcha_answer" required '
+            . 'inputmode="numeric" autocomplete="off" min="0" max="99" '
+            . 'class="mt-2 block w-full rounded-xl border-slate-300 px-4 py-2.5" '
+            . 'placeholder="Masukkan hasil perhitungan">'
+            . '<p class="mt-1.5 text-xs text-slate-500">Pertanyaan ini membantu mencegah pengiriman otomatis.</p>'
+            . '</div>';
+    }
+
+    /**
+     * Validate a public CAPTCHA. Challenges that reach five failed attempts
+     * are removed. Controllers consume a valid challenge immediately before
+     * persisting data, so ordinary validation errors do not force users to
+     * refill a long form.
+     */
+    public static function validatePublicCaptcha(string $scope, ?string $token, mixed $answer): bool
+    {
+        $scope = preg_replace('/[^a-z0-9_-]/i', '', $scope) ?: 'public';
+        self::prunePublicCaptchas($scope);
+
+        if (
+            !is_string($token)
+            || !preg_match('/^[a-f0-9]{32}$/', $token)
+            || !preg_match('/^\s*\d{1,2}\s*$/', (string) $answer)
+        ) {
+            return false;
+        }
+
+        $challenge = $_SESSION['_public_captchas'][$scope][$token] ?? null;
+        if (!is_array($challenge) || empty($challenge['hash']) || empty($challenge['secret'])) {
+            return false;
+        }
+
+        $answerHash = hash_hmac('sha256', trim((string) $answer), (string) $challenge['secret']);
+        $valid = hash_equals((string) $challenge['hash'], $answerHash);
+
+        if (!$valid) {
+            $_SESSION['_public_captchas'][$scope][$token]['attempts'] =
+                (int) ($challenge['attempts'] ?? 0) + 1;
+        }
+
+        if (!$valid && $_SESSION['_public_captchas'][$scope][$token]['attempts'] >= 5) {
+            unset($_SESSION['_public_captchas'][$scope][$token]);
+        }
+
+        return $valid;
+    }
+
+    public static function consumePublicCaptcha(string $scope, ?string $token): void
+    {
+        $scope = preg_replace('/[^a-z0-9_-]/i', '', $scope) ?: 'public';
+        if (is_string($token) && preg_match('/^[a-f0-9]{32}$/', $token)) {
+            unset($_SESSION['_public_captchas'][$scope][$token]);
+        }
+    }
+
+    private static function prunePublicCaptchas(string $scope): void
+    {
+        if (!isset($_SESSION['_public_captchas'][$scope])
+            || !is_array($_SESSION['_public_captchas'][$scope])) {
+            $_SESSION['_public_captchas'][$scope] = [];
+            return;
+        }
+
+        $now = time();
+        foreach ($_SESSION['_public_captchas'][$scope] as $token => $challenge) {
+            if (!is_array($challenge) || (int) ($challenge['expires_at'] ?? 0) < $now) {
+                unset($_SESSION['_public_captchas'][$scope][$token]);
+            }
+        }
+    }
+
+    /**
      * XSS filter - escape output
      */
     public static function escape(mixed $value): string

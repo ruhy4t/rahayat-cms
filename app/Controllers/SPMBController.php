@@ -127,6 +127,18 @@ class SPMBController extends Controller
                 return;
             }
 
+            if (!Security::validatePublicCaptcha(
+                'spmb',
+                (string) $this->post('captcha_token', ''),
+                $this->post('captcha_answer', '')
+            )) {
+                $this->json([
+                    'success' => false,
+                    'message' => 'Jawaban verifikasi keamanan tidak tepat. Silakan periksa dan coba kembali.'
+                ], 422);
+                return;
+            }
+
             // Generate registration number
             $registrationNumber = $this->spmbModel->generateRegistrationNumber();
 
@@ -204,6 +216,7 @@ class SPMBController extends Controller
             }
 
             // Save registration
+            Security::consumePublicCaptcha('spmb', (string) $this->post('captcha_token', ''));
             $id = $this->spmbModel->create($data);
 
             if ($id) {

@@ -657,7 +657,7 @@ abstract class Controller
             return null;
         }
 
-        if ($this->shouldOptimizeUpload($directory, (string) $detectedMime)) {
+        if ($this->shouldOptimizeUpload($directory, (string) $detectedMime) && function_exists('imagewebp')) {
             $extension = 'webp';
         }
 
@@ -1007,7 +1007,7 @@ abstract class Controller
         }
 
         $shouldOptimize = $this->shouldOptimizeUpload($directory, (string) $mimeType);
-        if ($shouldOptimize) {
+        if ($shouldOptimize && function_exists('imagewebp')) {
             $extension = 'webp';
         }
 
@@ -1125,12 +1125,23 @@ abstract class Controller
 
     private function shouldOptimizeUpload(string $directory, string $mimeType): bool
     {
-        if (!function_exists('imagewebp') || !in_array($mimeType, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'], true)) {
+        if (!in_array($mimeType, ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/webp'], true)) {
             return false;
         }
 
         // Keep SPMB documents close to the original file characteristics.
-        return !str_starts_with(str_replace('\\', '/', $directory), 'spmb');
+        if (str_starts_with(str_replace('\\', '/', $directory), 'spmb')) {
+            return false;
+        }
+
+        return match ($mimeType) {
+            'image/jpeg', 'image/pjpeg' => function_exists('imagecreatefromjpeg')
+                && (function_exists('imagewebp') || function_exists('imagejpeg')),
+            'image/png', 'image/x-png' => function_exists('imagecreatefrompng')
+                && (function_exists('imagewebp') || function_exists('imagepng')),
+            'image/webp' => function_exists('imagecreatefromwebp') && function_exists('imagewebp'),
+            default => false,
+        };
     }
 
     private function optimizeImage(string $filepath, string $mimeType): bool
@@ -1149,9 +1160,14 @@ abstract class Controller
         $width = imagesx($source);
         $height = imagesy($source);
         $normalizedPath = str_replace('\\', '/', $filepath);
-        $maxDimension = str_contains($normalizedPath, '/testimonials/')
-            ? 512
-            : (str_contains($normalizedPath, '/alumni/') ? 800 : 1920);
+        $maxDimension = match (true) {
+            str_contains($normalizedPath, '/testimonials/') => 512,
+            str_contains($normalizedPath, '/logos/') => 600,
+            str_contains($normalizedPath, '/alumni/') => 960,
+            str_contains($normalizedPath, '/staff/'),
+            str_contains($normalizedPath, '/photos/') => 1200,
+            default => 1920,
+        };
         $ratio = min(1, $maxDimension / max($width, $height));
         $targetWidth = max(1, (int) round($width * $ratio));
         $targetHeight = max(1, (int) round($height * $ratio));
@@ -1173,7 +1189,13 @@ abstract class Controller
             $height
         );
 
-        $result = imagewebp($canvas, $filepath, 82);
+        $result = function_exists('imagewebp')
+            ? imagewebp($canvas, $filepath, 85)
+            : match ($mimeType) {
+                'image/jpeg', 'image/pjpeg' => imagejpeg($canvas, $filepath, 88),
+                'image/png', 'image/x-png' => imagepng($canvas, $filepath, 6),
+                default => false,
+            };
         imagedestroy($source);
         imagedestroy($canvas);
 

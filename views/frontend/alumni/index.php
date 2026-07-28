@@ -83,11 +83,31 @@ $queryString = $_GET;
     </div>
 </section>
 
-<section id="daftar-alumni" class="py-14 lg:py-20 bg-white scroll-mt-20">
+<section class="py-14 lg:py-20 bg-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-slate-900 text-center">Pendataan Alumni</h2>
-        <p class="text-slate-600 text-center mt-3 mb-8">Data akan diverifikasi admin. Kontak dienkripsi dan tidak pernah ditampilkan kepada publik.</p>
-        <form action="/alumni/kirim" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 bg-slate-50 border border-slate-200 rounded-2xl space-y-5">
+        <details id="daftar-alumni" class="group scroll-mt-24">
+            <summary
+                class="list-none cursor-pointer rounded-2xl border border-primary-200 bg-primary-50 p-5 sm:p-6 transition-colors hover:bg-primary-100 focus:outline-none focus-visible:ring-4 focus-visible:ring-primary-200 [&::-webkit-details-marker]:hidden">
+                <span class="flex items-center justify-between gap-4">
+                    <span>
+                        <span class="block text-primary-600 font-semibold text-sm uppercase tracking-wider">Jejaring Lulusan</span>
+                        <span class="block text-xl sm:text-2xl font-bold text-slate-900 mt-1">Isi Data Alumni</span>
+                        <span class="block text-sm sm:text-base text-slate-600 mt-1">Klik untuk membuka formulir pendataan alumni.</span>
+                    </span>
+                    <span
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white transition-transform group-open:rotate-180"
+                        aria-hidden="true">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m6 9 6 6 6-6" />
+                        </svg>
+                    </span>
+                </span>
+            </summary>
+
+            <div class="pt-6">
+                <p class="text-slate-600 text-center mb-6">Data akan diverifikasi admin. Kontak dienkripsi dan tidak pernah ditampilkan kepada publik.</p>
+                <form action="/alumni/kirim" method="POST" enctype="multipart/form-data" class="p-6 sm:p-8 bg-slate-50 border border-slate-200 rounded-2xl space-y-5">
             <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
             <div class="absolute -left-[10000px]" aria-hidden="true"><label>Website<input name="website" tabindex="-1" autocomplete="off"></label></div>
             <div class="grid sm:grid-cols-2 gap-4">
@@ -110,7 +130,10 @@ $queryString = $_GET;
                 <label class="flex gap-2 text-sm text-slate-600"><input type="checkbox" name="publish_city" value="1" class="rounded text-primary-600"> Kota domisili</label>
                 <label class="flex items-start gap-2 text-sm text-slate-600"><input type="checkbox" name="consent" value="1" required class="mt-1 rounded text-primary-600"> Saya menyetujui publikasi nama, tahun lulus, serta informasi yang saya pilih setelah diverifikasi sekolah.</label>
             </div>
-            <button class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl">Kirim untuk Diverifikasi</button>
-        </form>
+                    <?= Security::publicCaptchaInput('alumni') ?>
+                    <button class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl">Kirim untuk Diverifikasi</button>
+                </form>
+            </div>
+        </details>
     </div>
 </section>

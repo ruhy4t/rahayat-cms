@@ -144,7 +144,7 @@
     </script>
 
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -579,6 +579,7 @@
     <?php endif; ?>
 
     <!-- JavaScript -->
+    <script src="/js/form-enhancements.js?v=<?= filemtime(ROOT_PATH . '/public/js/form-enhancements.js') ?>"></script>
     <script src="/js/app.js?v=<?= filemtime(ROOT_PATH . '/public/js/app.js') ?>"></script>
     <script>
         function toggleMobileMenu() {
