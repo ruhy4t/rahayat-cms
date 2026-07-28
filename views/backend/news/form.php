@@ -143,7 +143,7 @@ $editorUploadBatch = Security::randomString(32);
                             <input type="file" id="image" name="image" accept="image/jpeg,image/png,image/gif,image/webp"
                                 class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 transition-colors cursor-pointer">
                         </div>
-                        <p class="text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 5MB.</p>
+                        <p class="text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 2 MB.</p>
                     </div>
                 </div>
 

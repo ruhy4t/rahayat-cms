@@ -84,6 +84,19 @@ abstract class Controller
             }
         }
 
+        // Frontend layouts use these values for shared elements such as the
+        // footer and floating WhatsApp contact button.
+        if ($layout === 'frontend' && !isset($this->data['settings'])) {
+            try {
+                require_once APP_PATH . '/Models/SiteSetting.php';
+                $settingModel = new SiteSetting();
+                $this->data['settings'] = $settingModel->getAll();
+            } catch (\Throwable $e) {
+                error_log('Frontend settings load failed: ' . $e->getMessage());
+                $this->data['settings'] = [];
+            }
+        }
+
         // Ensure theme configuration is injected
         if (!$isInstallView && !isset($this->data['themeConfig'])) {
             try {
@@ -620,6 +633,14 @@ abstract class Controller
         if (!$detectedMime || !in_array($detectedMime, UPLOAD_ALLOWED_TYPES, true)) {
             return null;
         }
+        $dimensions = @getimagesizefromstring($binary);
+        if ($dimensions === false
+            || (int) ($dimensions[0] ?? 0) < 1
+            || (int) ($dimensions[1] ?? 0) < 1
+            || ((int) $dimensions[0] * (int) $dimensions[1]) > 16000000) {
+            $this->lastUploadError = 'Dimensi gambar di isi berita terlalu besar. Maksimal 16 megapiksel.';
+            return null;
+        }
 
         $extension = Security::extensionForMime((string) $detectedMime);
         if (!$extension) {
@@ -1037,6 +1058,15 @@ abstract class Controller
             return false;
         }
 
+        $dimensions = @getimagesizefromstring($binary);
+        if ($dimensions === false
+            || (int) ($dimensions[0] ?? 0) < 1
+            || (int) ($dimensions[1] ?? 0) < 1
+            || ((int) $dimensions[0] * (int) $dimensions[1]) > 16000000) {
+            $this->lastUploadError = 'Dimensi hasil crop terlalu besar. Maksimal 16 megapiksel.';
+            return false;
+        }
+
         $source = @imagecreatefromstring($binary);
         if (!$source instanceof \GdImage) {
             $this->lastUploadError = 'Hasil crop tidak dapat diproses. Pastikan ekstensi GD aktif.';
@@ -1118,7 +1148,10 @@ abstract class Controller
 
         $width = imagesx($source);
         $height = imagesy($source);
-        $maxDimension = 1920;
+        $normalizedPath = str_replace('\\', '/', $filepath);
+        $maxDimension = str_contains($normalizedPath, '/testimonials/')
+            ? 512
+            : (str_contains($normalizedPath, '/alumni/') ? 800 : 1920);
         $ratio = min(1, $maxDimension / max($width, $height));
         $targetWidth = max(1, (int) round($width * $ratio));
         $targetHeight = max(1, (int) round($height * $ratio));
@@ -1247,6 +1280,11 @@ abstract class Controller
             'frontend.news.show' => 'news',
             'frontend.news.search' => 'search',
             'frontend.prestasi' => 'prestasi',
+            'frontend.prestasi-detail' => 'prestasi_detail',
+            'frontend.ekstrakurikuler-detail' => 'ekstrakurikuler_detail',
+            'frontend.testimonials' => 'testimonials',
+            'frontend.alumni.index' => 'alumni_index',
+            'frontend.alumni.show' => 'alumni',
             'frontend.spmb.index' => 'spmb',
             'frontend.spmb.register' => 'spmb_register',
             'frontend.spmb.status' => 'spmb_status',
@@ -1257,6 +1295,15 @@ abstract class Controller
         if (!empty($data['news']['id'])) {
             $contentId = (int) $data['news']['id'];
             $title = (string) $data['news']['title'];
+        } elseif (!empty($data['prestasiItem']['id'])) {
+            $contentId = (int) $data['prestasiItem']['id'];
+            $title = (string) $data['prestasiItem']['title'];
+        } elseif (!empty($data['ekskulItem']['id'])) {
+            $contentId = (int) $data['ekskulItem']['id'];
+            $title = (string) $data['ekskulItem']['name'];
+        } elseif (!empty($data['alumni']['id'])) {
+            $contentId = (int) $data['alumni']['id'];
+            $title = (string) $data['alumni']['name'];
         } elseif (!empty($data['album']['id'])) {
             $contentId = (int) $data['album']['id'];
             $title = (string) $data['album']['title'];

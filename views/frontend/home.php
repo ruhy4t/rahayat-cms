@@ -349,7 +349,7 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
 
     <!-- Ekstrakurikuler Section (Default Theme) -->
     <?php if (!empty($ekskul)): ?>
-        <section class="py-16 lg:py-24 bg-slate-50 relative border-t border-slate-200/60">
+        <section id="ekstrakurikuler" class="py-16 lg:py-24 bg-slate-50 relative border-t border-slate-200/60">
             <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                     <div>
@@ -363,8 +363,9 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
                     foreach ($ekskul as $item):
                         if ($i++ >= 6)
                             break; ?>
-                        <div
-                            class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 group">
+                        <a href="/ekstrakurikuler/<?= (int) $item['id'] ?>"
+                            aria-label="Lihat informasi ekstrakurikuler <?= e($item['name']) ?>"
+                            class="block bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 group">
                             <div class="flex items-start gap-4">
                                 <div
                                     class="w-16 h-16 rounded-xl shrink-0 overflow-hidden bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center text-primary-500 relative">
@@ -398,15 +399,91 @@ $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
                                     <p class="text-slate-600 text-sm line-clamp-2">
                                         <?= e($item['description'] ?? 'Kegiatan ekstrakurikuler ' . $item['name']) ?>
                                     </p>
+                                    <span class="inline-flex items-center mt-3 text-xs font-semibold text-primary-600">
+                                        Lihat selengkapnya
+                                        <svg class="w-3.5 h-3.5 ml-1 group-hover:translate-x-1 transition-transform"
+                                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7" />
+                                        </svg>
+                                    </span>
                                 </div>
                             </div>
-                        </div>
+                        </a>
                     <?php endforeach; ?>
                 </div>
             </div>
         </section>
     <?php endif; ?>
 <?php endif; ?>
+
+<section class="py-16 lg:py-24 bg-white">
+        <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
+                <div>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Cerita Mereka</span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mt-2">Testimoni</h2>
+                    <p class="text-slate-600 mt-3 max-w-2xl">Pengalaman keluarga besar dan mitra sekolah bersama kami.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="/alumni"
+                        class="inline-flex items-center px-4 py-2.5 border border-primary-200 text-primary-700 hover:bg-primary-50 font-semibold rounded-xl transition-colors">
+                        Telusuri Alumni
+                    </a>
+                    <a href="/testimoni#kirim-testimoni"
+                        class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl transition-colors">
+                        Kirim Testimoni
+                    </a>
+                    <?php if (!empty($testimonials)): ?>
+                        <a href="/testimoni"
+                            class="inline-flex items-center text-primary-600 hover:text-primary-700 font-semibold group">
+                            Lihat Semua
+                            <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <?php if (!empty($testimonials)): ?>
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <?php foreach ($testimonials as $testimonial): ?>
+                    <article class="p-6 rounded-2xl bg-slate-50 border border-slate-200">
+                        <svg class="w-8 h-8 text-primary-200 mb-4" fill="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path d="M7.17 6A5.17 5.17 0 0 0 2 11.17V18h7v-7H5.07A2.17 2.17 0 0 1 7.17 9H9V6H7.17Zm10 0A5.17 5.17 0 0 0 12 11.17V18h7v-7h-3.93A2.17 2.17 0 0 1 17.17 9H19V6h-1.83Z" />
+                        </svg>
+                        <p class="text-slate-700 leading-relaxed line-clamp-5"><?= e($testimonial['testimonial']) ?></p>
+                        <footer class="flex items-center gap-3 mt-6">
+                            <?php if (!empty($testimonial['photo'])): ?>
+                                <img src="/storage/<?= e($testimonial['photo']) ?>"
+                                    alt="Foto <?= e($testimonial['name']) ?>"
+                                    class="w-11 h-11 rounded-full object-cover bg-slate-100"
+                                    loading="lazy" decoding="async">
+                            <?php else: ?>
+                                <div class="w-11 h-11 rounded-full bg-primary-100 text-primary-700 flex items-center justify-center font-bold"
+                                    aria-hidden="true">
+                                    <?= e(mb_strtoupper(mb_substr($testimonial['name'], 0, 1))) ?>
+                                </div>
+                            <?php endif; ?>
+                            <div class="min-w-0">
+                                <h3 class="font-bold text-slate-900 truncate"><?= e($testimonial['name']) ?></h3>
+                                <p class="text-sm text-slate-500 truncate"><?= e($testimonial['relationship']) ?></p>
+                            </div>
+                        </footer>
+                    </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php else: ?>
+                <div class="p-8 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+                    <p class="text-slate-600">Jadilah yang pertama membagikan pengalaman bersama sekolah kami.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    </section>
 
 <?php
 $ctaHref = '/kontak';

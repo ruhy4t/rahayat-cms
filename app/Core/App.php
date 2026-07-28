@@ -36,6 +36,13 @@ class App
         $this->router->add('kontak', ['controller' => 'Home', 'action' => 'contact']);
 
         $this->router->add('prestasi', ['controller' => 'Prestasi', 'action' => 'publicIndex']);
+        $this->router->add('prestasi/{id:[0-9]+}', ['controller' => 'Prestasi', 'action' => 'show']);
+        $this->router->add('ekstrakurikuler/{id:[0-9]+}', ['controller' => 'Ekstrakurikuler', 'action' => 'show']);
+        $this->router->add('testimoni', ['controller' => 'Testimonial', 'action' => 'publicIndex']);
+        $this->router->add('testimoni/kirim', ['controller' => 'Testimonial', 'action' => 'store']);
+        $this->router->add('alumni', ['controller' => 'Alumni', 'action' => 'publicIndex']);
+        $this->router->add('alumni/kirim', ['controller' => 'Alumni', 'action' => 'store']);
+        $this->router->add('alumni/{id:[0-9]+}', ['controller' => 'Alumni', 'action' => 'show']);
 
         // SPMB routes (public)
         $this->router->add('spmb', ['controller' => 'SPMB', 'action' => 'index']);
@@ -136,6 +143,18 @@ class App
         $this->router->add('admin/prestasi/edit/{id:[0-9]+}', ['controller' => 'Prestasi', 'action' => 'form']);
         $this->router->add('admin/prestasi/save', ['controller' => 'Prestasi', 'action' => 'save']);
         $this->router->add('admin/prestasi/delete/{id:[0-9]+}', ['controller' => 'Prestasi', 'action' => 'delete']);
+
+        // Admin - Testimoni
+        $this->router->add('admin/testimoni', ['controller' => 'Testimonial', 'action' => 'adminIndex']);
+        $this->router->add('admin/testimoni/save', ['controller' => 'Testimonial', 'action' => 'adminSave']);
+        $this->router->add('admin/testimoni/status/{id:[0-9]+}', ['controller' => 'Testimonial', 'action' => 'updateStatus']);
+        $this->router->add('admin/testimoni/delete/{id:[0-9]+}', ['controller' => 'Testimonial', 'action' => 'delete']);
+
+        // Admin - Alumni
+        $this->router->add('admin/alumni', ['controller' => 'Alumni', 'action' => 'adminIndex']);
+        $this->router->add('admin/alumni/save', ['controller' => 'Alumni', 'action' => 'adminSave']);
+        $this->router->add('admin/alumni/status/{id:[0-9]+}', ['controller' => 'Alumni', 'action' => 'updateStatus']);
+        $this->router->add('admin/alumni/delete/{id:[0-9]+}', ['controller' => 'Alumni', 'action' => 'delete']);
 
         // Admin - Users
         $this->router->add('admin/pengguna', ['controller' => 'Dashboard', 'action' => 'users']);

@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.5.0 - 2026-07-28
+
+- Direktori dan pencarian alumni berdasarkan nama, angkatan, kota, serta pekerjaan.
+- Pendaftaran alumni mandiri dengan verifikasi administrator dan pilihan data yang boleh dipublikasikan.
+- Kontak pribadi alumni dienkripsi menggunakan AES-256-GCM dan tidak dikirim ke halaman publik.
+- Profil alumni inspiratif, pagination, avatar ringan, dan panel pengelolaan admin.
+- Perlindungan konten alumni diperkuat dengan watermark, anti-klik kanan, anti-seleksi, anti-cetak, serta penghalang shortcut tangkap layar.
+- Migrasi gabungan tersedia di `database/migrations/add_engagement_features_1_5_0.sql`.
+
+## 1.4.0 - 2026-07-28
+
+- Formulir testimoni publik untuk orang tua, alumni, siswa, mitra, dan pihak terkait.
+- Moderasi testimoni oleh admin, termasuk persetujuan, penolakan, edit, unggulan, dan input manual.
+- Foto/avatar testimoni opsional dengan fallback inisial dan lazy loading.
+- Semua upload gambar dibatasi maksimal 2 MB serta diperiksa tipe MIME dan dimensinya.
+- Halaman detail prestasi dan ekstrakurikuler serta tombol WhatsApp saran/aduan.
+
 ## 1.3.2 - 2026-07-25
 
 - Galeri video mendukung Instagram Reel/Video, TikTok, Facebook Video, dan tautan media sosial lainnya.

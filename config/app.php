@@ -21,7 +21,7 @@ if (file_exists($localConfigFile)) {
 
 // Application Settings
 define('APP_NAME', getenv('APP_NAME') ?: 'SchoolWeb CMS');
-define('APP_VERSION', '1.3.2');
+define('APP_VERSION', '1.5.0');
 define('APP_DEBUG', filter_var(getenv('APP_DEBUG') ?: false, FILTER_VALIDATE_BOOLEAN));
 $appUrl = getenv('APP_URL') ?: '';
 if (!$appUrl && !empty($_SERVER['HTTP_HOST'])) {
@@ -56,7 +56,7 @@ define('PASSWORD_OPTIONS', [
 ]);
 
 // Upload Settings
-define('UPLOAD_MAX_SIZE', 5 * 1024 * 1024); // 5MB
+define('UPLOAD_MAX_SIZE', 2 * 1024 * 1024); // 2MB maximum for every uploaded image
 define('UPLOAD_ALLOWED_TYPES', ['image/jpeg', 'image/pjpeg', 'image/png', 'image/x-png', 'image/gif', 'image/webp']);
 
 // Watermark Settings

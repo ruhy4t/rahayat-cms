@@ -78,6 +78,27 @@ class PrestasiController extends Controller
     }
 
     /**
+     * Display a single achievement on the public website.
+     */
+    public function show(string $id): void
+    {
+        $prestasi = $this->prestasiModel->getWithAuthor((int) $id);
+
+        if (!$prestasi) {
+            http_response_code(404);
+            $this->view('errors.404', ['title' => 'Prestasi Tidak Ditemukan'], 'frontend');
+            return;
+        }
+
+        $prestasi['description'] = Security::sanitizeHtml((string) ($prestasi['description'] ?? ''));
+
+        $this->view('frontend.prestasi-detail', [
+            'title' => $prestasi['title'],
+            'prestasiItem' => $prestasi,
+        ], 'frontend');
+    }
+
+    /**
      * Show form for creating/editing prestasi
      */
     public function form(?int $id = null): void

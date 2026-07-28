@@ -311,6 +311,23 @@
                         </a>
                     <?php endif; ?>
 
+                    <?php if ($userRole === 'admin'): ?>
+                        <a href="/admin/testimoni"
+                            class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group <?= str_starts_with($_SERVER['REQUEST_URI'], '/admin/testimoni') ? 'bg-slate-800 text-white' : '' ?>">
+                            <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-primary-400" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4.255-.949L3 20l1.395-3.72A7.37 7.37 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Testimoni
+                        </a>
+                        <a href="/admin/alumni"
+                            class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group <?= str_starts_with($_SERVER['REQUEST_URI'], '/admin/alumni') ? 'bg-slate-800 text-white' : '' ?>">
+                            <svg class="w-5 h-5 mr-3 text-slate-400 group-hover:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.4-1.8M9 20H2v-2a3 3 0 015.4-1.8M12 12a4 4 0 100-8 4 4 0 000 8zm0 2c-4 0-7 2-7 6h14c0-4-3-6-7-6z"/></svg>
+                            Alumni
+                        </a>
+                    <?php endif; ?>
+
                     <?php if (in_array('slider', $userPerms)): ?>
                         <a href="/admin/slides"
                             class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group <?= str_starts_with($_SERVER['REQUEST_URI'], '/admin/slides') ? 'bg-slate-800 text-white' : '' ?>">

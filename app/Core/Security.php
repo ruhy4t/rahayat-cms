@@ -320,6 +320,17 @@ class Security
             $errors[] = 'Tipe file tidak dapat dibaca.';
         } elseif (!in_array($mimeType, $allowedTypes, true)) {
             $errors[] = 'Tipe file tidak didukung (' . $mimeType . '). Gunakan ' . self::allowedUploadLabel($allowedTypes) . '.';
+        } elseif (str_starts_with($mimeType, 'image/')) {
+            $dimensions = @getimagesize($file['tmp_name'] ?? '');
+            if ($dimensions === false) {
+                $errors[] = 'Berkas gambar tidak valid atau rusak.';
+            } else {
+                $width = (int) ($dimensions[0] ?? 0);
+                $height = (int) ($dimensions[1] ?? 0);
+                if ($width < 1 || $height < 1 || ($width * $height) > 16000000) {
+                    $errors[] = 'Dimensi gambar terlalu besar. Maksimal 16 megapiksel.';
+                }
+            }
         }
 
         return $errors;

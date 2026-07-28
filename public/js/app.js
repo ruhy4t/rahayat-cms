@@ -37,6 +37,15 @@
                 showBlocker();
             });
 
+            ['copy', 'cut', 'selectstart'].forEach((eventName) => {
+                document.addEventListener(eventName, (e) => {
+                    if (!this.isActive) return;
+                    const tag = (e.target.tagName || '').toLowerCase();
+                    if (eventName === 'selectstart' && ['input', 'textarea', 'select'].includes(tag)) return;
+                    e.preventDefault();
+                });
+            });
+
             // 2. Block keyboard shortcuts
             document.addEventListener('keydown', (e) => {
                 if (!this.isActive) return;
@@ -92,6 +101,14 @@
                     }, 300);
                 }
             });
+
+            document.addEventListener('visibilitychange', () => {
+                if (!this.isActive || !this.protector) return;
+                if (document.hidden) {
+                    this.protector.style.display = 'flex';
+                    this.protector.style.opacity = '1';
+                }
+            });
         },
 
         updateState(doc) {
@@ -100,8 +117,15 @@
             
             if (this.isActive) {
                 document.body.classList.add('content-protected');
+                if (!document.querySelector('.content-protection-watermark')) {
+                    const watermark = doc.querySelector('.content-protection-watermark');
+                    if (watermark) {
+                        document.body.appendChild(watermark.cloneNode(true));
+                    }
+                }
             } else {
                 document.body.classList.remove('content-protected');
+                document.querySelector('.content-protection-watermark')?.remove();
             }
         }
     };

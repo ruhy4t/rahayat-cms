@@ -63,10 +63,12 @@ $currentCategory = $data['current_category'] ?? '';
         <?php else: ?>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <?php foreach ($prestasi as $item): ?>
-                    <div
+                    <article
                         class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 group flex flex-col h-full transform hover:-translate-y-1">
                         <!-- Image Container with Aspect Ratio -->
-                        <div class="relative w-full pt-[60%] bg-slate-100 overflow-hidden">
+                        <a href="/prestasi/<?= (int) $item['id'] ?>"
+                            class="relative block w-full pt-[60%] bg-slate-100 overflow-hidden"
+                            aria-label="Baca selengkapnya: <?= e($item['title']) ?>">
                             <?php if (!empty($item['image'])): ?>
                                 <img src="/storage/<?= htmlspecialchars($item['image']) ?>"
                                     alt="<?= htmlspecialchars($item['title']) ?>"
@@ -88,7 +90,7 @@ $currentCategory = $data['current_category'] ?? '';
                                     <?= htmlspecialchars($item['category']) ?>
                                 </span>
                             </div>
-                        </div>
+                        </a>
 
                         <!-- Content -->
                         <div class="p-6 flex flex-col flex-grow">
@@ -104,9 +106,11 @@ $currentCategory = $data['current_category'] ?? '';
                                 </div>
                             </div>
 
-                            <h3
-                                class="text-xl font-bold text-slate-900 mb-3 leading-snug group-hover:text-primary-600 transition-colors">
-                                <?= htmlspecialchars($item['title']) ?>
+                            <h3 class="text-xl font-bold text-slate-900 mb-3 leading-snug">
+                                <a href="/prestasi/<?= (int) $item['id'] ?>"
+                                    class="group-hover:text-primary-600 transition-colors">
+                                    <?= htmlspecialchars($item['title']) ?>
+                                </a>
                             </h3>
 
                             <?php if (!empty($item['description'])): ?>
@@ -114,8 +118,17 @@ $currentCategory = $data['current_category'] ?? '';
                                     <?= htmlspecialchars(strip_tags($item['description'])) ?>
                                 </p>
                             <?php endif; ?>
+                            <a href="/prestasi/<?= (int) $item['id'] ?>"
+                                class="inline-flex items-center mt-auto text-sm font-semibold text-primary-600 hover:text-primary-700">
+                                Baca selengkapnya
+                                <svg class="w-4 h-4 ml-1.5 group-hover:translate-x-1 transition-transform" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5l7 7-7 7" />
+                                </svg>
+                            </a>
                         </div>
-                    </div>
+                    </article>
                 <?php endforeach; ?>
             </div>
         <?php endif; ?>

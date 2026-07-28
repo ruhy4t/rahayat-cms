@@ -18,6 +18,10 @@ class EkstrakurikulerController extends Controller
 
     public function before(string $action): bool
     {
+        if ($action === 'show') {
+            return true;
+        }
+
         $this->requireAuth();
 
         $user = $this->currentUser();
@@ -52,6 +56,25 @@ class EkstrakurikulerController extends Controller
         ];
 
         $this->view('backend.ekstrakurikuler.index', $data, 'backend');
+    }
+
+    /**
+     * Display a single active extracurricular item on the public website.
+     */
+    public function show(string $id): void
+    {
+        $item = $this->ekskulModel->find((int) $id);
+
+        if (!$item || empty($item['is_active'])) {
+            http_response_code(404);
+            $this->view('errors.404', ['title' => 'Ekstrakurikuler Tidak Ditemukan'], 'frontend');
+            return;
+        }
+
+        $this->view('frontend.ekstrakurikuler-detail', [
+            'title' => $item['name'],
+            'ekskulItem' => $item,
+        ], 'frontend');
     }
 
     public function store(): void

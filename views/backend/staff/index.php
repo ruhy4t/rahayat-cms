@@ -282,7 +282,7 @@ $flash = $data['flash'] ?? [];
                                         accept="image/jpeg,image/png,image/gif,image/webp">
                                     Pilih Foto
                                 </label>
-                                <p class="text-xs text-slate-500 mt-1">Ukuran/dimensi bebas. Format JPG, PNG, GIF, atau WebP, maks. 5MB.</p>
+                                <p class="text-xs text-slate-500 mt-1">Format JPG, PNG, GIF, atau WebP, maks. 2 MB dan 16 megapiksel.</p>
                             </div>
                         </div>
 

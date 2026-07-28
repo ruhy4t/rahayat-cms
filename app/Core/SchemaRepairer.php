@@ -165,6 +165,59 @@ class SchemaRepairer
             INDEX idx_announcement_active_schedule (type, is_active, start_at, end_at),
             INDEX idx_announcement_sort (type, sort_order)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $this->safeExec("CREATE TABLE IF NOT EXISTS testimonials (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            relationship VARCHAR(40) NOT NULL,
+            graduation_year SMALLINT UNSIGNED NULL,
+            occupation VARCHAR(120) NULL,
+            testimonial TEXT NOT NULL,
+            photo VARCHAR(255) NULL,
+            contact VARCHAR(120) NULL,
+            consent TINYINT(1) NOT NULL DEFAULT 0,
+            status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+            is_featured TINYINT(1) NOT NULL DEFAULT 0,
+            sort_order INT NOT NULL DEFAULT 0,
+            submitted_ip_hash CHAR(64) NULL,
+            approved_at DATETIME NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_testimonial_public (status, consent, is_featured, sort_order),
+            INDEX idx_testimonial_ip_created (submitted_ip_hash, created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        $this->safeExec("CREATE TABLE IF NOT EXISTS alumni (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            graduation_year SMALLINT UNSIGNED NOT NULL,
+            final_class VARCHAR(60) NULL,
+            further_education VARCHAR(160) NULL,
+            occupation VARCHAR(120) NULL,
+            institution VARCHAR(160) NULL,
+            city VARCHAR(100) NULL,
+            story TEXT NULL,
+            achievement TEXT NULL,
+            photo VARCHAR(255) NULL,
+            contact_encrypted TEXT NULL,
+            contact_hash CHAR(64) NULL,
+            consent TINYINT(1) NOT NULL DEFAULT 0,
+            publish_photo TINYINT(1) NOT NULL DEFAULT 0,
+            publish_occupation TINYINT(1) NOT NULL DEFAULT 0,
+            publish_city TINYINT(1) NOT NULL DEFAULT 0,
+            status ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending',
+            is_featured TINYINT(1) NOT NULL DEFAULT 0,
+            sort_order INT NOT NULL DEFAULT 0,
+            submitted_ip_hash CHAR(64) NULL,
+            approved_at DATETIME NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_alumni_public (status, consent, graduation_year, is_featured, sort_order),
+            INDEX idx_alumni_city (city),
+            INDEX idx_alumni_occupation (occupation),
+            INDEX idx_alumni_contact_hash (contact_hash),
+            INDEX idx_alumni_ip_created (submitted_ip_hash, created_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     }
 
     private function ensureUsersColumns(): void
@@ -483,6 +536,9 @@ class SchemaRepairer
             ['spmb_enabled', '0', 'boolean', 'Enable SPMB registration'],
             ['spmb_start_date', null, 'text', 'SPMB registration start date'],
             ['spmb_end_date', null, 'text', 'SPMB registration end date'],
+            ['whatsapp_enabled', '1', 'boolean', 'Show the floating WhatsApp feedback button'],
+            ['whatsapp_number', null, 'text', 'School WhatsApp number; school profile phone is used when empty'],
+            ['whatsapp_message', 'Halo, saya ingin menyampaikan saran, masukan, atau aduan kepada pihak sekolah.', 'text', 'Prefilled WhatsApp feedback message'],
         ];
 
         foreach ($settings as $setting) {
@@ -529,6 +585,8 @@ class SchemaRepairer
             'gallery_albums' => ['slug', 'type', 'cover_image', 'is_active', 'sort_order'],
             'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'video_source', 'video_url', 'video_id', 'is_active', 'sort_order'],
             'announcements' => ['type', 'content', 'image', 'start_at', 'end_at', 'is_active', 'sort_order'],
+            'testimonials' => ['name', 'relationship', 'testimonial', 'photo', 'consent', 'status', 'is_featured', 'sort_order', 'submitted_ip_hash', 'approved_at'],
+            'alumni' => ['name', 'graduation_year', 'contact_encrypted', 'contact_hash', 'consent', 'publish_photo', 'publish_occupation', 'publish_city', 'status', 'is_featured', 'submitted_ip_hash', 'approved_at'],
         ];
 
         foreach ($requiredColumns as $table => $columns) {

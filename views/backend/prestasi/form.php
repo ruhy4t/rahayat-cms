@@ -92,7 +92,7 @@
                                 file:bg-primary-50 file:text-primary-700
                                 hover:file:bg-primary-100 transition-all cursor-pointer">
                         </div>
-                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks 5MB.</p>
+                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks. 2 MB.</p>
                     </div>
                 </div>
             </div>

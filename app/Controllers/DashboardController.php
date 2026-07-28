@@ -643,6 +643,9 @@ class DashboardController extends Controller
             'social_instagram',
             'social_twitter',
             'social_youtube',
+            'whatsapp_enabled',
+            'whatsapp_number',
+            'whatsapp_message',
             'maintenance_mode',
             'maintenance_message'
         ];

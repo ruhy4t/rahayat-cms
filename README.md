@@ -60,7 +60,14 @@ SetEnv DB_HOST localhost
 SetEnv DB_NAME schoolweb_db
 SetEnv DB_USER schoolweb_user
 SetEnv DB_PASS password-kuat-anda
+SetEnv DATA_ENCRYPTION_KEY ganti-dengan-kunci-acak-minimal-32-karakter
 ```
+
+`DATA_ENCRYPTION_KEY` digunakan untuk mengenkripsi kontak pribadi alumni.
+Gunakan nilai acak yang kuat dan simpan di password manager/backup terenkripsi.
+Jika variabel tersebut tidak disediakan, aplikasi membuat kunci lokal di
+`storage/.data-encryption-key`. Jangan menghapus atau menimpa kunci tersebut
+karena data yang telah dienkripsi tidak dapat dipulihkan tanpanya.
 
 Rahayat CMS hanya dapat dijalankan online pada domain resmi sekolah Indonesia
 dengan akhiran `.sch.id`. Domain lokal seperti `localhost`, `127.0.0.1`,

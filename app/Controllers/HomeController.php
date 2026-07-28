@@ -18,6 +18,7 @@ class HomeController extends Controller
     private Facility $facilityModel;
     private Staff $staffModel;
     private Ekstrakurikuler $ekskulModel;
+    private Testimonial $testimonialModel;
 
     public function __construct()
     {
@@ -30,6 +31,7 @@ class HomeController extends Controller
         $this->facilityModel = new Facility();
         $this->staffModel = new Staff();
         $this->ekskulModel = new Ekstrakurikuler();
+        $this->testimonialModel = new Testimonial();
     }
 
     /**
@@ -48,6 +50,7 @@ class HomeController extends Controller
             'theme' => $this->safeValue(fn () => $this->settingModel->getTheme(), 'indigo-modern'),
             'facilities' => $this->safeValue(fn () => $this->facilityModel->getActive(), []),
             'ekskul' => $this->safeValue(fn () => $this->ekskulModel->getActive(), []),
+            'testimonials' => $this->safeValue(fn () => $this->testimonialModel->getForHomepage(6), []),
             'flash' => $this->getFlash()
         ];
 

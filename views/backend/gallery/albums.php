@@ -248,7 +248,7 @@ $albums = $data['albums'] ?? [];
                             file:text-sm file:font-semibold
                             file:bg-indigo-50 file:text-indigo-700
                             hover:file:bg-indigo-100">
-                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 5MB.</p>
+                        <p class="mt-1 text-xs text-slate-500">Format: JPG, PNG, GIF, WebP. Maks: 2 MB.</p>
                     </div>
                 </div>
             </div>
