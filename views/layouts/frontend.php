@@ -38,6 +38,8 @@
                 $baseRadius = '1.5rem'; // Highly rounded
             } else if ($themeName === 'crimson-bold') {
                 $baseRadius = '0rem'; // Sharp edges
+            } else if ($themeName === 'cendekia-smp') {
+                $baseRadius = '1rem';
             }
 
             // Helpers
@@ -145,6 +147,10 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
+    <?php if ($themeName === 'cendekia-smp'): ?>
+        <link rel="stylesheet"
+            href="/css/themes/cendekia-smp.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/cendekia-smp.css') ?>">
+    <?php endif; ?>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -153,6 +159,8 @@
         <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <?php elseif ($themeName === 'crimson-bold'): ?>
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <?php elseif ($themeName === 'cendekia-smp'): ?>
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <?php else: ?>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <?php endif; ?>
@@ -163,6 +171,8 @@
             font-family: 'Poppins', sans-serif;
             <?php elseif ($themeName === 'crimson-bold'): ?>
             font-family: 'Plus Jakarta Sans', sans-serif;
+            <?php elseif ($themeName === 'cendekia-smp'): ?>
+            font-family: 'Manrope', sans-serif;
             <?php else: ?>
             font-family: 'Inter', sans-serif;
             <?php endif; ?>
@@ -182,6 +192,14 @@
                 --base-radius-xl: 0;
                 --base-radius-2xl: 0;
                 --base-radius-3xl: 0;
+            <?php elseif ($themeName === 'cendekia-smp'): ?>
+                --base-radius-sm: 0.375rem;
+                --base-radius: 0.625rem;
+                --base-radius-md: 0.75rem;
+                --base-radius-lg: 0.875rem;
+                --base-radius-xl: 1rem;
+                --base-radius-2xl: 1.25rem;
+                --base-radius-3xl: 1.75rem;
             <?php else: ?>
                 --base-radius-sm: 0.125rem;
                 --base-radius: 0.25rem;
@@ -245,6 +263,8 @@
         <?php include __DIR__ . '/partials/nav-emerald.php'; ?>
     <?php elseif ($themeName === 'crimson-bold'): ?>
         <?php include __DIR__ . '/partials/nav-crimson.php'; ?>
+    <?php elseif ($themeName === 'cendekia-smp'): ?>
+        <?php include __DIR__ . '/partials/nav-cendekia.php'; ?>
     <?php else: ?>
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -372,9 +392,19 @@
         </section>
     <?php endif; ?>
 
+    <?php
+    $themePublicPath = trim((string) (parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/'), '/');
+    $themePublicPage = $themePublicPath === '' ? 'home' : $themePublicPath;
+    ?>
     <!-- Main Content -->
-    <main class="flex-1">
-        <?= $content ?>
+    <main class="flex-1" data-public-page="<?= e($themePublicPage) ?>">
+        <?php if ($themeName === 'cendekia-smp'): ?>
+            <div class="cendekia-page-surface">
+                <?= $content ?>
+            </div>
+        <?php else: ?>
+            <?= $content ?>
+        <?php endif; ?>
     </main>
 
     <?php
@@ -427,6 +457,8 @@
         <?php include __DIR__ . '/partials/footer-emerald.php'; ?>
     <?php elseif ($themeName === 'crimson-bold'): ?>
         <?php include __DIR__ . '/partials/footer-crimson.php'; ?>
+    <?php elseif ($themeName === 'cendekia-smp'): ?>
+        <?php include __DIR__ . '/partials/footer-cendekia.php'; ?>
     <?php else: ?>
     <footer class="bg-slate-900 text-slate-400">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -584,7 +616,10 @@
     <script>
         function toggleMobileMenu() {
             const menu = document.getElementById('mobileMenu');
+            if (!menu) return;
             menu.classList.toggle('hidden');
+            const trigger = document.querySelector('[aria-controls="mobileMenu"]');
+            trigger?.setAttribute('aria-expanded', String(!menu.classList.contains('hidden')));
         }
 
         (() => {

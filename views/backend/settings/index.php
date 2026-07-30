@@ -33,7 +33,7 @@ $flash = $data['flash'] ?? null;
             <p class="text-slate-500 text-sm mt-1">Ubah tampilan website dengan memilih salah satu tema</p>
         </div>
         <div class="p-6">
-            <div class="grid md:grid-cols-3 gap-6">
+            <div class="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
                 <?php foreach ($themes as $key => $theme): ?>
                     <label class="cursor-pointer group">
                         <input type="radio" name="theme" value="<?= e($key) ?>" <?= $currentTheme === $key ? 'checked' : '' ?>
@@ -42,7 +42,9 @@ $flash = $data['flash'] ?? null;
                             class="border-2 rounded-xl overflow-hidden transition-all peer-checked:border-primary-500 peer-checked:ring-2 peer-checked:ring-primary-200 border-slate-200 group-hover:border-slate-300">
                             <!-- Theme Preview -->
                             <div class="h-36 relative flex flex-col items-center justify-center p-4 transition-all"
-                                style="background: linear-gradient(135deg, <?= e($theme['primary']) ?> 0%, <?= e($theme['primary']) ?>dd 100%)">
+                                style="background: <?= $key === 'cendekia-smp'
+                                    ? 'linear-gradient(125deg, #071A2E 0%, #2563EB 38%, #7C3AED 72%, #0E7490 100%)'
+                                    : 'linear-gradient(135deg, ' . e($theme['primary']) . ' 0%, ' . e($theme['primary']) . 'dd 100%)' ?>">
 
                                 <div
                                     class="bg-white/20 rounded-lg px-4 py-2 backdrop-blur-sm mb-3 z-10 shadow-sm border border-white/10">
@@ -77,6 +79,17 @@ $flash = $data['flash'] ?? null;
                                             style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0% 100%);"></div>
                                         <div class="absolute inset-y-0 left-0 w-1 bg-white/80"></div>
                                         <div class="absolute left-2 top-2 w-1/3 h-2 bg-white rounded-sm"></div>
+                                    </div>
+                                <?php elseif ($key === 'cendekia-smp'): ?>
+                                    <div class="w-full max-w-[120px] opacity-70">
+                                        <div class="h-2 bg-white rounded-t-md mb-1"></div>
+                                        <div class="grid grid-cols-5 gap-1 h-10">
+                                            <div class="col-span-3 bg-white rounded-md"></div>
+                                            <div class="col-span-2 grid grid-rows-2 gap-1">
+                                                <div class="bg-cyan-200 rounded-md"></div>
+                                                <div class="bg-white/60 rounded-md"></div>
+                                            </div>
+                                        </div>
                                     </div>
                                 <?php endif; ?>
 
