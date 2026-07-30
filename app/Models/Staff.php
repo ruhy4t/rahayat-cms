@@ -50,16 +50,40 @@ class Staff extends Model
      */
     public function getGrouped(): array
     {
-        return [
+        $groups = [
+            'principal' => [
+                'name' => 'Kepala Sekolah',
+                'items' => []
+            ],
             'teachers' => [
                 'name' => 'Guru',
-                'items' => $this->getTeachers()
+                'items' => []
             ],
             'staff' => [
                 'name' => 'Tenaga Kependidikan',
-                'items' => $this->getNonTeachers()
+                'items' => []
             ]
         ];
+
+        foreach ($this->getActive() as $staff) {
+            $position = trim((string) ($staff['position'] ?? ''));
+            $normalizedPosition = function_exists('mb_strtolower')
+                ? mb_strtolower($position, 'UTF-8')
+                : strtolower($position);
+            $isPrincipal = (int) ($staff['is_principal'] ?? 0) === 1
+                || str_contains($normalizedPosition, 'kepala sekolah');
+
+            if ($isPrincipal) {
+                $staff['position'] = 'Kepala Sekolah';
+                $groups['principal']['items'][] = $staff;
+                continue;
+            }
+
+            $groupKey = (int) ($staff['is_teacher'] ?? 0) === 1 ? 'teachers' : 'staff';
+            $groups[$groupKey]['items'][] = $staff;
+        }
+
+        return $groups;
     }
 
     /**

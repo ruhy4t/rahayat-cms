@@ -1,0 +1,383 @@
+/**
+ * Theme: Cendekia SMP
+ * Lightweight public theme using the familiar blue uniform palette.
+ */
+
+.theme-cendekia-smp {
+    --cendekia-navy: #071a2e;
+    --cendekia-blue: #2563eb;
+    --cendekia-purple: #7c3aed;
+    --cendekia-ocean: #0e7490;
+    --cendekia-cyan: #22d3ee;
+    --cendekia-sky: #38bdf8;
+    --theme-gradient: linear-gradient(125deg, #071a2e 0%, #2563eb 38%, #7c3aed 72%, #0e7490 100%);
+    --theme-gradient-light: linear-gradient(110deg, #2563eb, #7c3aed 58%, #06b6d4);
+    --theme-shadow: 0 14px 40px rgba(49, 46, 129, 0.12);
+    background: #f5f7ff;
+    color: #1e293b;
+    text-rendering: optimizeLegibility;
+}
+
+.theme-cendekia-smp .cendekia-header {
+    box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
+}
+
+.theme-cendekia-smp .cendekia-header > div:first-child {
+    background: linear-gradient(90deg, #071a2e 0%, #172554 42%, #3b0764 100%);
+}
+
+.theme-cendekia-smp .cendekia-header nav {
+    border-bottom-color: rgba(37, 99, 235, 0.16);
+}
+
+.theme-cendekia-smp .cendekia-page-surface {
+    min-height: 60vh;
+    background:
+        radial-gradient(circle at 0 8%, rgba(34, 211, 238, 0.1), transparent 24rem),
+        radial-gradient(circle at 100% 34%, rgba(124, 58, 237, 0.08), transparent 30rem),
+        #f7f9ff;
+}
+
+/* Full-width shell with responsive gutters; long-form detail pages retain their
+   narrower reading widths for readability. */
+.theme-cendekia-smp :is(.max-w-\[1440px\], .max-w-\[1320px\], .container) {
+    width: 100%;
+    max-width: none !important;
+}
+
+.theme-cendekia-smp .cendekia-hero {
+    background:
+        radial-gradient(circle at 42% 8%, rgba(124, 58, 237, 0.12), transparent 24rem),
+        radial-gradient(circle at 10% 90%, rgba(34, 211, 238, 0.12), transparent 20rem),
+        #f4f8fb !important;
+}
+
+/* Shared internal-page mastheads */
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="bg-primary-600"],
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="bg-slate-900"],
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="from-primary-900"] {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(circle at 85% 20%, rgba(34, 211, 238, 0.3), transparent 18rem),
+        linear-gradient(125deg, #071a2e 0%, #1d4ed8 38%, #6d28d9 72%, #0e7490 100%) !important;
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="bg-primary-600"]::after,
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="bg-slate-900"]::after,
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > [class*="from-primary-900"]::after {
+    position: absolute;
+    right: -4rem;
+    bottom: -7rem;
+    width: 20rem;
+    height: 20rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    box-shadow: inset 0 0 0 3rem rgba(255, 255, 255, 0.025);
+    content: "";
+    pointer-events: none;
+}
+
+/* Pages whose original templates do not have a masthead */
+.theme-cendekia-smp main:is(
+    [data-public-page="profil"],
+    [data-public-page="berita"],
+    [data-public-page="galeri"],
+    [data-public-page="kontak"]
+) .cendekia-page-surface > section:first-child > div:first-child > div:first-child {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 2.5rem;
+    padding: clamp(2rem, 6vw, 4.5rem);
+    border-radius: 0.5rem 2.5rem 0.5rem 2.5rem;
+    background:
+        linear-gradient(118deg, rgba(7, 26, 46, 0.98), rgba(37, 99, 235, 0.94) 48%, rgba(124, 58, 237, 0.9));
+    box-shadow: 0 28px 70px rgba(30, 64, 175, 0.18);
+    text-align: left !important;
+}
+
+.theme-cendekia-smp main:is(
+    [data-public-page="profil"],
+    [data-public-page="berita"],
+    [data-public-page="galeri"],
+    [data-public-page="kontak"]
+) .cendekia-page-surface > section:first-child > div:first-child > div:first-child > :is(h1, h2) {
+    color: #fff !important;
+}
+
+.theme-cendekia-smp main:is(
+    [data-public-page="profil"],
+    [data-public-page="berita"],
+    [data-public-page="galeri"],
+    [data-public-page="kontak"]
+) .cendekia-page-surface > section:first-child > div:first-child > div:first-child > p,
+.theme-cendekia-smp main:is(
+    [data-public-page="profil"],
+    [data-public-page="berita"],
+    [data-public-page="galeri"],
+    [data-public-page="kontak"]
+) .cendekia-page-surface > section:first-child > div:first-child > div:first-child > nav,
+.theme-cendekia-smp main:is(
+    [data-public-page="profil"],
+    [data-public-page="berita"],
+    [data-public-page="galeri"],
+    [data-public-page="kontak"]
+) .cendekia-page-surface > section:first-child > div:first-child > div:first-child > nav :is(a, span) {
+    color: #cffafe !important;
+}
+
+.theme-cendekia-smp main[data-public-page="profil"] .cendekia-page-surface > section:first-child > div:first-child > div:first-child > div span {
+    border-color: rgba(255, 255, 255, 0.22) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    color: #dbeafe !important;
+}
+
+/* Cards and forms across every public module */
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface :is(article, form, div)[class*="bg-white"][class*="rounded"] {
+    border-color: rgba(99, 102, 241, 0.18) !important;
+    border-radius: 0.45rem 1.65rem 0.45rem 1.65rem !important;
+    box-shadow: 0 14px 40px rgba(30, 64, 175, 0.08);
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface article[class*="bg-white"] {
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface article[class*="bg-white"]:hover {
+    border-color: rgba(34, 211, 238, 0.65) !important;
+    box-shadow: 0 24px 55px rgba(79, 70, 229, 0.14);
+}
+
+/* Accessible text contrast on light and dark surfaces. */
+.theme-cendekia-smp .cendekia-page-surface :is(.bg-white, .bg-slate-50) :is(
+    .text-slate-400,
+    .text-slate-500,
+    .text-slate-600
+) {
+    color: #475569 !important;
+}
+
+.theme-cendekia-smp .cendekia-page-surface :is(.bg-white, .bg-slate-50) :is(
+    .text-slate-700,
+    .text-slate-800,
+    .text-slate-900
+) {
+    color: #0f172a !important;
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > :is(
+    .glass-header,
+    [class*="bg-slate-900"],
+    [class*="bg-primary-800"],
+    [class*="bg-primary-900"],
+    [class*="from-primary-900"]
+) :is(h1, h2, h3, .text-slate-800, .text-slate-900) {
+    color: #fff !important;
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface > :is(
+    .glass-header,
+    [class*="bg-slate-900"],
+    [class*="bg-primary-800"],
+    [class*="bg-primary-900"],
+    [class*="from-primary-900"]
+) :is(p, .text-slate-500, .text-slate-600, .text-primary-100, .text-primary-200) {
+    color: #dbeafe !important;
+}
+
+.theme-cendekia-smp .cendekia-page-surface :is(button, a)[class*="bg-primary-"] {
+    color: #fff !important;
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface [class*="bg-primary-600"]:not(:first-child),
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface button[class*="bg-primary-"],
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface a[class*="bg-primary-"] {
+    border-color: transparent !important;
+    background: linear-gradient(105deg, #2563eb, #7c3aed 64%, #0e7490) !important;
+    box-shadow: 0 10px 24px rgba(79, 70, 229, 0.2);
+}
+
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface input:focus,
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface select:focus,
+.theme-cendekia-smp main:not([data-public-page="home"]) .cendekia-page-surface textarea:focus {
+    border-color: #06b6d4 !important;
+    box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.16), 0 8px 24px rgba(79, 70, 229, 0.08) !important;
+}
+
+/* Magazine-style listing layouts */
+@media (min-width: 1024px) {
+    .theme-cendekia-smp main[data-public-page="berita"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > article:first-child,
+    .theme-cendekia-smp main[data-public-page="galeri"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > a:first-child,
+    .theme-cendekia-smp main[data-public-page="prestasi"] .cendekia-page-surface .grid.lg\:grid-cols-3 > article:first-child {
+        grid-column: span 2;
+    }
+
+    .theme-cendekia-smp main[data-public-page="berita"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > article:first-child,
+    .theme-cendekia-smp main[data-public-page="galeri"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > a:first-child {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(18rem, 0.75fr);
+    }
+
+    .theme-cendekia-smp main[data-public-page="berita"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > article:first-child > div:first-child,
+    .theme-cendekia-smp main[data-public-page="galeri"] .cendekia-page-surface section:first-child .grid.lg\:grid-cols-3 > a:first-child > div:first-child {
+        height: 100%;
+    }
+}
+
+.theme-cendekia-smp main[data-public-page="profil"] .cendekia-page-surface .grid.lg\:grid-cols-2 {
+    gap: 1rem;
+}
+
+.theme-cendekia-smp main[data-public-page="kontak"] .cendekia-page-surface .grid.md\:grid-cols-3 > div:nth-child(2) {
+    transform: translateY(1rem);
+    background: linear-gradient(145deg, #eff6ff, #f5f3ff) !important;
+}
+
+.theme-cendekia-smp main[data-public-page="kontak"] .cendekia-page-surface [class*="bg-white"] :is(h2, h3) {
+    color: #0f172a !important;
+}
+
+.theme-cendekia-smp main[data-public-page="kontak"] .cendekia-page-surface [class*="bg-white"] :is(p, .text-slate-500, .text-slate-600) {
+    color: #334155 !important;
+}
+
+.theme-cendekia-smp main[data-public-page="profil/gtk"] .gtk-principal-section {
+    position: relative;
+    margin-top: -3rem;
+    padding-top: 3rem;
+}
+
+.theme-cendekia-smp main[data-public-page="profil/gtk"] .gtk-principal-card {
+    border: 1px solid rgba(34, 211, 238, 0.5);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(239, 246, 255, 0.92));
+    box-shadow: 0 24px 60px rgba(49, 46, 129, 0.16);
+}
+
+.theme-cendekia-smp main[data-public-page="profil/gtk"] .gtk-principal-card .img-container {
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
+}
+
+.theme-cendekia-smp main[data-public-page^="spmb"] .cendekia-page-surface {
+    background:
+        radial-gradient(circle at 8% 30%, rgba(34, 211, 238, 0.13), transparent 22rem),
+        radial-gradient(circle at 92% 65%, rgba(124, 58, 237, 0.11), transparent 28rem),
+        #f5f7ff;
+}
+
+.theme-cendekia-smp main[data-public-page^="berita/"] .cendekia-page-surface article,
+.theme-cendekia-smp main[data-public-page^="prestasi/"] .cendekia-page-surface article,
+.theme-cendekia-smp main[data-public-page^="ekstrakurikuler/"] .cendekia-page-surface article,
+.theme-cendekia-smp main[data-public-page^="alumni/"] .cendekia-page-surface article {
+    border-top: 5px solid transparent;
+    border-image: linear-gradient(90deg, #2563eb, #7c3aed, #22d3ee) 1;
+}
+
+.theme-cendekia-smp .cendekia-grid {
+    background-image:
+        linear-gradient(rgba(14, 116, 144, 0.055) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14, 116, 144, 0.055) 1px, transparent 1px);
+    background-size: 46px 46px;
+}
+
+.theme-cendekia-smp .cendekia-photo-main {
+    clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+    box-shadow: 32px 32px 0 rgba(34, 211, 238, 0.9);
+}
+
+.theme-cendekia-smp .cendekia-photo-fallback {
+    background:
+        linear-gradient(135deg, rgba(207, 250, 254, 0.96), rgba(186, 230, 253, 0.72)),
+        repeating-linear-gradient(45deg, transparent, transparent 18px, rgba(14, 116, 144, 0.08) 18px, rgba(14, 116, 144, 0.08) 19px);
+}
+
+.theme-cendekia-smp .cendekia-button-primary {
+    box-shadow: 6px 6px 0 #22d3ee;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.theme-cendekia-smp .cendekia-button-primary:hover {
+    transform: translate(3px, 3px);
+    box-shadow: 3px 3px 0 #22d3ee;
+}
+
+.theme-cendekia-smp .cendekia-quick-link {
+    min-height: 104px;
+    transition: background-color 180ms ease;
+}
+
+.theme-cendekia-smp .cendekia-quick-link:hover {
+    background: linear-gradient(135deg, #eff6ff, #f5f3ff 62%, #ecfeff);
+}
+
+.theme-cendekia-smp .cendekia-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #0e7490;
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+.theme-cendekia-smp .cendekia-kicker::before {
+    width: 2.5rem;
+    height: 0.25rem;
+    border-radius: 999px;
+    background: #22d3ee;
+    content: "";
+}
+
+.theme-cendekia-smp .cendekia-news {
+    background-image:
+        linear-gradient(rgba(14, 116, 144, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(14, 116, 144, 0.04) 1px, transparent 1px);
+    background-size: 56px 56px;
+}
+
+.theme-cendekia-smp .cendekia-activity {
+    transition: padding 180ms ease, background-color 180ms ease;
+}
+
+.theme-cendekia-smp .cendekia-activity:hover {
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.theme-cendekia-smp .cendekia-quote {
+    border-radius: 0.25rem 1.75rem 0.25rem 1.75rem;
+}
+
+.theme-cendekia-smp .public-text-slider {
+    background: #0e7490;
+    border-color: #155e75;
+}
+
+.theme-cendekia-smp main > section:not(.cendekia-hero):not(.cendekia-news) {
+    position: relative;
+}
+
+.theme-cendekia-smp .cendekia-footer {
+    background-image: radial-gradient(circle at 15% 0, rgba(14, 116, 144, 0.16), transparent 25rem);
+}
+
+@media (max-width: 639px) {
+    .theme-cendekia-smp .cendekia-photo-main {
+        clip-path: none;
+        box-shadow: 14px 14px 0 rgba(34, 211, 238, 0.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme-cendekia-smp *,
+    .theme-cendekia-smp *::before,
+    .theme-cendekia-smp *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+    }
+}

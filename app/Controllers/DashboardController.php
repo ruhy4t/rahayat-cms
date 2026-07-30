@@ -625,7 +625,13 @@ class DashboardController extends Controller
     {
         $this->requireCsrf();
         $input = json_decode(file_get_contents('php://input'), true);
-        $theme = $input['theme'] ?? 'indigo-modern';
+        $theme = is_array($input) ? (string) ($input['theme'] ?? '') : '';
+        $availableThemes = $this->settingModel->getAvailableThemes();
+
+        if (!array_key_exists($theme, $availableThemes)) {
+            $this->json(['success' => false, 'message' => 'Tema tidak valid'], 422);
+            return;
+        }
 
         $this->settingModel->set('theme', $theme);
         $this->json(['success' => true, 'message' => 'Tema berhasil diubah']);

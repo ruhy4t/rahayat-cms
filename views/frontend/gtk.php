@@ -5,6 +5,13 @@
 $title = $data['title'] ?? 'Guru & Tenaga Kependidikan';
 $profile = $data['profile'] ?? null;
 $groupedStaff = $data['groupedStaff'] ?? [];
+$hasStaff = false;
+foreach ($groupedStaff as $staffGroup) {
+    if (!empty($staffGroup['items'])) {
+        $hasStaff = true;
+        break;
+    }
+}
 ?>
 
 <style>
@@ -122,19 +129,24 @@ $groupedStaff = $data['groupedStaff'] ?? [];
 
         <?php foreach ($groupedStaff as $groupKey => $groupData): ?>
             <?php if (!empty($groupData['items'])): ?>
+                <?php $isPrincipalGroup = $groupKey === 'principal'; ?>
 
-                <div class="mb-20">
+                <div class="mb-20 <?= $isPrincipalGroup ? 'gtk-principal-section' : '' ?>">
                     <div class="text-center mb-12">
-                        <span class="text-indigo-600 font-semibold tracking-wider uppercase text-sm mb-2 block">Kategori</span>
+                        <span class="text-indigo-600 font-semibold tracking-wider uppercase text-sm mb-2 block">
+                            <?= $isPrincipalGroup ? 'Pimpinan Sekolah' : 'Kategori' ?>
+                        </span>
                         <h2 class="text-3xl md:text-4xl font-bold text-slate-800">
                             <?= e($groupData['name']) ?>
                         </h2>
                         <div class="w-16 h-1 bg-indigo-500 mx-auto mt-4 rounded-full"></div>
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-10">
+                    <div class="<?= $isPrincipalGroup
+                        ? 'flex flex-wrap justify-center gap-8 lg:gap-10'
+                        : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 lg:gap-10' ?>">
                         <?php foreach ($groupData['items'] as $staff): ?>
-                            <div class="glass-card flex flex-col p-4 relative group">
+                            <div class="glass-card flex flex-col p-4 relative group <?= $isPrincipalGroup ? 'gtk-principal-card w-full max-w-sm' : '' ?>">
                                 <div class="img-container mb-6">
                                     <?php
                                     $photoSrc = (!empty($staff['photo']))
@@ -161,7 +173,7 @@ $groupedStaff = $data['groupedStaff'] ?? [];
             <?php endif; ?>
         <?php endforeach; ?>
 
-        <?php if (empty($groupedStaff['teachers']['items']) && empty($groupedStaff['staff']['items'])): ?>
+        <?php if (!$hasStaff): ?>
             <div class="text-center py-20">
                 <div
                     class="w-24 h-24 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-6 text-slate-400">

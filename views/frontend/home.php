@@ -8,6 +8,13 @@ $news = $data['news'] ?? [];
 $slides = $data['slides'] ?? [];
 $theme = $data['theme'] ?? 'indigo-modern';
 $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
+
+// Cendekia SMP owns its complete homepage composition. Keeping it in a
+// dedicated partial prevents layout changes from leaking into older themes.
+if ($theme === 'cendekia-smp') {
+    include __DIR__ . '/home/partials/home-cendekia.php';
+    return;
+}
 ?>
 
 <!-- Hero Section with Slider -->

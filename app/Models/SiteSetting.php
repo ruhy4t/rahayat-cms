@@ -93,7 +93,11 @@ class SiteSetting extends Model
      */
     public function getTheme(): string
     {
-        return $this->get('theme', 'indigo-modern');
+        $theme = (string) $this->get('theme', 'indigo-modern');
+
+        return array_key_exists($theme, $this->getAvailableThemes())
+            ? $theme
+            : 'indigo-modern';
     }
 
     /**
@@ -116,6 +120,11 @@ class SiteSetting extends Model
                 'name' => 'Crimson Bold',
                 'primary' => '#BE123C',
                 'description' => 'Bold, solid dark navbar, diagonal hero, horizontal news cards'
+            ],
+            'cendekia-smp' => [
+                'name' => 'Cendekia SMP',
+                'primary' => '#2563EB',
+                'description' => 'Tampilan modern bernuansa biru, ungu, navy, ocean, dan cyan'
             ]
         ];
     }
