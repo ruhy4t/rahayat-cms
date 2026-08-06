@@ -152,6 +152,7 @@ class App
 
         // Admin - Alumni
         $this->router->add('admin/alumni', ['controller' => 'Alumni', 'action' => 'adminIndex']);
+        $this->router->add('admin/alumni/export', ['controller' => 'Alumni', 'action' => 'export']);
         $this->router->add('admin/alumni/save', ['controller' => 'Alumni', 'action' => 'adminSave']);
         $this->router->add('admin/alumni/status/{id:[0-9]+}', ['controller' => 'Alumni', 'action' => 'updateStatus']);
         $this->router->add('admin/alumni/delete/{id:[0-9]+}', ['controller' => 'Alumni', 'action' => 'delete']);

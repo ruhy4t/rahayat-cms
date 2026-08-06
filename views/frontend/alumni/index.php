@@ -5,7 +5,8 @@ $filters = $data['filters'] ?? [];
 $query = $data['query'] ?? [];
 $flash = $data['flash'] ?? null;
 $queryString = $_GET;
-$continuationOptions = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', 'Tidak/Belum Melanjutkan', 'Lainnya'];
+$continuationOptions = $data['continuationOptions'] ?? [];
+$employmentStatuses = $data['employmentStatuses'] ?? [];
 ?>
 
 <section class="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white">
@@ -114,23 +115,31 @@ $continuationOptions = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', '
             <div class="grid sm:grid-cols-2 gap-4">
                 <label class="text-sm font-semibold text-slate-700">Nama lengkap *<input name="name" required maxlength="100" autocomplete="name" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Tahun lulus *<input type="number" name="graduation_year" required min="1950" max="<?= (int) date('Y') + 1 ?>" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
-                <label class="text-sm font-semibold text-slate-700">Kelas/jurusan terakhir<input name="final_class" maxlength="60" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
-                <label class="text-sm font-semibold text-slate-700">Melanjutkan ke
-                    <select name="further_education" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
+                <label class="text-sm font-semibold text-slate-700">Kelas terakhir<input name="final_class" maxlength="60" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Melanjutkan ke *
+                    <select id="publicContinuationType" name="further_education" required class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
                         <option value="">Pilih tujuan setelah lulus</option>
                         <?php foreach ($continuationOptions as $option): ?>
                             <option value="<?= e($option) ?>"><?= e($option) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
-                <label class="text-sm font-semibold text-slate-700">Status sekolah
-                    <select name="further_education_status" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
+                <label class="text-sm font-semibold text-slate-700">Status sekolah <span id="publicContinuationStatusRequired">*</span>
+                    <select id="publicContinuationStatus" name="further_education_status" required class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
                         <option value="">Pilih negeri atau swasta</option>
                         <option value="Negeri">Negeri</option>
                         <option value="Swasta">Swasta</option>
                     </select>
                 </label>
-                <label class="text-sm font-semibold text-slate-700">Nama sekolah/tujuan<input name="further_education_detail" maxlength="120" placeholder="Contoh: SMAN 1 Bogor" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Nama sekolah tujuan <span id="publicContinuationDetailRequired">*</span><input id="publicContinuationDetail" name="further_education_detail" required maxlength="120" placeholder="Contoh: SMAN 1 Bogor" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Status pekerjaan/aktivitas
+                    <select name="employment_status" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
+                        <option value="">Pilih status saat ini</option>
+                        <?php foreach ($employmentStatuses as $option): ?>
+                            <option value="<?= e($option) ?>"><?= e($option) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
                 <label class="text-sm font-semibold text-slate-700">Pekerjaan/bidang<input name="occupation" maxlength="120" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Instansi<input name="institution" maxlength="160" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Kota domisili<input name="city" maxlength="100" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
@@ -153,3 +162,23 @@ $continuationOptions = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', '
         </details>
     </div>
 </section>
+
+<script>
+(() => {
+    const type = document.getElementById('publicContinuationType');
+    const status = document.getElementById('publicContinuationStatus');
+    const detail = document.getElementById('publicContinuationDetail');
+    const statusRequired = document.getElementById('publicContinuationStatusRequired');
+    const detailRequired = document.getElementById('publicContinuationDetailRequired');
+    const syncSchoolFields = () => {
+        const disabled = ['Bekerja', 'Tidak Melanjutkan'].includes(type?.value || '');
+        if (status) { status.disabled = disabled; status.required = !disabled; }
+        if (detail) { detail.disabled = disabled; detail.required = !disabled; }
+        if (statusRequired) statusRequired.classList.toggle('hidden', disabled);
+        if (detailRequired) detailRequired.classList.toggle('hidden', disabled);
+        if (disabled) { status.value = ''; detail.value = ''; }
+    };
+    type?.addEventListener('change', syncSchoolFields);
+    syncSchoolFields();
+})();
+</script>

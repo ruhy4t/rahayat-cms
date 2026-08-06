@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.7.0 - 2026-08-06
+
+- Editor foto alumni 4:5 memungkinkan admin menggeser dan memperbesar foto agar wajah tampil jelas.
+- Tujuan setelah lulus menjadi wajib dan menyediakan pilihan `Tidak Melanjutkan`; status serta nama sekolah tujuan juga wajib untuk jalur pendidikan.
+- Status pekerjaan/aktivitas alumni disimpan sebagai data terstruktur.
+- Dashboard admin alumni menampilkan tiga grafik batang: tujuan setelah lulus, status sekolah tujuan, serta status pekerjaan/aktivitas.
+- Data alumni dapat diunduh sebagai berkas Excel lengkap dengan header, filter, dan baris judul beku.
+- Migrasi terstruktur idempoten tersedia di `database/migrations/add_alumni_analytics_1_7_0.sql`, aman dijalankan ulang melalui phpMyAdmin, dan juga dijalankan otomatis oleh perbaikan skema.
+
 ## 1.6.0 - 2026-08-06
 
 - Kartu direktori alumni dibuat lebih ringkas agar foto tidak mendominasi tampilan.

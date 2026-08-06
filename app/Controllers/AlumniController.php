@@ -5,6 +5,8 @@ declare(strict_types=1);
 class AlumniController extends Controller
 {
     private const STATUSES = ['pending', 'approved', 'rejected'];
+    private const CONTINUATION_OPTIONS = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', 'Tidak Melanjutkan', 'Lainnya'];
+    private const EMPLOYMENT_STATUSES = ['Pelajar/Mahasiswa', 'Bekerja', 'Wirausaha', 'Belum Bekerja', 'Tidak Bekerja', 'Lainnya'];
     private const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
 
     private Alumni $alumniModel;
@@ -42,6 +44,8 @@ class AlumniController extends Controller
             'result' => $this->alumniModel->searchPublic($term, $year, $city, $occupation, $page),
             'filters' => $this->alumniModel->publicFilters(),
             'query' => compact('term', 'yearRaw', 'city', 'occupation'),
+            'continuationOptions' => self::CONTINUATION_OPTIONS,
+            'employmentStatuses' => self::EMPLOYMENT_STATUSES,
             'flash' => $this->getFlash(),
             'enableContentProtection' => true,
         ], 'frontend');
@@ -138,8 +142,23 @@ class AlumniController extends Controller
             'title' => 'Kelola Alumni',
             'user' => $this->currentUser(),
             'alumniItems' => $items,
+            'statistics' => $this->alumniModel->adminStatistics(),
+            'continuationOptions' => self::CONTINUATION_OPTIONS,
+            'employmentStatuses' => self::EMPLOYMENT_STATUSES,
             'flash' => $this->getFlash(),
         ], 'backend');
+    }
+
+    public function export(): void
+    {
+        $items = $this->alumniModel->getAllForAdmin();
+        foreach ($items as &$item) {
+            $item['contact_plain'] = DataCipher::decrypt($item['contact_encrypted'] ?? null);
+            unset($item['contact_encrypted'], $item['contact_hash'], $item['submitted_ip_hash']);
+        }
+        unset($item);
+
+        AlumniExcelExporter::download($items);
     }
 
     public function adminSave(): void
@@ -174,7 +193,16 @@ class AlumniController extends Controller
             ? (($existing['approved_at'] ?? null) ?: date('Y-m-d H:i:s'))
             : null;
 
-        if ($this->hasPhotoUpload()) {
+        $croppedPhoto = trim((string) $this->post('cropped_photo', ''));
+        if ($croppedPhoto !== '') {
+            $photo = $this->saveCroppedPortrait($croppedPhoto, 'alumni');
+            if (!$photo) {
+                $this->flash('error', $this->uploadErrorMessage('Hasil pengaturan foto alumni gagal disimpan'));
+                $this->redirect('/admin/alumni');
+            }
+            $data['photo'] = $photo;
+            $this->deletePhoto($existing['photo'] ?? null);
+        } elseif ($this->hasPhotoUpload()) {
             $photo = $this->uploadAlumniPhoto();
             if (!$photo) {
                 $this->flash('error', $this->uploadErrorMessage('Foto alumni gagal diunggah'));
@@ -238,6 +266,12 @@ class AlumniController extends Controller
         $continuationType = $this->clean((string) $this->post('further_education', ''));
         $continuationStatus = $this->clean((string) $this->post('further_education_status', ''));
         $continuationDetail = $this->clean((string) $this->post('further_education_detail', ''));
+        $employmentStatus = $this->clean((string) $this->post('employment_status', ''));
+        $requiresSchoolDetails = !in_array($continuationType, ['Bekerja', 'Tidak Melanjutkan'], true);
+        if (!$requiresSchoolDetails) {
+            $continuationStatus = '';
+            $continuationDetail = '';
+        }
         $fields['further_education'] = $continuationType;
         if ($continuationStatus !== '') {
             $fields['further_education'] .= ' — ' . $continuationStatus;
@@ -245,6 +279,10 @@ class AlumniController extends Controller
         if ($continuationDetail !== '') {
             $fields['further_education'] .= ' — ' . $continuationDetail;
         }
+        $fields['continuation_type'] = $continuationType;
+        $fields['continuation_status'] = $continuationStatus;
+        $fields['continuation_institution'] = $continuationDetail;
+        $fields['employment_status'] = $employmentStatus;
         $year = (int) $this->post('graduation_year', 0);
         $contact = trim((string) $this->post('contact', ''));
         $consent = $admin || (bool) $this->post('consent');
@@ -252,10 +290,13 @@ class AlumniController extends Controller
         if ($fields['name'] === '' || mb_strlen($fields['name']) > 100
             || $year < 1950 || $year > ((int) date('Y') + 1)
             || mb_strlen($fields['final_class']) > 60
+            || $continuationType === ''
+            || (!$admin && !in_array($continuationType, self::CONTINUATION_OPTIONS, true))
             || mb_strlen($fields['further_education']) > 160
             || mb_strlen($continuationDetail) > 120
             || ($continuationStatus !== '' && !in_array($continuationStatus, ['Negeri', 'Swasta'], true))
-            || (($continuationStatus !== '' || $continuationDetail !== '') && $continuationType === '')
+            || ($requiresSchoolDetails && ($continuationStatus === '' || $continuationDetail === ''))
+            || ($employmentStatus !== '' && !in_array($employmentStatus, self::EMPLOYMENT_STATUSES, true))
             || mb_strlen($fields['occupation']) > 120
             || mb_strlen($fields['institution']) > 160
             || mb_strlen($fields['city']) > 100
@@ -264,7 +305,7 @@ class AlumniController extends Controller
             || mb_strlen($contact) > 160
             || (!$admin && $contact === '')
             || !$consent) {
-            $this->flash('error', 'Periksa kembali data wajib, panjang isian, tahun lulus, kontak, dan persetujuan publikasi.');
+            $this->flash('error', 'Periksa kembali nama, tahun lulus, tujuan setelah lulus, panjang isian, kontak, dan persetujuan publikasi.');
             return null;
         }
 

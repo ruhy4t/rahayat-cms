@@ -44,6 +44,7 @@ class SchemaRepairer
         $this->ensureSchoolProfileColumns();
         $this->ensureNewsColumns();
         $this->ensureGalleryTablesAndColumns();
+        $this->ensureAlumniColumns();
         $this->ensureDefaultProfile();
         $this->ensureDefaultMenus();
         $this->ensureDefaultSettings();
@@ -193,6 +194,10 @@ class SchemaRepairer
             graduation_year SMALLINT UNSIGNED NOT NULL,
             final_class VARCHAR(60) NULL,
             further_education VARCHAR(160) NULL,
+            continuation_type VARCHAR(40) NULL,
+            continuation_status VARCHAR(20) NULL,
+            continuation_institution VARCHAR(120) NULL,
+            employment_status VARCHAR(40) NULL,
             occupation VARCHAR(120) NULL,
             institution VARCHAR(160) NULL,
             city VARCHAR(100) NULL,
@@ -229,6 +234,41 @@ class SchemaRepairer
         $this->addColumn('users', 'editor_id', 'INT UNSIGNED NULL');
         $this->addColumn('users', 'is_spmb_committee', 'TINYINT(1) DEFAULT 0');
         $this->addColumn('users', 'permissions', 'LONGTEXT NULL');
+    }
+
+    private function ensureAlumniColumns(): void
+    {
+        if (!$this->tableExists('alumni')) {
+            return;
+        }
+
+        $this->addColumn('alumni', 'continuation_type', 'VARCHAR(40) NULL AFTER `further_education`');
+        $this->addColumn('alumni', 'continuation_status', 'VARCHAR(20) NULL AFTER `continuation_type`');
+        $this->addColumn('alumni', 'continuation_institution', 'VARCHAR(120) NULL AFTER `continuation_status`');
+        $this->addColumn('alumni', 'employment_status', 'VARCHAR(40) NULL AFTER `continuation_institution`');
+
+        // Backfill the structured columns from the legacy combined value.
+        $this->safeExec("UPDATE alumni
+            SET continuation_type = CASE
+                WHEN TRIM(SUBSTRING_INDEX(further_education, ' — ', 1)) = 'Tidak/Belum Melanjutkan' THEN 'Tidak Melanjutkan'
+                ELSE NULLIF(TRIM(SUBSTRING_INDEX(further_education, ' — ', 1)), '')
+            END
+            WHERE continuation_type IS NULL AND further_education IS NOT NULL AND further_education <> ''");
+        $this->safeExec("UPDATE alumni
+            SET continuation_status = SUBSTRING_INDEX(SUBSTRING_INDEX(further_education, ' — ', 2), ' — ', -1)
+            WHERE continuation_status IS NULL
+              AND SUBSTRING_INDEX(SUBSTRING_INDEX(further_education, ' — ', 2), ' — ', -1) IN ('Negeri', 'Swasta')");
+        $this->safeExec("UPDATE alumni
+            SET continuation_institution = CASE
+                WHEN continuation_status IN ('Negeri', 'Swasta')
+                    THEN NULLIF(TRIM(SUBSTRING(further_education, CHAR_LENGTH(SUBSTRING_INDEX(further_education, ' — ', 2)) + 4)), '')
+                ELSE NULLIF(TRIM(SUBSTRING(further_education, CHAR_LENGTH(SUBSTRING_INDEX(further_education, ' — ', 1)) + 4)), '')
+            END
+            WHERE continuation_institution IS NULL AND further_education LIKE '% — %'");
+        $this->safeExec("UPDATE alumni
+            SET continuation_type = 'Tidak Melanjutkan'
+            WHERE continuation_type = 'Tidak/Belum Melanjutkan'
+               OR further_education = 'Tidak/Belum Melanjutkan'");
     }
 
     private function ensureStaffColumns(): void
@@ -586,7 +626,7 @@ class SchemaRepairer
             'gallery_items' => ['album_id', 'type', 'file_path', 'youtube_url', 'youtube_video_id', 'video_source', 'video_url', 'video_id', 'is_active', 'sort_order'],
             'announcements' => ['type', 'content', 'image', 'start_at', 'end_at', 'is_active', 'sort_order'],
             'testimonials' => ['name', 'relationship', 'testimonial', 'photo', 'consent', 'status', 'is_featured', 'sort_order', 'submitted_ip_hash', 'approved_at'],
-            'alumni' => ['name', 'graduation_year', 'contact_encrypted', 'contact_hash', 'consent', 'publish_photo', 'publish_occupation', 'publish_city', 'status', 'is_featured', 'submitted_ip_hash', 'approved_at'],
+            'alumni' => ['name', 'graduation_year', 'continuation_type', 'continuation_status', 'continuation_institution', 'employment_status', 'contact_encrypted', 'contact_hash', 'consent', 'publish_photo', 'publish_occupation', 'publish_city', 'status', 'is_featured', 'submitted_ip_hash', 'approved_at'],
         ];
 
         foreach ($requiredColumns as $table => $columns) {

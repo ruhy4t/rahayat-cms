@@ -6,7 +6,8 @@ class Alumni extends Model
 {
     protected string $table = 'alumni';
     protected array $fillable = [
-        'name', 'graduation_year', 'final_class', 'further_education', 'occupation',
+        'name', 'graduation_year', 'final_class', 'further_education', 'continuation_type',
+        'continuation_status', 'continuation_institution', 'employment_status', 'occupation',
         'institution', 'city', 'story', 'achievement', 'photo', 'contact_encrypted',
         'contact_hash', 'consent', 'publish_photo', 'publish_occupation', 'publish_city',
         'status', 'is_featured', 'sort_order', 'submitted_ip_hash', 'approved_at',
@@ -80,6 +81,30 @@ class Alumni extends Model
             "SELECT * FROM {$this->table}
              ORDER BY FIELD(status, 'pending', 'approved', 'rejected'), created_at DESC, id DESC"
         );
+    }
+
+    public function adminStatistics(): array
+    {
+        return [
+            'continuation' => $this->db->fetchAll(
+                "SELECT COALESCE(NULLIF(continuation_type, ''), 'Belum Diisi') AS label, COUNT(*) AS total
+                 FROM {$this->table}
+                 GROUP BY label ORDER BY total DESC, label ASC"
+            ),
+            'school_status' => $this->db->fetchAll(
+                "SELECT CASE
+                    WHEN continuation_type IN ('Bekerja', 'Tidak Melanjutkan') THEN 'Tidak Berlaku'
+                    ELSE COALESCE(NULLIF(continuation_status, ''), 'Belum Diisi')
+                 END AS label, COUNT(*) AS total
+                 FROM {$this->table}
+                 GROUP BY label ORDER BY total DESC, label ASC"
+            ),
+            'employment' => $this->db->fetchAll(
+                "SELECT COALESCE(NULLIF(employment_status, ''), 'Belum Diisi') AS label, COUNT(*) AS total
+                 FROM {$this->table}
+                 GROUP BY label ORDER BY total DESC, label ASC"
+            ),
+        ];
     }
 
     public function countRecentByIpHash(string $hash, int $minutes = 60): int

@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "released_at": "2026-08-06",
-  "summary": "Penyempurnaan kartu alumni dan pendataan tujuan setelah lulus berdasarkan jenjang, status sekolah, serta nama sekolah tujuan.",
+  "summary": "Dashboard analitik alumni dengan editor foto, tujuan setelah lulus wajib, status pekerjaan terstruktur, tiga grafik, dan ekspor Excel.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",
