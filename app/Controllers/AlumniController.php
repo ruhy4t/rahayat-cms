@@ -232,8 +232,18 @@ class AlumniController extends Controller
     private function validatedData(bool $admin): ?array
     {
         $fields = [];
-        foreach (['name', 'final_class', 'further_education', 'occupation', 'institution', 'city', 'story', 'achievement'] as $field) {
+        foreach (['name', 'final_class', 'occupation', 'institution', 'city', 'story', 'achievement'] as $field) {
             $fields[$field] = $this->clean((string) $this->post($field, ''));
+        }
+        $continuationType = $this->clean((string) $this->post('further_education', ''));
+        $continuationStatus = $this->clean((string) $this->post('further_education_status', ''));
+        $continuationDetail = $this->clean((string) $this->post('further_education_detail', ''));
+        $fields['further_education'] = $continuationType;
+        if ($continuationStatus !== '') {
+            $fields['further_education'] .= ' — ' . $continuationStatus;
+        }
+        if ($continuationDetail !== '') {
+            $fields['further_education'] .= ' — ' . $continuationDetail;
         }
         $year = (int) $this->post('graduation_year', 0);
         $contact = trim((string) $this->post('contact', ''));
@@ -243,6 +253,9 @@ class AlumniController extends Controller
             || $year < 1950 || $year > ((int) date('Y') + 1)
             || mb_strlen($fields['final_class']) > 60
             || mb_strlen($fields['further_education']) > 160
+            || mb_strlen($continuationDetail) > 120
+            || ($continuationStatus !== '' && !in_array($continuationStatus, ['Negeri', 'Swasta'], true))
+            || (($continuationStatus !== '' || $continuationDetail !== '') && $continuationType === '')
             || mb_strlen($fields['occupation']) > 120
             || mb_strlen($fields['institution']) > 160
             || mb_strlen($fields['city']) > 100

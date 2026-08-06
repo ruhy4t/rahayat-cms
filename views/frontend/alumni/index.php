@@ -5,6 +5,7 @@ $filters = $data['filters'] ?? [];
 $query = $data['query'] ?? [];
 $flash = $data['flash'] ?? null;
 $queryString = $_GET;
+$continuationOptions = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', 'Tidak/Belum Melanjutkan', 'Lainnya'];
 ?>
 
 <section class="bg-gradient-to-br from-primary-900 via-primary-800 to-primary-900 text-white">
@@ -53,16 +54,16 @@ $queryString = $_GET;
         <?php else: ?>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 <?php foreach ($items as $item): ?>
-                    <a href="/alumni/<?= (int) $item['id'] ?>" class="group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all">
-                        <div class="aspect-square bg-primary-50 relative">
+                    <a href="/alumni/<?= (int) $item['id'] ?>" class="alumni-card group bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-lg transition-all">
+                        <div class="alumni-card__media">
                             <?php if (!empty($item['photo'])): ?>
-                                <img src="/storage/<?= e($item['photo']) ?>" alt="Foto <?= e($item['name']) ?>" loading="lazy" decoding="async" class="w-full h-full object-cover">
+                                <img src="/storage/<?= e($item['photo']) ?>" alt="Foto <?= e($item['name']) ?>" loading="lazy" decoding="async" class="alumni-card__photo">
                             <?php else: ?>
-                                <div class="absolute inset-0 flex items-center justify-center text-5xl font-bold text-primary-300"><?= e(mb_strtoupper(mb_substr($item['name'], 0, 1))) ?></div>
+                                <div class="alumni-card__initial" aria-hidden="true"><?= e(mb_strtoupper(mb_substr(trim($item['name']), 0, 1))) ?></div>
                             <?php endif; ?>
                             <?php if (!empty($item['is_featured'])): ?><span class="absolute top-3 right-3 px-2.5 py-1 bg-amber-400 text-amber-950 rounded-full text-xs font-bold">Inspiratif</span><?php endif; ?>
                         </div>
-                        <div class="p-5">
+                        <div class="alumni-card__body p-5">
                             <h2 class="font-bold text-lg text-slate-900 group-hover:text-primary-600"><?= e($item['name']) ?></h2>
                             <p class="text-sm text-primary-600 font-semibold mt-1">Angkatan <?= (int) $item['graduation_year'] ?></p>
                             <?php if (!empty($item['occupation'])): ?><p class="text-sm text-slate-500 mt-2 line-clamp-1"><?= e($item['occupation']) ?><?= !empty($item['institution']) ? ' · ' . e($item['institution']) : '' ?></p><?php endif; ?>
@@ -114,7 +115,22 @@ $queryString = $_GET;
                 <label class="text-sm font-semibold text-slate-700">Nama lengkap *<input name="name" required maxlength="100" autocomplete="name" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Tahun lulus *<input type="number" name="graduation_year" required min="1950" max="<?= (int) date('Y') + 1 ?>" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Kelas/jurusan terakhir<input name="final_class" maxlength="60" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
-                <label class="text-sm font-semibold text-slate-700">Pendidikan lanjutan<input name="further_education" maxlength="160" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Melanjutkan ke
+                    <select name="further_education" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
+                        <option value="">Pilih tujuan setelah lulus</option>
+                        <?php foreach ($continuationOptions as $option): ?>
+                            <option value="<?= e($option) ?>"><?= e($option) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </label>
+                <label class="text-sm font-semibold text-slate-700">Status sekolah
+                    <select name="further_education_status" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl">
+                        <option value="">Pilih negeri atau swasta</option>
+                        <option value="Negeri">Negeri</option>
+                        <option value="Swasta">Swasta</option>
+                    </select>
+                </label>
+                <label class="text-sm font-semibold text-slate-700">Nama sekolah/tujuan<input name="further_education_detail" maxlength="120" placeholder="Contoh: SMAN 1 Bogor" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Pekerjaan/bidang<input name="occupation" maxlength="120" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Instansi<input name="institution" maxlength="160" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Kota domisili<input name="city" maxlength="100" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>

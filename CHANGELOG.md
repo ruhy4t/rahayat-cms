@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.6.0 - 2026-08-06
+
+- Kartu direktori alumni dibuat lebih ringkas agar foto tidak mendominasi tampilan.
+- Alumni tanpa foto kini menggunakan inisial yang tampil utuh di dalam avatar lingkaran.
+- Formulir publik dan admin menyediakan pilihan tujuan setelah lulus: SMA, SMK, MA, pesantren, Paket C, bekerja, tidak/belum melanjutkan, atau lainnya.
+- Status sekolah negeri/swasta dan nama sekolah tujuan dapat dicatat tanpa mengubah skema database.
+- Panel admin menampilkan tujuan lanjutan alumni secara langsung pada tabel pengelolaan.
+
 ## 1.5.0 - 2026-07-28
 
 - Direktori dan pencarian alumni berdasarkan nama, angkatan, kota, serta pekerjaan.
