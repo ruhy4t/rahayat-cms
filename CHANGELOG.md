@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.7.1 - 2026-08-09
+
+- Kolom kontak verifikasi alumni dipisahkan menjadi nomor WhatsApp dan email, termasuk pada pengelolaan admin dan ekspor Excel.
+- Pilihan informasi alumni yang boleh ditampilkan dirapikan menjadi checkbox kotak yang sejajar dan mendukung banyak pilihan.
+- Keterangan tambahan pada verifikasi keamanan dihapus.
+- Seluruh unggahan gambar diperkuat dengan batas keras maksimal 2 MB, termasuk pemeriksaan ulang setelah optimasi, watermark, atau crop.
+- Foto alumni dan testimoni dibatasi maksimal 1 MB pada formulir publik, panel admin, dan validasi server.
+
 ## 1.7.0 - 2026-08-06
 
 - Editor foto alumni 4:5 memungkinkan admin menggeser dan memperbesar foto agar wajah tampil jelas.

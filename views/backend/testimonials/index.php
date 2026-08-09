@@ -174,9 +174,9 @@ $statusLabels = ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' 
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Foto/Avatar</label>
-                    <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+                    <input id="testimonialAdminPhoto" type="file" name="photo" accept="image/jpeg,image/png,image/webp"
                         class="w-full text-sm border border-slate-300 rounded-lg p-2">
-                    <p class="text-xs text-slate-500 mt-1">JPG, PNG, atau WebP. Maksimal 2 MB.</p>
+                    <p class="text-xs text-slate-500 mt-1">JPG, PNG, atau WebP. Maksimal 1 MB.</p>
                     <label id="removePhotoLabel" class="hidden items-center gap-2 mt-2 text-sm text-red-600">
                         <input type="checkbox" name="remove_photo" value="1"> Hapus foto saat ini
                     </label>
@@ -252,5 +252,12 @@ $statusLabels = ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' 
 
     testimonialModal.addEventListener('click', event => {
         if (event.target === testimonialModal) closeTestimonialModal();
+    });
+
+    document.getElementById('testimonialAdminPhoto')?.addEventListener('change', function () {
+        if (this.files?.[0] && this.files[0].size > 1048576) {
+            alert('Ukuran foto testimoni maksimal 1 MB.');
+            this.value = '';
+        }
     });
 </script>

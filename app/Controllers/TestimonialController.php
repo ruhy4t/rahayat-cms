@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 class TestimonialController extends Controller
 {
-    private const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
+    private const MAX_PHOTO_SIZE = 1 * 1024 * 1024;
     private const RELATIONSHIPS = ['Orang Tua/Wali', 'Alumni', 'Siswa', 'Mitra Sekolah', 'Tokoh Masyarakat', 'Lainnya'];
     private const STATUSES = ['pending', 'approved', 'rejected'];
 

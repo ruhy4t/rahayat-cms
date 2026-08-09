@@ -167,7 +167,7 @@ $flash = $data['flash'] ?? null;
                     <input id="testimonial-photo" type="file" name="photo"
                         accept="image/jpeg,image/png,image/webp"
                         class="w-full text-sm text-slate-600 file:mr-3 file:px-3 file:py-2 file:border-0 file:rounded-lg file:bg-primary-100 file:text-primary-700 file:font-semibold">
-                    <p class="text-xs text-slate-500 mt-1.5">JPG, PNG, atau WebP. Maksimal 2 MB.</p>
+                    <p class="text-xs text-slate-500 mt-1.5">JPG, PNG, atau WebP. Maksimal 1 MB.</p>
                 </div>
                 <div>
                     <label for="testimonial-contact" class="block text-sm font-semibold text-slate-700 mb-1.5">
@@ -198,3 +198,15 @@ $flash = $data['flash'] ?? null;
         </details>
     </div>
 </section>
+
+<script>
+(() => {
+    const photo = document.getElementById('testimonial-photo');
+    photo?.addEventListener('change', () => {
+        if (photo.files?.[0] && photo.files[0].size > 1048576) {
+            alert('Ukuran foto testimoni maksimal 1 MB.');
+            photo.value = '';
+        }
+    });
+})();
+</script>

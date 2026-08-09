@@ -143,17 +143,20 @@ $employmentStatuses = $data['employmentStatuses'] ?? [];
                 <label class="text-sm font-semibold text-slate-700">Pekerjaan/bidang<input name="occupation" maxlength="120" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Instansi<input name="institution" maxlength="160" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
                 <label class="text-sm font-semibold text-slate-700">Kota domisili<input name="city" maxlength="100" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
-                <label class="text-sm font-semibold text-slate-700">WhatsApp/email untuk verifikasi *<input name="contact" required maxlength="160" autocomplete="email" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Nomor WhatsApp untuk verifikasi *<input type="tel" name="whatsapp" required maxlength="30" inputmode="tel" autocomplete="tel" placeholder="Contoh: 081234567890" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
+                <label class="text-sm font-semibold text-slate-700">Email untuk verifikasi *<input type="email" name="email" required maxlength="160" autocomplete="email" placeholder="Contoh: nama@email.com" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></label>
             </div>
             <label class="block text-sm font-semibold text-slate-700">Cerita setelah lulus<textarea name="story" maxlength="1500" rows="4" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></textarea></label>
             <label class="block text-sm font-semibold text-slate-700">Prestasi/pencapaian<textarea name="achievement" maxlength="1000" rows="3" class="block w-full mt-1.5 px-3 py-2.5 border-slate-300 rounded-xl"></textarea></label>
-            <div><label class="block text-sm font-semibold text-slate-700">Foto opsional</label><input type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="mt-2 text-sm"><p class="text-xs text-slate-500 mt-1">JPG, PNG, atau WebP; maksimal 2 MB dan 16 megapiksel.</p></div>
-            <div class="p-4 bg-white border border-slate-200 rounded-xl space-y-3">
-                <p class="text-sm font-bold text-slate-700">Informasi yang boleh ditampilkan:</p>
-                <label class="flex gap-2 text-sm text-slate-600"><input type="checkbox" name="publish_photo" value="1" class="rounded text-primary-600"> Foto</label>
-                <label class="flex gap-2 text-sm text-slate-600"><input type="checkbox" name="publish_occupation" value="1" class="rounded text-primary-600"> Pekerjaan dan instansi</label>
-                <label class="flex gap-2 text-sm text-slate-600"><input type="checkbox" name="publish_city" value="1" class="rounded text-primary-600"> Kota domisili</label>
-                <label class="flex items-start gap-2 text-sm text-slate-600"><input type="checkbox" name="consent" value="1" required class="mt-1 rounded text-primary-600"> Saya menyetujui publikasi nama, tahun lulus, serta informasi yang saya pilih setelah diverifikasi sekolah.</label>
+            <div><label class="block text-sm font-semibold text-slate-700">Foto opsional</label><input id="publicAlumniPhoto" type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="mt-2 text-sm"><p class="text-xs text-slate-500 mt-1">JPG, PNG, atau WebP; maksimal 1 MB dan 16 megapiksel.</p></div>
+            <div class="alumni-publication-options p-4 bg-white border border-slate-200 rounded-xl">
+                <p class="text-sm font-bold text-slate-700 mb-3">Informasi yang boleh ditampilkan:</p>
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3 text-sm text-slate-600"><input type="checkbox" name="publish_photo" value="1" class="mt-0.5 h-4 w-4 shrink-0 rounded-none border-slate-400 text-primary-600"> <span>Foto</span></label>
+                    <label class="flex items-start gap-3 text-sm text-slate-600"><input type="checkbox" name="publish_occupation" value="1" class="mt-0.5 h-4 w-4 shrink-0 rounded-none border-slate-400 text-primary-600"> <span>Pekerjaan dan instansi</span></label>
+                    <label class="flex items-start gap-3 text-sm text-slate-600"><input type="checkbox" name="publish_city" value="1" class="mt-0.5 h-4 w-4 shrink-0 rounded-none border-slate-400 text-primary-600"> <span>Kota domisili</span></label>
+                </div>
+                <label class="flex items-start gap-3 mt-4 pt-4 border-t border-slate-200 text-sm text-slate-600"><input type="checkbox" name="consent" value="1" required class="mt-0.5 h-4 w-4 shrink-0 rounded-none border-slate-400 text-primary-600"> <span>Saya menyetujui publikasi nama, tahun lulus, serta informasi yang saya pilih setelah diverifikasi sekolah. <span class="text-red-600" aria-hidden="true">*</span></span></label>
             </div>
                     <?= Security::publicCaptchaInput('alumni') ?>
                     <button class="px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-semibold rounded-xl">Kirim untuk Diverifikasi</button>
@@ -180,5 +183,13 @@ $employmentStatuses = $data['employmentStatuses'] ?? [];
     };
     type?.addEventListener('change', syncSchoolFields);
     syncSchoolFields();
+
+    const photo = document.getElementById('publicAlumniPhoto');
+    photo?.addEventListener('change', () => {
+        if (photo.files?.[0] && photo.files[0].size > 1048576) {
+            alert('Ukuran foto alumni maksimal 1 MB.');
+            photo.value = '';
+        }
+    });
 })();
 </script>

@@ -7,7 +7,7 @@ class AlumniController extends Controller
     private const STATUSES = ['pending', 'approved', 'rejected'];
     private const CONTINUATION_OPTIONS = ['SMA', 'SMK', 'MA', 'Pesantren', 'Paket C', 'Bekerja', 'Tidak Melanjutkan', 'Lainnya'];
     private const EMPLOYMENT_STATUSES = ['Pelajar/Mahasiswa', 'Bekerja', 'Wirausaha', 'Belum Bekerja', 'Tidak Bekerja', 'Lainnya'];
-    private const MAX_PHOTO_SIZE = 2 * 1024 * 1024;
+    private const MAX_PHOTO_SIZE = 1 * 1024 * 1024;
 
     private Alumni $alumniModel;
 
@@ -100,7 +100,8 @@ class AlumniController extends Controller
             $this->redirect('/alumni#daftar-alumni');
         }
 
-        $contact = trim((string) $this->post('contact', ''));
+        [$whatsapp, $email] = $this->contactInputs();
+        $contact = $this->encodeContact($whatsapp, $email);
         $contactHash = DataCipher::blindIndex($contact);
         if ($contactHash && $this->alumniModel->findBy('contact_hash', $contactHash)) {
             $this->flash('error', 'Kontak tersebut sudah pernah digunakan untuk pendataan alumni.');
@@ -133,7 +134,7 @@ class AlumniController extends Controller
     {
         $items = $this->alumniModel->getAllForAdmin();
         foreach ($items as &$item) {
-            $item['contact_plain'] = DataCipher::decrypt($item['contact_encrypted'] ?? null);
+            [$item['whatsapp_plain'], $item['email_plain']] = $this->decryptContact($item['contact_encrypted'] ?? null);
             unset($item['contact_encrypted'], $item['contact_hash'], $item['submitted_ip_hash']);
         }
         unset($item);
@@ -153,7 +154,7 @@ class AlumniController extends Controller
     {
         $items = $this->alumniModel->getAllForAdmin();
         foreach ($items as &$item) {
-            $item['contact_plain'] = DataCipher::decrypt($item['contact_encrypted'] ?? null);
+            [$item['whatsapp_plain'], $item['email_plain']] = $this->decryptContact($item['contact_encrypted'] ?? null);
             unset($item['contact_encrypted'], $item['contact_hash'], $item['submitted_ip_hash']);
         }
         unset($item);
@@ -176,12 +177,22 @@ class AlumniController extends Controller
             $this->redirect('/admin/alumni');
         }
 
-        $contact = trim((string) $this->post('contact', ''));
-        if ($contact !== '') {
+        [$whatsapp, $email] = $this->contactInputs();
+        if ($whatsapp !== '' || $email !== '') {
+            [$savedWhatsapp, $savedEmail] = $existing
+                ? $this->decryptContact($existing['contact_encrypted'] ?? null)
+                : ['', ''];
+            $whatsapp = $whatsapp !== '' ? $whatsapp : $savedWhatsapp;
+            $email = $email !== '' ? $email : $savedEmail;
+            if (!$this->validContact($whatsapp, $email)) {
+                $this->flash('error', 'Nomor WhatsApp dan alamat email harus diisi dengan format yang valid.');
+                $this->redirect('/admin/alumni');
+            }
+            $contact = $this->encodeContact($whatsapp, $email);
             $data['contact_encrypted'] = DataCipher::encrypt($contact);
             $data['contact_hash'] = DataCipher::blindIndex($contact);
         } elseif (!$existing) {
-            $this->flash('error', 'Kontak verifikasi wajib diisi.');
+            $this->flash('error', 'Nomor WhatsApp dan alamat email wajib diisi.');
             $this->redirect('/admin/alumni');
         }
 
@@ -195,7 +206,7 @@ class AlumniController extends Controller
 
         $croppedPhoto = trim((string) $this->post('cropped_photo', ''));
         if ($croppedPhoto !== '') {
-            $photo = $this->saveCroppedPortrait($croppedPhoto, 'alumni');
+            $photo = $this->saveCroppedPortrait($croppedPhoto, 'alumni', self::MAX_PHOTO_SIZE);
             if (!$photo) {
                 $this->flash('error', $this->uploadErrorMessage('Hasil pengaturan foto alumni gagal disimpan'));
                 $this->redirect('/admin/alumni');
@@ -284,7 +295,7 @@ class AlumniController extends Controller
         $fields['continuation_institution'] = $continuationDetail;
         $fields['employment_status'] = $employmentStatus;
         $year = (int) $this->post('graduation_year', 0);
-        $contact = trim((string) $this->post('contact', ''));
+        [$whatsapp, $email] = $this->contactInputs();
         $consent = $admin || (bool) $this->post('consent');
 
         if ($fields['name'] === '' || mb_strlen($fields['name']) > 100
@@ -302,8 +313,7 @@ class AlumniController extends Controller
             || mb_strlen($fields['city']) > 100
             || mb_strlen($fields['story']) > 1500
             || mb_strlen($fields['achievement']) > 1000
-            || mb_strlen($contact) > 160
-            || (!$admin && $contact === '')
+            || (!$admin && !$this->validContact($whatsapp, $email))
             || !$consent) {
             $this->flash('error', 'Periksa kembali nama, tahun lulus, tujuan setelah lulus, panjang isian, kontak, dan persetujuan publikasi.');
             return null;
@@ -321,6 +331,49 @@ class AlumniController extends Controller
     private function clean(string $value): string
     {
         return trim((string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', strip_tags($value)));
+    }
+
+    private function contactInputs(): array
+    {
+        return [
+            $this->clean((string) $this->post('whatsapp', '')),
+            mb_strtolower($this->clean((string) $this->post('email', ''))),
+        ];
+    }
+
+    private function validContact(string $whatsapp, string $email): bool
+    {
+        $digits = preg_replace('/\D+/', '', $whatsapp) ?? '';
+        return mb_strlen($whatsapp) <= 30
+            && strlen($digits) >= 8
+            && strlen($digits) <= 20
+            && mb_strlen($email) <= 160
+            && filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    private function encodeContact(string $whatsapp, string $email): string
+    {
+        return (string) json_encode(
+            ['whatsapp' => $whatsapp, 'email' => $email],
+            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        );
+    }
+
+    private function decryptContact(?string $encrypted): array
+    {
+        $plain = trim((string) DataCipher::decrypt($encrypted));
+        $decoded = json_decode($plain, true);
+        if (is_array($decoded)) {
+            return [
+                trim((string) ($decoded['whatsapp'] ?? '')),
+                trim((string) ($decoded['email'] ?? '')),
+            ];
+        }
+
+        // Data lama hanya memiliki satu kolom kontak.
+        return filter_var($plain, FILTER_VALIDATE_EMAIL) !== false
+            ? ['', $plain]
+            : [$plain, ''];
     }
 
     private function hasPhotoUpload(): bool

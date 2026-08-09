@@ -112,7 +112,6 @@ class Security
             . 'inputmode="numeric" autocomplete="off" min="0" max="99" '
             . 'class="mt-2 block w-full rounded-xl border-slate-300 px-4 py-2.5" '
             . 'placeholder="Masukkan hasil perhitungan">'
-            . '<p class="mt-1.5 text-xs text-slate-500">Pertanyaan ini membantu mencegah pengiriman otomatis.</p>'
             . '</div>';
     }
 
@@ -420,12 +419,17 @@ class Security
             return $errors;
         }
 
-        if (($file['size'] ?? 0) > $maxSize) {
-            $errors[] = 'Ukuran file melebihi batas ' . self::formatBytes($maxSize) . '.';
-        }
-
         $finfo = new finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($file['tmp_name'] ?? '');
+
+        // Batas gambar adalah invariant global. Parameter yang lebih besar hanya
+        // boleh digunakan untuk tipe non-gambar seperti PDF editor.
+        $effectiveMaxSize = is_string($mimeType) && str_starts_with($mimeType, 'image/')
+            ? min($maxSize, UPLOAD_MAX_SIZE)
+            : $maxSize;
+        if (($file['size'] ?? 0) > $effectiveMaxSize) {
+            $errors[] = 'Ukuran file melebihi batas ' . self::formatBytes($effectiveMaxSize) . '.';
+        }
 
         if (!$mimeType) {
             $errors[] = 'Tipe file tidak dapat dibaca.';
@@ -502,7 +506,7 @@ class Security
         return 'upload_max_filesize=' . $uploadMax . ', post_max_size=' . $postMax;
     }
 
-    private static function formatBytes(int $bytes): string
+    public static function formatBytes(int $bytes): string
     {
         $units = ['B', 'KB', 'MB', 'GB'];
         $size = (float) $bytes;

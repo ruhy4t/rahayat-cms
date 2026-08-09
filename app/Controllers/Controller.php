@@ -1027,6 +1027,17 @@ abstract class Controller
             // Apply watermark if enabled
             $this->applyWatermark($filepath, $directory);
 
+            if (str_starts_with((string) $mimeType, 'image/')) {
+                $storedMaxSize = min($maxSize ?? UPLOAD_MAX_SIZE, UPLOAD_MAX_SIZE);
+                clearstatcache(true, $filepath);
+                if ((int) filesize($filepath) > $storedMaxSize) {
+                    unlink($filepath);
+                    $this->lastUploadError = 'Ukuran gambar setelah diproses melebihi batas '
+                        . Security::formatBytes($storedMaxSize) . '.';
+                    return false;
+                }
+            }
+
             return $directory . '/' . $filename;
         }
 
@@ -1042,9 +1053,10 @@ abstract class Controller
     /**
      * Validate and store a client-cropped portrait as a normalized 4:5 image.
      */
-    protected function saveCroppedPortrait(string $dataUrl, string $directory = 'staff'): string|false
+    protected function saveCroppedPortrait(string $dataUrl, string $directory = 'staff', ?int $maxSize = null): string|false
     {
         $this->lastUploadError = '';
+        $maxSize = min($maxSize ?? UPLOAD_MAX_SIZE, UPLOAD_MAX_SIZE);
 
         if (!preg_match('#^data:image/(?:jpeg|png|webp);base64,([A-Za-z0-9+/=\r\n]+)$#', $dataUrl, $matches)) {
             $this->lastUploadError = 'Data hasil crop foto tidak valid.';
@@ -1052,9 +1064,9 @@ abstract class Controller
         }
 
         $binary = base64_decode(preg_replace('/\s+/', '', $matches[1]), true);
-        if ($binary === false || strlen($binary) > UPLOAD_MAX_SIZE) {
+        if ($binary === false || strlen($binary) > $maxSize) {
             $this->lastUploadError = 'Hasil crop foto tidak valid atau melebihi batas '
-                . number_format(UPLOAD_MAX_SIZE / 1024 / 1024, 0) . 'MB.';
+                . Security::formatBytes($maxSize) . '.';
             return false;
         }
 
@@ -1117,6 +1129,13 @@ abstract class Controller
 
         if (!$saved) {
             $this->lastUploadError = 'Hasil crop foto gagal disimpan.';
+            return false;
+        }
+
+        clearstatcache(true, $filepath);
+        if ((int) filesize($filepath) > $maxSize) {
+            unlink($filepath);
+            $this->lastUploadError = 'Ukuran hasil crop melebihi batas ' . Security::formatBytes($maxSize) . '.';
             return false;
         }
 

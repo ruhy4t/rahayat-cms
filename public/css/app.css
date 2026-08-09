@@ -62,6 +62,15 @@
     flex: 1 1 auto;
 }
 
+/* Keep alumni publication choices square and aligned in every frontend theme. */
+.alumni-publication-options input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    flex: 0 0 1rem;
+    margin-top: 0.125rem;
+    border-radius: 2px !important;
+}
+
 @media (max-width: 639px) {
     .alumni-card__media {
         height: 13.5rem;

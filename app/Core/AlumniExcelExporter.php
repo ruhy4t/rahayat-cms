@@ -32,14 +32,14 @@ final class AlumniExcelExporter
         echo '</Styles>';
         echo '<Worksheet ss:Name="Data Alumni"><Table>';
 
-        $widths = [45, 180, 70, 85, 110, 80, 190, 120, 150, 170, 105, 170, 85, 70, 120];
+        $widths = [45, 180, 70, 85, 110, 80, 190, 120, 150, 170, 105, 130, 170, 85, 70, 120];
         foreach ($widths as $width) {
             echo '<Column ss:AutoFitWidth="0" ss:Width="' . $width . '"/>';
         }
 
-        echo '<Row ss:Height="28"><Cell ss:MergeAcross="14" ss:StyleID="Title"><Data ss:Type="String">Data Alumni ' . self::xml(SCHOOL_NAME) . '</Data></Cell></Row>';
+        echo '<Row ss:Height="28"><Cell ss:MergeAcross="15" ss:StyleID="Title"><Data ss:Type="String">Data Alumni ' . self::xml(SCHOOL_NAME) . '</Data></Cell></Row>';
         echo '<Row ss:Height="34">';
-        foreach (['No.', 'Nama', 'Tahun Lulus', 'Kelas Terakhir', 'Melanjutkan Ke', 'Status Sekolah', 'Nama Sekolah Tujuan', 'Status Pekerjaan', 'Pekerjaan/Bidang', 'Instansi', 'Kota', 'Kontak Privat', 'Status Data', 'Inspiratif', 'Tanggal Masuk'] as $header) {
+        foreach (['No.', 'Nama', 'Tahun Lulus', 'Kelas Terakhir', 'Melanjutkan Ke', 'Status Sekolah', 'Nama Sekolah Tujuan', 'Status Pekerjaan', 'Pekerjaan/Bidang', 'Instansi', 'Kota', 'WhatsApp', 'Email', 'Status Data', 'Inspiratif', 'Tanggal Masuk'] as $header) {
             echo self::cell($header, 'String', 'Header');
         }
         echo '</Row>';
@@ -59,7 +59,8 @@ final class AlumniExcelExporter
             echo self::cell((string) ($item['occupation'] ?? ''));
             echo self::cell((string) ($item['institution'] ?? ''));
             echo self::cell((string) ($item['city'] ?? ''));
-            echo self::cell((string) ($item['contact_plain'] ?? ''));
+            echo self::cell((string) ($item['whatsapp_plain'] ?? ''));
+            echo self::cell((string) ($item['email_plain'] ?? ''));
             echo self::cell($statusLabels[$item['status'] ?? ''] ?? (string) ($item['status'] ?? ''));
             echo self::cell(!empty($item['is_featured']) ? 'Ya' : 'Tidak');
             echo self::cell((string) ($item['created_at'] ?? ''));
@@ -71,7 +72,7 @@ final class AlumniExcelExporter
             . '<FreezePanes/><FrozenNoSplit/><SplitHorizontal>2</SplitHorizontal><TopRowBottomPane>2</TopRowBottomPane>'
             . '<ProtectObjects>False</ProtectObjects><ProtectScenarios>False</ProtectScenarios>'
             . '</WorksheetOptions>';
-        echo '<AutoFilter x:Range="R2C1:R' . $lastRow . 'C15" xmlns="urn:schemas-microsoft-com:office:excel"/>';
+        echo '<AutoFilter x:Range="R2C1:R' . $lastRow . 'C16" xmlns="urn:schemas-microsoft-com:office:excel"/>';
         echo '</Worksheet></Workbook>';
         exit;
     }

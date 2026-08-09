@@ -92,7 +92,10 @@ $chartData = [
                                 </td>
                                 <td class="px-5 py-4 min-w-40"><span class="text-slate-700"><?= e($item['employment_status'] ?: 'Belum diisi') ?></span></td>
                                 <td class="px-5 py-4 text-slate-600 min-w-48"><?= e($item['occupation'] ?: '-') ?><br><span class="text-xs text-slate-400"><?= e($item['institution'] ?: $item['city']) ?></span></td>
-                                <td class="px-5 py-4 text-slate-600 min-w-44"><?= e($item['contact_plain'] ?: '-') ?></td>
+                                <td class="px-5 py-4 text-slate-600 min-w-52">
+                                    <div><span class="text-xs text-slate-400">WhatsApp:</span> <?= e($item['whatsapp_plain'] ?: '-') ?></div>
+                                    <div class="mt-1"><span class="text-xs text-slate-400">Email:</span> <?= e($item['email_plain'] ?: '-') ?></div>
+                                </td>
                                 <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold <?= $item['status'] === 'approved' ? 'bg-green-100 text-green-700' : ($item['status'] === 'rejected' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700') ?>"><?= e($labels[$item['status']] ?? '') ?></span></td>
                                 <td class="px-5 py-4">
                                     <div class="flex justify-end gap-2 min-w-48">
@@ -134,7 +137,8 @@ $chartData = [
                     <label class="text-sm font-medium">Pekerjaan/bidang<input id="aOccupation" name="occupation" maxlength="120" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"></label>
                     <label class="text-sm font-medium">Instansi<input id="aInstitution" name="institution" maxlength="160" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"></label>
                     <label class="text-sm font-medium">Kota<input id="aCity" name="city" maxlength="100" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"></label>
-                    <label class="text-sm font-medium">Kontak privat *<input id="aContact" name="contact" maxlength="160" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"><small class="text-slate-500">Kosongkan saat edit untuk mempertahankan kontak.</small></label>
+                    <label class="text-sm font-medium">Nomor WhatsApp *<input id="aWhatsapp" type="tel" name="whatsapp" maxlength="30" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"><small class="text-slate-500">Kosongkan saat edit untuk mempertahankan nomor.</small></label>
+                    <label class="text-sm font-medium">Email *<input id="aEmail" type="email" name="email" maxlength="160" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"><small class="text-slate-500">Kosongkan saat edit untuk mempertahankan email.</small></label>
                 </div>
 
                 <label class="block text-sm font-medium">Cerita<textarea id="aStory" name="story" maxlength="1500" rows="3" class="block w-full mt-1 px-3 py-2 border-slate-300 rounded-lg"></textarea></label>
@@ -146,7 +150,7 @@ $chartData = [
                         <div class="flex-1">
                             <label class="block text-sm font-semibold text-slate-700">Foto alumni</label>
                             <input id="aPhotoInput" type="file" name="photo" accept="image/jpeg,image/png,image/webp" class="mt-2 text-sm">
-                            <p class="text-xs text-slate-500 mt-1">Pilih foto lalu geser dan perbesar sampai wajah berada di dalam bingkai.</p>
+                            <p class="text-xs text-slate-500 mt-1">Maksimal 1 MB. Pilih foto lalu geser dan perbesar sampai wajah berada di dalam bingkai.</p>
                             <label id="aRemoveLabel" class="hidden mt-2 text-sm text-red-600"><input type="checkbox" name="remove_photo" value="1"> Hapus foto</label>
                         </div>
                     </div>
@@ -221,7 +225,7 @@ const alumniModal = document.getElementById('alumniModal');
 const alumniForm = document.getElementById('alumniForm');
 const aId = document.getElementById('aId'), aTitle = document.getElementById('aTitle'), aName = document.getElementById('aName'), aYear = document.getElementById('aYear'), aClass = document.getElementById('aClass');
 const aEducation = document.getElementById('aEducation'), aEducationStatus = document.getElementById('aEducationStatus'), aEducationDetail = document.getElementById('aEducationDetail'), aEducationStatusRequired = document.getElementById('aEducationStatusRequired'), aEducationDetailRequired = document.getElementById('aEducationDetailRequired'), aEmploymentStatus = document.getElementById('aEmploymentStatus');
-const aOccupation = document.getElementById('aOccupation'), aInstitution = document.getElementById('aInstitution'), aCity = document.getElementById('aCity'), aContact = document.getElementById('aContact'), aStory = document.getElementById('aStory'), aAchievement = document.getElementById('aAchievement');
+const aOccupation = document.getElementById('aOccupation'), aInstitution = document.getElementById('aInstitution'), aCity = document.getElementById('aCity'), aWhatsapp = document.getElementById('aWhatsapp'), aEmail = document.getElementById('aEmail'), aStory = document.getElementById('aStory'), aAchievement = document.getElementById('aAchievement');
 const aStatus = document.getElementById('aStatus'), aOrder = document.getElementById('aOrder'), aFeatured = document.getElementById('aFeatured'), aPublishPhoto = document.getElementById('aPublishPhoto'), aPublishJob = document.getElementById('aPublishJob'), aPublishCity = document.getElementById('aPublishCity'), aRemoveLabel = document.getElementById('aRemoveLabel');
 const aPhotoInput = document.getElementById('aPhotoInput'), aPhotoPreview = document.getElementById('aPhotoPreview'), aCroppedPhoto = document.getElementById('aCroppedPhoto'), aCropEditor = document.getElementById('aCropEditor'), aCropCanvas = document.getElementById('aCropCanvas'), aCropContext = aCropCanvas.getContext('2d'), aCropZoom = document.getElementById('aCropZoom'), aCropZoomValue = document.getElementById('aCropZoomValue');
 let cropImage = null, cropBaseScale = 1, cropScale = 1, cropOffsetX = 0, cropOffsetY = 0, cropDragging = false, cropPointerX = 0, cropPointerY = 0, cropDirty = false;
@@ -319,7 +323,8 @@ function editAlumni(item) {
     aOccupation.value = item.occupation || '';
     aInstitution.value = item.institution || '';
     aCity.value = item.city || '';
-    aContact.value = '';
+    aWhatsapp.value = '';
+    aEmail.value = '';
     aStory.value = item.story || '';
     aAchievement.value = item.achievement || '';
     aStatus.value = item.status;
@@ -339,7 +344,7 @@ function closeAlumniModal() { alumniModal.classList.replace('flex', 'hidden'); }
 aEducation.addEventListener('change', toggleSchoolFields);
 aPhotoInput.addEventListener('change', function () {
     if (!this.files?.[0]) return;
-    if (this.files[0].size > 2097152) { alert('Ukuran foto maksimal 2 MB.'); this.value = ''; return; }
+    if (this.files[0].size > 1048576) { alert('Ukuran foto alumni maksimal 1 MB.'); this.value = ''; return; }
     const url = URL.createObjectURL(this.files[0]);
     const image = new Image();
     image.onload = () => { URL.revokeObjectURL(url); cropImage = image; cropDirty = true; aCropEditor.classList.remove('hidden'); fitCrop(); };
