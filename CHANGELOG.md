@@ -4,7 +4,7 @@
 
 ## 1.9.0 - 2026-08-11
 
-- Seluruh ekstrakurikuler aktif ditampilkan pada beranda tanpa batas enam item pada tema Cendekia SMP.
+- Seluruh ekstrakurikuler aktif ditampilkan pada beranda tanpa batas enam item di semua tema.
 - Data ekstrakurikuler mendukung banyak pembina atau pelatih, jadwal pada banyak hari, dan daftar prestasi beserta tahun pencapaiannya.
 - Data pembina dan jadwal lama tetap dibaca sebagai fallback selama proses upgrade schema otomatis.
 - Lebar konten tema Cendekia SMP dibatasi secara proporsional pada layar ultrawide sambil mempertahankan gaya editorial yang lebar.

@@ -354,10 +354,11 @@ if ($theme === 'cendekia-smp') {
             </div>
         </section>
     <?php endif; ?>
+<?php endif; ?>
 
-    <!-- Ekstrakurikuler Section (Default Theme) -->
-    <?php if (!empty($ekskul)): ?>
-        <section id="ekstrakurikuler" class="py-16 lg:py-24 bg-slate-50 relative border-t border-slate-200/60">
+<!-- Ekstrakurikuler Section (All non-Cendekia themes) -->
+<?php if (!empty($ekskul)): ?>
+    <section id="ekstrakurikuler" class="py-16 lg:py-24 bg-slate-50 relative border-t border-slate-200/60">
             <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                     <div>
@@ -367,10 +368,7 @@ if ($theme === 'cendekia-smp') {
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <?php $i = 0;
-                    foreach ($ekskul as $item):
-                        if ($i++ >= 6)
-                            break; ?>
+                    <?php foreach ($ekskul as $item): ?>
                         <a href="/ekstrakurikuler/<?= (int) $item['id'] ?>"
                             aria-label="Lihat informasi ekstrakurikuler <?= e($item['name']) ?>"
                             class="block bg-white rounded-2xl p-6 shadow-sm border border-slate-100 hover:shadow-xl hover:border-primary-100 transition-all duration-300 group">
@@ -426,8 +424,7 @@ if ($theme === 'cendekia-smp') {
                     <?php endforeach; ?>
                 </div>
             </div>
-        </section>
-    <?php endif; ?>
+    </section>
 <?php endif; ?>
 
 <section class="py-16 lg:py-24 bg-white">
