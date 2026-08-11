@@ -84,7 +84,7 @@ $flash = $data['flash'] ?? [];
                         <?= e($item['description'] ?? '-') ?>
                     </p>
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button onclick='editItem(<?= json_encode($item) ?>)'
+                        <button onclick='editItem(<?= json_encode(Security::normalizeTextData($item), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'
                             class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

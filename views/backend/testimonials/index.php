@@ -104,7 +104,7 @@ $statusLabels = ['pending' => 'Menunggu', 'approved' => 'Disetujui', 'rejected' 
                                                 <button class="px-2.5 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-medium">Tolak</button>
                                             </form>
                                         <?php endif; ?>
-                                        <button type="button" onclick='editTestimonial(<?= e(json_encode($item, JSON_HEX_APOS | JSON_HEX_QUOT)) ?>)'
+                                        <button type="button" onclick='editTestimonial(<?= json_encode(Security::normalizeTextData($item), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'
                                             class="px-2.5 py-1.5 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 rounded-lg font-medium">
                                             Edit
                                         </button>

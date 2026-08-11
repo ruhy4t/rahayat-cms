@@ -9,7 +9,7 @@
         </a>
         <div>
             <h1 class="text-2xl font-bold text-slate-900">
-                <?= htmlspecialchars($title) ?>
+                <?= e($title) ?>
             </h1>
             <p class="text-slate-500 mt-1">Isi formulir di bawah ini dengan lengkap dan benar.</p>
         </div>
@@ -18,7 +18,7 @@
     <?php if (isset($_SESSION['flash'])): ?>
         <div
             class="mb-6 p-4 rounded-lg <?= $_SESSION['flash']['type'] === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800' ?>">
-            <?= htmlspecialchars($_SESSION['flash']['message']) ?>
+            <?= e($_SESSION['flash']['message']) ?>
         </div>
         <?php unset($_SESSION['flash']); ?>
     <?php endif; ?>
@@ -39,7 +39,7 @@
                         <label for="title" class="block text-sm font-medium text-slate-700 mb-1">Judul Prestasi <span
                                 class="text-red-500">*</span></label>
                         <input type="text" id="title" name="title" required
-                            value="<?= $prestasi ? htmlspecialchars($prestasi['title']) : '' ?>"
+                            value="<?= $prestasi ? e($prestasi['title']) : '' ?>"
                             class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
                             placeholder="Contoh: Juara 1 Lomba OSN Tingkat Provinsi">
                     </div>
@@ -48,7 +48,7 @@
                         <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Deskripsi</label>
                         <textarea id="description" name="description" rows="4"
                             class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all"
-                            placeholder="Tuliskan keterangan lebih lanjut tentang prestasi ini..."><?= $prestasi ? htmlspecialchars($prestasi['description']) : '' ?></textarea>
+                            placeholder="Tuliskan keterangan lebih lanjut tentang prestasi ini..."><?= $prestasi ? e($prestasi['description']) : '' ?></textarea>
                     </div>
                 </div>
 
@@ -71,7 +71,7 @@
                         <label for="date" class="block text-sm font-medium text-slate-700 mb-1">Tanggal Prestasi <span
                                 class="text-red-500">*</span></label>
                         <input type="date" id="date" name="date" required
-                            value="<?= $prestasi ? htmlspecialchars($prestasi['date']) : date('Y-m-d') ?>"
+                            value="<?= $prestasi ? e($prestasi['date']) : date('Y-m-d') ?>"
                             class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all">
                     </div>
 
@@ -80,7 +80,7 @@
                             class="block text-sm font-medium text-slate-700 mb-1">Gambar/Sertifikat</label>
                         <?php if ($prestasi && !empty($prestasi['image'])): ?>
                             <div class="mb-3 relative group rounded-lg overflow-hidden border border-slate-200">
-                                <img src="/storage/<?= htmlspecialchars($prestasi['image']) ?>" alt="Preview"
+                                <img src="/storage/<?= e($prestasi['image']) ?>" alt="Preview"
                                     class="w-full h-auto">
                             </div>
                         <?php endif; ?>

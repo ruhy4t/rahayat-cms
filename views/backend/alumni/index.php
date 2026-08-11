@@ -102,7 +102,7 @@ $chartData = [
                                         <?php if ($item['status'] !== 'approved'): ?>
                                             <form method="POST" action="/admin/alumni/status/<?= (int) $item['id'] ?>"><input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>"><input type="hidden" name="status" value="approved"><button class="px-2 py-1.5 bg-green-50 text-green-700 rounded">Setujui</button></form>
                                         <?php endif; ?>
-                                        <button type="button" onclick='editAlumni(<?= e(json_encode($item, JSON_HEX_APOS | JSON_HEX_QUOT)) ?>)' class="px-2 py-1.5 bg-indigo-50 text-indigo-700 rounded">Edit</button>
+                                        <button type="button" onclick='editAlumni(<?= json_encode(Security::normalizeTextData($item), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)' class="px-2 py-1.5 bg-indigo-50 text-indigo-700 rounded">Edit</button>
                                         <form method="POST" action="/admin/alumni/delete/<?= (int) $item['id'] ?>" onsubmit="return confirm('Hapus data alumni ini?')"><input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>"><button class="px-2 py-1.5 bg-red-50 text-red-700 rounded">Hapus</button></form>
                                     </div>
                                 </td>
@@ -179,7 +179,7 @@ $chartData = [
 
 <script src="/vendor/chart.js/chart.umd.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/chart.js/chart.umd.js') ?>"></script>
 <script>
-const alumniChartData = <?= json_encode($chartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+const alumniChartData = <?= json_encode(Security::normalizeTextData($chartData), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 const barValueLabels = {
     id: 'barValueLabels',
     afterDatasetsDraw(chart) {

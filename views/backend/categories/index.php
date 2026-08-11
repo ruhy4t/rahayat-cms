@@ -100,7 +100,7 @@ $flash = $data['flash'] ?? null;
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex justify-center gap-2">
-                                    <button onclick="editCategory(<?= e(json_encode($cat)) ?>)"
+                                    <button onclick='editCategory(<?= json_encode(Security::normalizeTextData($cat), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'
                                         class="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors"
                                         title="Edit">
                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

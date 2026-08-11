@@ -135,7 +135,7 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
                 <?php if (!empty($items)): ?>
                     <?php foreach ($items as $item): ?>
                         <div class="aspect-square bg-gradient-to-br from-primary-100 to-primary-200 rounded-xl overflow-hidden group cursor-pointer shadow-sm hover:shadow-lg transition-all"
-                            onclick='openImageModal(<?= json_encode((string) ($item['file_path'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>, <?= json_encode((string) ($item['title'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT) ?>)'>
+                            onclick='openImageModal(<?= json_encode(Security::plainText($item['file_path'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>, <?= json_encode(Security::plainText($item['title'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'>
                             <div class="w-full h-full relative overflow-hidden">
                                 <?php if (!empty($item['file_path'])): ?>
                                     <img src="/storage/<?= e($item['file_path']) ?>" alt="<?= e($item['title'] ?? ($album['title'] ?? 'Album Galeri')) ?>"

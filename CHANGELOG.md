@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.9.1 - 2026-08-11
+
+- Penyimpanan teks biasa tidak lagi mengubah karakter khusus menjadi entity HTML.
+- Data lama yang sudah ter-encode satu atau beberapa kali dinormalisasi saat ditampilkan, lalu tetap di-escape satu kali untuk menjaga keamanan XSS.
+- Tampilan dan formulir prestasi menggunakan helper escape yang sama agar karakter `&`, tanda kutip, serta tanda kurang/lebih tampil konsisten.
+
 ## 1.9.0 - 2026-08-11
 
 - Seluruh ekstrakurikuler aktif ditampilkan pada beranda tanpa batas enam item di semua tema.

@@ -186,7 +186,14 @@ class Security
         if ($value === null) {
             return '';
         }
-        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        // Legacy records may already contain HTML entities because older input
+        // sanitization encoded values before storage. Decode them to canonical
+        // plain text first, then escape exactly once at the output boundary.
+        return htmlspecialchars(
+            self::plainText($value),
+            ENT_QUOTES | ENT_HTML5 | ENT_SUBSTITUTE,
+            'UTF-8'
+        );
     }
 
     /**
@@ -207,7 +214,47 @@ class Security
         }
         $value = trim((string) $value);
         $value = stripslashes($value);
-        return htmlspecialchars($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $value = self::plainText($value);
+
+        // Plain-text fields are stored as plain text. HTML escaping belongs to
+        // escape()/e() when the value is rendered, preventing double encoding.
+        return strip_tags($value);
+    }
+
+    public static function plainText(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        $value = (string) $value;
+
+        // A small fixed limit handles data encoded more than once without an
+        // unbounded loop. The final output is always escaped again by escape().
+        for ($pass = 0; $pass < 5; $pass++) {
+            $decoded = html_entity_decode($value, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $value) {
+                break;
+            }
+            $value = $decoded;
+        }
+
+        return $value;
+    }
+
+    public static function normalizeTextData(mixed $value): mixed
+    {
+        if (is_string($value)) {
+            return self::plainText($value);
+        }
+
+        if (is_array($value)) {
+            foreach ($value as $key => $item) {
+                $value[$key] = self::normalizeTextData($item);
+            }
+        }
+
+        return $value;
     }
 
     /**

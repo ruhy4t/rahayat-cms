@@ -93,7 +93,7 @@ $flash = $data['flash'] ?? null;
                             </span>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="editMenu(<?= e(json_encode($menu)) ?>)"
+                            <button onclick='editMenu(<?= json_encode(Security::normalizeTextData($menu), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'
                                 class="p-1.5 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

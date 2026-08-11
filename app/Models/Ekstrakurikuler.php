@@ -61,6 +61,12 @@ class Ekstrakurikuler extends Model
 
     private function expandStructuredData(array $item): array
     {
+        foreach (['name', 'description', 'schedule', 'supervisor'] as $field) {
+            if (array_key_exists($field, $item)) {
+                $item[$field] = Security::plainText($item[$field]);
+            }
+        }
+
         $item['supervisors'] = $this->decodeList($item['supervisors_json'] ?? null);
         if ($item['supervisors'] === [] && trim((string) ($item['supervisor'] ?? '')) !== '') {
             $item['supervisors'] = [[
@@ -78,8 +84,24 @@ class Ekstrakurikuler extends Model
             ]];
         }
 
-        $item['achievements'] = $this->decodeList($item['achievements_json'] ?? null);
+        $item['supervisors'] = $this->normalizeList($item['supervisors']);
+        $item['schedules'] = $this->normalizeList($item['schedules']);
+        $item['achievements'] = $this->normalizeList($this->decodeList($item['achievements_json'] ?? null));
         return $item;
+    }
+
+    private function normalizeList(array $items): array
+    {
+        foreach ($items as &$item) {
+            foreach ($item as $key => $value) {
+                if (is_scalar($value) || $value === null) {
+                    $item[$key] = Security::plainText($value);
+                }
+            }
+        }
+        unset($item);
+
+        return $items;
     }
 
     private function decodeList(mixed $value): array

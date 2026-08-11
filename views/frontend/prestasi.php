@@ -74,8 +74,8 @@ $currentCategory = $data['current_category'] ?? '';
                             class="relative block w-full pt-[60%] bg-slate-100 overflow-hidden"
                             aria-label="Baca selengkapnya: <?= e($item['title']) ?>">
                             <?php if (!empty($item['image'])): ?>
-                                <img src="/storage/<?= htmlspecialchars($item['image']) ?>"
-                                    alt="<?= htmlspecialchars($item['title']) ?>"
+                                <img src="/storage/<?= e($item['image']) ?>"
+                                    alt="<?= e($item['title']) ?>"
                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                     loading="lazy">
                             <?php else: ?>
@@ -91,7 +91,7 @@ $currentCategory = $data['current_category'] ?? '';
                             <div class="absolute top-4 left-4">
                                 <span
                                     class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md shadow-sm <?= $item['category'] === 'Sekolah' ? 'bg-blue-500/90 text-white' : ($item['category'] === 'Guru' ? 'bg-purple-500/90 text-white' : 'bg-amber-500/90 text-white') ?>">
-                                    <?= htmlspecialchars($item['category']) ?>
+                                    <?= e($item['category']) ?>
                                 </span>
                             </div>
                         </a>
@@ -113,13 +113,13 @@ $currentCategory = $data['current_category'] ?? '';
                             <h3 class="text-xl font-bold text-slate-900 mb-3 leading-snug">
                                 <a href="/prestasi/<?= (int) $item['id'] ?>"
                                     class="group-hover:text-primary-600 transition-colors">
-                                    <?= htmlspecialchars($item['title']) ?>
+                                    <?= e($item['title']) ?>
                                 </a>
                             </h3>
 
                             <?php if (!empty($item['description'])): ?>
                                 <p class="text-slate-600 line-clamp-3 text-sm flex-grow mb-4">
-                                    <?= htmlspecialchars(strip_tags($item['description'])) ?>
+                                    <?= e(strip_tags($item['description'])) ?>
                                 </p>
                             <?php endif; ?>
                             <a href="/prestasi/<?= (int) $item['id'] ?>"

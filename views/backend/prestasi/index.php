@@ -17,7 +17,7 @@
     <?php if (isset($flash)): ?>
         <div
             class="p-4 rounded-lg <?= $flash['type'] === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800' ?>">
-            <?= htmlspecialchars($flash['message']) ?>
+            <?= e($flash['message']) ?>
         </div>
     <?php endif; ?>
 
@@ -47,8 +47,8 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-4">
                                         <?php if (!empty($item['image'])): ?>
-                                            <img src="/storage/<?= htmlspecialchars($item['image']) ?>"
-                                                alt="<?= htmlspecialchars($item['title']) ?>"
+                                            <img src="/storage/<?= e($item['image']) ?>"
+                                                alt="<?= e($item['title']) ?>"
                                                 class="w-16 h-16 object-cover rounded-lg">
                                         <?php else: ?>
                                             <div
@@ -61,7 +61,7 @@
                                         <?php endif; ?>
                                         <div>
                                             <h3 class="font-medium text-slate-900 line-clamp-1">
-                                                <?= htmlspecialchars($item['title']) ?>
+                                                <?= e($item['title']) ?>
                                             </h3>
                                         </div>
                                     </div>
@@ -69,14 +69,14 @@
                                 <td class="px-6 py-4">
                                     <span
                                         class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium <?= $item['category'] === 'Sekolah' ? 'bg-blue-100 text-blue-800' : ($item['category'] === 'Guru' ? 'bg-purple-100 text-purple-800' : 'bg-amber-100 text-amber-800') ?>">
-                                        <?= htmlspecialchars($item['category']) ?>
+                                        <?= e($item['category']) ?>
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600">
                                     <?= date('d M Y', strtotime($item['date'])) ?>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-600">
-                                    <?= htmlspecialchars($item['author_name'] ?? 'Sistem') ?>
+                                    <?= e($item['author_name'] ?? 'Sistem') ?>
                                 </td>
                                 <td class="px-6 py-4 text-right space-x-2">
                                     <a href="/admin/prestasi/edit/<?= $item['id'] ?>"
