@@ -46,7 +46,11 @@ $quickLinks = [
                 </div>
             </div>
 
-            <?php $featuredFacility = $cendekiaFacilities[0]; ?>
+            <?php
+            $featuredFacility = $cendekiaFacilities[0];
+            $highlightFacilities = array_slice($cendekiaFacilities, 1, 4);
+            $additionalFacilities = array_slice($cendekiaFacilities, 5);
+            ?>
             <div class="grid lg:grid-cols-12 gap-4 lg:h-[560px]">
                 <article class="group lg:col-span-7 relative min-h-[390px] lg:min-h-0 overflow-hidden bg-slate-900">
                     <?php if (!empty($featuredFacility['image'])): ?>
@@ -64,7 +68,7 @@ $quickLinks = [
                 </article>
 
                 <div class="lg:col-span-5 grid sm:grid-cols-2 gap-4">
-                    <?php foreach (array_slice($cendekiaFacilities, 1, 4) as $facilityIndex => $facility): ?>
+                    <?php foreach ($highlightFacilities as $facilityIndex => $facility): ?>
                         <article class="group relative min-h-[230px] overflow-hidden bg-slate-100">
                             <?php if (!empty($facility['image'])): ?>
                                 <img src="/storage/<?= e($facility['image']) ?>" alt="<?= e($facility['name']) ?>"
@@ -81,6 +85,30 @@ $quickLinks = [
                     <?php endforeach; ?>
                 </div>
             </div>
+
+            <?php if (!empty($additionalFacilities)): ?>
+                <div class="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <?php foreach ($additionalFacilities as $facilityIndex => $facility): ?>
+                        <article class="group relative min-h-[260px] overflow-hidden bg-slate-100">
+                            <?php if (!empty($facility['image'])): ?>
+                                <img src="/storage/<?= e($facility['image']) ?>" alt="<?= e($facility['name']) ?>"
+                                    class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async">
+                            <?php else: ?>
+                                <div class="absolute inset-0 cendekia-photo-fallback"></div>
+                            <?php endif; ?>
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/10 to-transparent"></div>
+                            <div class="absolute inset-x-0 bottom-0 p-5 text-white">
+                                <span class="text-[10px] font-black text-cyan-300"><?= str_pad((string) ($facilityIndex + 6), 2, '0', STR_PAD_LEFT) ?></span>
+                                <span class="block mt-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-cyan-200"><?= e($facility['type'] ?? 'Fasilitas') ?></span>
+                                <h3 class="mt-1 text-lg font-extrabold"><?= e($facility['name']) ?></h3>
+                                <?php if (!empty($facility['description'])): ?>
+                                    <p class="mt-2 text-sm text-slate-300 line-clamp-2"><?= e($facility['description']) ?></p>
+                                <?php endif; ?>
+                            </div>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </section>
 <?php endif; ?>

@@ -274,9 +274,8 @@ if ($theme === 'cendekia-smp') {
     </section>
 <?php endif; ?>
 
-<!-- Fasilitas Section (Default Theme) -->
-<?php if ($theme === 'indigo-modern'): ?>
-    <?php if (!empty($facilities)): ?>
+<!-- Fasilitas Section (All non-Cendekia themes) -->
+<?php if (!empty($facilities)): ?>
         <section class="py-16 lg:py-24 bg-white relative overflow-hidden">
             <!-- Background elements -->
             <div class="absolute top-0 right-0 -translate-y-12 translate-x-1/3 opacity-5 pointer-events-none text-primary-600">
@@ -300,10 +299,7 @@ if ($theme === 'cendekia-smp') {
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <?php $i = 0;
-                    foreach ($facilities as $fasilitas):
-                        if ($i++ >= 4)
-                            break; ?>
+                    <?php foreach ($facilities as $fasilitas): ?>
                         <div
                             class="group relative rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
                             <div class="aspect-[4/3] bg-slate-100 relative">
@@ -353,7 +349,6 @@ if ($theme === 'cendekia-smp') {
                 </div>
             </div>
         </section>
-    <?php endif; ?>
 <?php endif; ?>
 
 <!-- Ekstrakurikuler Section (All non-Cendekia themes) -->

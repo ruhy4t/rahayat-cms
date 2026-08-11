@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.0 - 2026-08-11
+
+- Seluruh fasilitas aktif ditampilkan pada beranda di semua tema tanpa batas empat atau lima item.
+- Tema Cendekia SMP mempertahankan komposisi fasilitas unggulan dan menampilkan fasilitas berikutnya dalam grid lanjutan yang proporsional.
+- Urutan fasilitas publik tetap mengikuti pengaturan urutan tampil di panel admin.
+
 ## 1.9.1 - 2026-08-11
 
 - Penyimpanan teks biasa tidak lagi mengubah karakter khusus menjadi entity HTML.
