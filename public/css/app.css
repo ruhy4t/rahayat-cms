@@ -48,10 +48,10 @@
     height: 6rem;
     flex: 0 0 6rem;
     place-items: center;
-    border: 4px solid rgba(var(--color-primary-600, 79 70 229) / 0.12);
+    border: 4px solid rgba(var(--primary-rgb-600, 79 70 229) / 0.12);
     border-radius: 9999px;
     background-color: #ffffff;
-    color: rgb(var(--color-primary-600, 79 70 229));
+    color: rgb(var(--primary-rgb-600, 79 70 229));
     box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
     font-size: 2.25rem;
     font-weight: 800;
@@ -108,8 +108,8 @@ form textarea:hover {
 form input:not([type="hidden"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):focus,
 form select:focus,
 form textarea:focus {
-    border-color: rgb(var(--color-primary-600, 79 70 229)) !important;
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-500, 79 70 229) / 0.16) !important;
+    border-color: rgb(var(--primary-rgb-600, 79 70 229)) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-rgb-500, 79 70 229) / 0.16) !important;
     outline: none;
 }
 

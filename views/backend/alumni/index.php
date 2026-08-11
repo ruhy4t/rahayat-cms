@@ -177,7 +177,7 @@ $chartData = [
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="/vendor/chart.js/chart.umd.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/chart.js/chart.umd.js') ?>"></script>
 <script>
 const alumniChartData = <?= json_encode($chartData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 const barValueLabels = {

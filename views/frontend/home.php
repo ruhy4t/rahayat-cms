@@ -31,7 +31,8 @@ if ($theme === 'cendekia-smp') {
                     <div class="hero-slide absolute inset-0 transition-opacity duration-1000 <?= $index === 0 ? 'opacity-100' : 'opacity-0' ?>"
                         data-slide="<?= $index ?>">
                         <img src="/storage/<?= e($slide['image']) ?>" alt="<?= e($slide['title'] ?? '') ?>"
-                            class="w-full h-full object-cover" loading="<?= $index === 0 ? 'eager' : 'lazy' ?>">
+                            class="w-full h-full object-cover" loading="<?= $index === 0 ? 'eager' : 'lazy' ?>"
+                            fetchpriority="<?= $index === 0 ? 'high' : 'low' ?>" decoding="async">
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -378,7 +379,7 @@ if ($theme === 'cendekia-smp') {
                                     class="w-16 h-16 rounded-xl shrink-0 overflow-hidden bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center text-primary-500 relative">
                                     <?php if (!empty($item['image'])): ?>
                                         <img src="/storage/<?= e($item['image']) ?>" alt="<?= e($item['name']) ?>"
-                                            class="w-full h-full object-cover">
+                                            class="w-full h-full object-cover" loading="lazy" decoding="async">
                                     <?php else: ?>
                                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"

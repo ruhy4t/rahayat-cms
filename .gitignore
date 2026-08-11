@@ -23,7 +23,7 @@ storage/**
 !storage/uploads/*/.gitkeep
 
 # Local dependency/build folders
-vendor/
+/vendor/
 node_modules/
 
 # Database dumps

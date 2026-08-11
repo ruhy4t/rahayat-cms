@@ -39,7 +39,8 @@ $publishedNews = array_values($publishedNews);
                             <a href="/berita/<?= e($item['slug']) ?>" class="absolute inset-0 z-20"></a>
                             <?php if (!empty($item['image'])): ?>
                                 <img src="/storage/<?= e($item['image']) ?>" alt="<?= e($item['title']) ?>"
-                                    class="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 grayscale-[30%] group-hover:grayscale-0">
+                                    class="w-full h-full object-cover group-hover:scale-110 group-hover:rotate-1 transition-transform duration-700 grayscale-[30%] group-hover:grayscale-0"
+                                    loading="lazy" decoding="async">
                             <?php else: ?>
                                 <div class="w-full h-full flex items-center justify-center p-6 bg-slate-200">
                                     <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

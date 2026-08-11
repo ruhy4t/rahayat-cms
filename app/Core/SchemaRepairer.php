@@ -24,7 +24,38 @@ class SchemaRepairer
         }
 
         self::$checked = true;
-        (new self())->run();
+
+        $marker = self::schemaMarkerPath();
+        if (!SCHEMA_CHECK_ALWAYS && is_file($marker)) {
+            $cachedVersion = trim((string) @file_get_contents($marker));
+            if (hash_equals(APP_VERSION, $cachedVersion)) {
+                return;
+            }
+        }
+
+        $repairer = new self();
+        $repairer->run();
+
+        if ($repairer->schemaVersion() === APP_VERSION) {
+            self::writeSchemaMarker($marker);
+        }
+    }
+
+    private static function schemaMarkerPath(): string
+    {
+        return STORAGE_PATH . '/cache/schema-version';
+    }
+
+    private static function writeSchemaMarker(string $marker): void
+    {
+        $directory = dirname($marker);
+        if (!is_dir($directory) && !@mkdir($directory, 0750, true) && !is_dir($directory)) {
+            return;
+        }
+
+        if (@file_put_contents($marker, APP_VERSION, LOCK_EX) !== false && function_exists('chmod')) {
+            @chmod($marker, 0640);
+        }
     }
 
     private function run(): void

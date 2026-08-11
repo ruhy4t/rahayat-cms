@@ -159,9 +159,7 @@ class InstallController extends Controller
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
         ];
-        if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
-            $options[PDO::MYSQL_ATTR_MULTI_STATEMENTS] = true;
-        }
+        $options[\Pdo\Mysql::ATTR_MULTI_STATEMENTS] = true;
 
         $quotedDb = '`' . str_replace('`', '``', $dbName) . '`';
 

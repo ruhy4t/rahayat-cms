@@ -39,6 +39,9 @@ define('UPDATE_BRANCH', getenv('UPDATE_BRANCH') ?: 'main');
 define('UPDATE_CHECK_URL', getenv('UPDATE_CHECK_URL') ?: 'https://raw.githubusercontent.com/ruhy4t/rahayat-cms/main/version.json');
 define('UPDATE_DOWNLOAD_URL', getenv('UPDATE_DOWNLOAD_URL') ?: 'https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip');
 
+// Schema is verified once per application version and cached on disk.
+define('SCHEMA_CHECK_ALWAYS', filter_var(getenv('SCHEMA_CHECK_ALWAYS') ?: false, FILTER_VALIDATE_BOOLEAN));
+
 // Default Controller and Action
 define('DEFAULT_CONTROLLER', 'Home');
 define('DEFAULT_ACTION', 'index');
@@ -47,7 +50,7 @@ define('DEFAULT_ACTION', 'index');
 define('CSRF_TOKEN_NAME', 'csrf_token');
 define('CSRF_TOKEN_EXPIRY', 3600); // 1 hour
 
-// Password Hashing (PHP 8.3+ Argon2ID)
+// Password Hashing (Argon2ID)
 define('PASSWORD_ALGO', PASSWORD_ARGON2ID);
 define('PASSWORD_OPTIONS', [
     'memory_cost' => PASSWORD_ARGON2_DEFAULT_MEMORY_COST,

@@ -1,6 +1,6 @@
 # Rahayat CMS
 
-PHP 8.5 Native MVC dengan MariaDB/MySQL.
+PHP 8.5 Native MVC dengan MariaDB/MySQL, kompatibel dengan PHP 8.4.
 
 ## Disclaimer Aplikasi
 
@@ -56,12 +56,17 @@ SetEnv APP_URL https://domain-sekolah.sch.id
 SetEnv REQUIRED_DOMAIN_SUFFIX .sch.id
 SetEnv UPDATE_ENABLED false
 SetEnv UPDATE_BRANCH main
+SetEnv SCHEMA_CHECK_ALWAYS false
 SetEnv DB_HOST localhost
 SetEnv DB_NAME schoolweb_db
 SetEnv DB_USER schoolweb_user
 SetEnv DB_PASS password-kuat-anda
 SetEnv DATA_ENCRYPTION_KEY ganti-dengan-kunci-acak-minimal-32-karakter
 ```
+
+Schema database diverifikasi sekali untuk setiap versi aplikasi lalu hasilnya
+disimpan di `storage/cache/schema-version`. Hapus file tersebut atau set
+`SCHEMA_CHECK_ALWAYS=true` hanya saat ingin memaksa pemeriksaan ulang.
 
 `DATA_ENCRYPTION_KEY` digunakan untuk mengenkripsi kontak pribadi alumni.
 Gunakan nilai acak yang kuat dan simpan di password manager/backup terenkripsi.
@@ -95,6 +100,21 @@ Installer akan:
 Halaman install tetap mengikuti pembatasan domain `.sch.id` untuk deployment
 online. Domain lokal seperti `localhost`, `.test`, dan `.local` hanya untuk
 development.
+
+### 5. Build Aset Frontend
+
+Tailwind CSS, font, dan library antarmuka disajikan dari `public/` tanpa CDN.
+File hasil build sudah disertakan dalam paket rilis, sehingga server production
+tidak memerlukan Node.js. Pengembang yang mengubah class atau aset frontend
+harus menjalankan:
+
+```bash
+npm install
+npm run build:css
+```
+
+Commit `package-lock.json`, `public/css/tailwind.min.css`, `public/css/fonts.css`,
+`public/fonts/`, dan `public/vendor/` bersama perubahan frontend.
 
 ## Login Admin
 Segera ganti password admin setelah import database pertama kali.

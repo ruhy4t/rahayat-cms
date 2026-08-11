@@ -4,18 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdn.ckeditor.com 'unsafe-inline';
-        style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
-        img-src 'self' data: blob: https://*;
-        connect-src 'self' https://cdn.ckeditor.com https://*.ckeditor.com;
-        frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com;
-        font-src 'self' https://fonts.gstatic.com;
-        object-src 'none';
-        base-uri 'self';
-        form-action 'self';
-    ">
     <?= Security::csrfMeta() ?>
 
     <title>
@@ -23,16 +11,9 @@
         <?= e(SCHOOL_NAME) ?>
     </title>
 
-    <!-- Tailwind CSS via CDN -->
-    <script>
-        // Suppress Tailwind CDN warning
-        // Suppress Tailwind CDN warning
-        const originalWarn = console.warn;
-        console.warn = (...args) => {
-            if (args[0] && args[0].includes && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
-            originalWarn.apply(console, args);
-        };
-    </script>
+    <!-- Compiled production assets -->
+    <link rel="stylesheet" href="/css/tailwind.min.css?v=<?= filemtime(ROOT_PATH . '/public/css/tailwind.min.css') ?>">
+    <link rel="stylesheet" href="/css/fonts.css?v=<?= filemtime(ROOT_PATH . '/public/css/fonts.css') ?>">
     <style>
         :root {
             <?php
@@ -98,62 +79,21 @@
             $p800 = adjustBrightness($baseColor, -0.4);
             $p900 = adjustBrightness($baseColor, -0.6);
 
-            echo "--color-primary-50: " . hex2rgb($p50) . ";\n";
-            echo "--color-primary-100: " . hex2rgb($p100) . ";\n";
-            echo "--color-primary-200: " . hex2rgb($p200) . ";\n";
-            echo "--color-primary-300: " . hex2rgb($p300) . ";\n";
-            echo "--color-primary-400: " . hex2rgb($p400) . ";\n";
-            echo "--color-primary-500: " . hex2rgb($p500) . ";\n";
-            echo "--color-primary-600: " . hex2rgb($p600) . ";\n";
-            echo "--color-primary-700: " . hex2rgb($p700) . ";\n";
-            echo "--color-primary-800: " . hex2rgb($p800) . ";\n";
-            echo "--color-primary-900: " . hex2rgb($p900) . ";\n";
+            echo "--primary-rgb-50: " . hex2rgb($p50) . ";\n";
+            echo "--primary-rgb-100: " . hex2rgb($p100) . ";\n";
+            echo "--primary-rgb-200: " . hex2rgb($p200) . ";\n";
+            echo "--primary-rgb-300: " . hex2rgb($p300) . ";\n";
+            echo "--primary-rgb-400: " . hex2rgb($p400) . ";\n";
+            echo "--primary-rgb-500: " . hex2rgb($p500) . ";\n";
+            echo "--primary-rgb-600: " . hex2rgb($p600) . ";\n";
+            echo "--primary-rgb-700: " . hex2rgb($p700) . ";\n";
+            echo "--primary-rgb-800: " . hex2rgb($p800) . ";\n";
+            echo "--primary-rgb-900: " . hex2rgb($p900) . ";\n";
             ?>
         }
     </style>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: {
-                            50: 'rgb(var(--color-primary-50) / <alpha-value>)',
-                            100: 'rgb(var(--color-primary-100) / <alpha-value>)',
-                            200: 'rgb(var(--color-primary-200) / <alpha-value>)',
-                            300: 'rgb(var(--color-primary-300) / <alpha-value>)',
-                            400: 'rgb(var(--color-primary-400) / <alpha-value>)',
-                            500: 'rgb(var(--color-primary-500) / <alpha-value>)',
-                            600: 'rgb(var(--color-primary-600) / <alpha-value>)',
-                            700: 'rgb(var(--color-primary-700) / <alpha-value>)',
-                            800: 'rgb(var(--color-primary-800) / <alpha-value>)',
-                            900: 'rgb(var(--color-primary-900) / <alpha-value>)',
-                            DEFAULT: 'rgb(var(--color-primary-500) / <alpha-value>)',
-                        }
-                    },
-                    borderRadius: {
-                        'none': '0px',
-                        'sm': 'var(--base-radius-sm, 0.125rem)',
-                        DEFAULT: 'var(--base-radius, 0.25rem)',
-                        'md': 'var(--base-radius-md, 0.375rem)',
-                        'lg': 'var(--base-radius-lg, 0.5rem)',
-                        'xl': 'var(--base-radius-xl, 0.75rem)',
-                        '2xl': 'var(--base-radius-2xl, 1rem)',
-                        '3xl': 'var(--base-radius-3xl, 1.5rem)',
-                        'full': '9999px',
-                    }
-                }
-            }
-        }
-    </script>
-
     <!-- Custom CSS -->
     <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
-
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         body {
@@ -189,20 +129,20 @@
             .shadow-lg,
             .shadow-xl,
             .shadow-2xl {
-                box-shadow: 4px 4px 0px rgba(var(--color-primary-900) / 0.2) !important;
-                border: 1px solid rgb(var(--color-primary-200));
+                box-shadow: 4px 4px 0px rgba(var(--primary-rgb-900) / 0.2) !important;
+                border: 1px solid rgb(var(--primary-rgb-200));
             }
 
             .shadow-sm,
             .shadow {
-                box-shadow: 2px 2px 0px rgba(var(--color-primary-900) / 0.1) !important;
+                box-shadow: 2px 2px 0px rgba(var(--primary-rgb-900) / 0.1) !important;
             }
 
         <?php endif; ?>
     </style>
 
     <!-- SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/vendor/sweetalert2/sweetalert2.all.min.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/sweetalert2/sweetalert2.all.min.js') ?>"></script>
 </head>
 
 <body class="bg-slate-100 min-h-screen theme-<?= e($themeName) ?>">
