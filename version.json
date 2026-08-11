@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.7.1",
-  "released_at": "2026-08-09",
-  "summary": "Penyempurnaan formulir alumni, pemisahan kontak WhatsApp dan email, serta penguatan batas ukuran unggahan gambar.",
+  "version": "1.8.0",
+  "released_at": "2026-08-11",
+  "summary": "Kompatibilitas PHP 8.4 dan 8.5, aset Tailwind serta vendor lokal, peningkatan CSP, cache, dan performa pemuatan halaman.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

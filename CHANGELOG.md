@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 1.8.0 - 2026-08-11
+
 - Tailwind CSS 4, font tema, CKEditor, SweetAlert, Chart.js, dan SortableJS kini dibangun atau disajikan lokal tanpa ketergantungan CDN production.
 - CSP response header diperketat ke sumber lokal dan cache aset statis diperpanjang dengan cache busting.
 - Hero seluruh tema memperoleh prioritas LCP yang konsisten; gambar berita dan ekstrakurikuler di bawah fold memakai lazy loading.
