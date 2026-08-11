@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Tailwind CSS 4, font tema, CKEditor, SweetAlert, Chart.js, dan SortableJS kini dibangun atau disajikan lokal tanpa ketergantungan CDN production.
+- CSP response header diperketat ke sumber lokal dan cache aset statis diperpanjang dengan cache busting.
+- Hero seluruh tema memperoleh prioritas LCP yang konsisten; gambar berita dan ekstrakurikuler di bawah fold memakai lazy loading.
+- Pemeriksaan schema dicache per versi aplikasi agar request normal tidak menjalankan query versi berulang.
+- Runtime utama ditetapkan ke PHP 8.5 dengan kompatibilitas minimum PHP 8.4.
+
 ## 1.7.1 - 2026-08-09
 
 - Kolom kontak verifikasi alumni dipisahkan menjadi nomor WhatsApp dan email, termasuk pada pengelolaan admin dan ekspor Excel.

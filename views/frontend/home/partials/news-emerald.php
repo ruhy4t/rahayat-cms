@@ -23,7 +23,7 @@ $publishedNews = array_values($publishedNews);
                 <div class="lg:col-span-7 group cursor-pointer relative rounded-[2rem] overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-primary-600/20 transition-all duration-500 h-[450px] border border-slate-200/50">
                     <a href="/berita/<?= e($featured['slug']) ?>" class="absolute inset-0 z-20"></a>
                     <?php if (!empty($featured['image'])): ?>
-                        <img src="/storage/<?= e($featured['image']) ?>" alt="<?= e($featured['title']) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700">
+                        <img src="/storage/<?= e($featured['image']) ?>" alt="<?= e($featured['title']) ?>" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async">
                     <?php else: ?>
                         <div class="w-full h-full bg-slate-200 flex items-center justify-center">
                             <svg class="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
@@ -60,7 +60,7 @@ $publishedNews = array_values($publishedNews);
                                 <a href="/berita/<?= e($item['slug']) ?>" class="absolute inset-0 z-20"></a>
                                 <div class="w-1/3 rounded-xl overflow-hidden relative shadow-sm">
                                     <?php if (!empty($item['image'])): ?>
-                                        <img src="/storage/<?= e($item['image']) ?>" alt="<?= e($item['title']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                        <img src="/storage/<?= e($item['image']) ?>" alt="<?= e($item['title']) ?>" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async">
                                     <?php else: ?>
                                         <div class="w-full h-full bg-slate-50 flex items-center justify-center">
                                             <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>

@@ -66,7 +66,7 @@ $spmbTarget = ($spmbPublic['target'] ?? '_self') === '_blank' ? '_blank' : '_sel
                     <?php if (!empty($heroImages[0])): ?>
                         <img src="/storage/<?= e($heroImages[0]['image']) ?>"
                             alt="<?= e($heroImages[0]['title'] ?? 'Kegiatan sekolah') ?>"
-                            class="w-full h-full object-cover" loading="eager" fetchpriority="high">
+                            class="w-full h-full object-cover" loading="eager" fetchpriority="high" decoding="async">
                     <?php else: ?>
                         <div class="w-full h-full cendekia-photo-fallback flex items-center justify-center">
                             <span class="text-8xl font-black text-primary-200"><?= e(strtoupper(substr($schoolName, 0, 1))) ?></span>
@@ -83,7 +83,7 @@ $spmbTarget = ($spmbPublic['target'] ?? '_self') === '_blank' ? '_blank' : '_sel
                     <?php if (!empty($heroImages[1])): ?>
                         <img src="/storage/<?= e($heroImages[1]['image']) ?>"
                             alt="<?= e($heroImages[1]['title'] ?? 'Aktivitas murid') ?>"
-                            class="w-full h-full object-cover" loading="lazy">
+                            class="w-full h-full object-cover" loading="lazy" fetchpriority="low" decoding="async">
                     <?php else: ?>
                         <div class="w-full h-full bg-primary-700 p-6 flex items-end">
                             <p class="text-white text-lg sm:text-2xl font-extrabold leading-tight"><?= e($profile['tagline'] ?? 'Belajar, berteman, dan berprestasi.') ?></p>

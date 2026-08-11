@@ -119,7 +119,7 @@ abstract class Controller
         }
 
         // Extract data to variables
-        extract($this->data);
+        extract($this->data, EXTR_SKIP);
 
         // Start output buffering
         ob_start();

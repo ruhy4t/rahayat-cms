@@ -8,7 +8,7 @@ $profile = $data['profile'] ?? [];
 $flash = $data['flash'] ?? [];
 ?>
 
-<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/ckeditor.js"></script>
+<script src="/vendor/ckeditor5/ckeditor.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/ckeditor5/ckeditor.js') ?>"></script>
 
 <style>
     /* Restore list styles for CKEditor */

@@ -11,7 +11,7 @@ $defaults = $defaults ?? [];
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <?= Security::csrfMeta() ?>
     <title>Install Rahayat CMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/tailwind.min.css?v=<?= filemtime(ROOT_PATH . '/public/css/tailwind.min.css') ?>">
 </head>
 
 <body class="min-h-screen bg-slate-100 text-slate-800">

@@ -1,9 +1,9 @@
 <?php
 /**
  * ============================================
- * Database Class - PHP 8.3 PDO Wrapper
+ * Database Class - PHP 8.5 PDO Wrapper
  * ============================================
- * Using readonly properties (PHP 8.3 feature)
+ * Compatible with PHP 8.4 and newer.
  */
 
 declare(strict_types=1);
@@ -12,7 +12,7 @@ class Database
 {
     private static ?Database $instance = null;
 
-    // PHP 8.3 readonly properties
+    // Readonly connection metadata.
     public readonly PDO $connection;
     public readonly string $host;
     public readonly string $dbname;
@@ -164,9 +164,14 @@ class Database
     }
 
     /**
-     * Prevent unserialization
+     * Prevent serialization and unserialization of the singleton.
      */
-    public function __wakeup(): void
+    public function __serialize(): array
+    {
+        throw new RuntimeException('Cannot serialize singleton');
+    }
+
+    public function __unserialize(array $data): void
     {
         throw new RuntimeException('Cannot unserialize singleton');
     }

@@ -14,7 +14,8 @@ $spmbButtonTarget = $spmbPublic['target'] ?? '_self';
                 <div class="hero-slide absolute inset-0 transition-opacity duration-1000 <?= $index === 0 ? 'opacity-100' : 'opacity-0' ?>"
                     data-slide="<?= $index ?>">
                     <img src="/storage/<?= e($slide['image']) ?>" alt="<?= e($slide['title'] ?? '') ?>"
-                        class="w-full h-full object-cover" loading="<?= $index === 0 ? 'eager' : 'lazy' ?>">
+                        class="w-full h-full object-cover" loading="<?= $index === 0 ? 'eager' : 'lazy' ?>"
+                        fetchpriority="<?= $index === 0 ? 'high' : 'low' ?>" decoding="async">
                 </div>
             <?php endforeach; ?>
         </div>

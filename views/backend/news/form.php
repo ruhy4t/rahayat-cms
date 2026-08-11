@@ -7,7 +7,7 @@ $editorUploadBatch = Security::randomString(32);
 ?>
 
 <!-- CKEditor 5 Superbuild (Includes all features + Table Resize) -->
-<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/super-build/ckeditor.js"></script>
+<script src="/vendor/ckeditor5/ckeditor.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/ckeditor5/ckeditor.js') ?>"></script>
 
 <div class="bg-white rounded-2xl shadow-sm border border-slate-200/50 overflow-hidden">
     <form id="newsForm" enctype="multipart/form-data">

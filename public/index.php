@@ -3,10 +3,15 @@
  * ============================================
  * SchoolWeb CMS - Single Entry Point
  * ============================================
- * PHP 8.3 Native MVC Framework
+ * PHP 8.5 Native MVC Framework (compatible with PHP 8.4)
  */
 
 declare(strict_types=1);
+
+if (PHP_VERSION_ID < 80400) {
+    http_response_code(500);
+    exit('Rahayat CMS memerlukan PHP 8.4 atau versi yang lebih baru.');
+}
 
 // Define base paths
 define('ROOT_PATH', dirname(__DIR__));
@@ -155,6 +160,17 @@ header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: SAMEORIGIN');
 header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()');
+header(
+    "Content-Security-Policy: default-src 'self'; "
+    . "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+    . "style-src 'self' 'unsafe-inline'; "
+    . "font-src 'self' data:; "
+    . "img-src 'self' data: blob: https:; "
+    . "media-src 'self'; "
+    . "frame-src 'self' https://www.google.com https://maps.google.com https://www.youtube.com https://www.youtube-nocookie.com; "
+    . "connect-src 'self'; worker-src 'self' blob:; object-src 'none'; "
+    . "base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+);
 header_remove('X-Powered-By');
 if ($isHttps) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');

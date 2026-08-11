@@ -187,5 +187,5 @@ $flash = $data['flash'] ?? null;
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/vendor/sortablejs/Sortable.min.js?v=<?= filemtime(ROOT_PATH . '/public/vendor/sortablejs/Sortable.min.js') ?>"></script>
 <script src="/js/menu-admin.js?v=<?= filemtime(ROOT_PATH . '/public/js/menu-admin.js') ?>"></script>
