@@ -10,7 +10,22 @@ declare(strict_types=1);
 class Ekstrakurikuler extends Model
 {
     protected string $table = 'ekstrakurikuler';
-    protected array $fillable = ['name', 'description', 'image', 'schedule', 'supervisor', 'is_active', 'sort_order'];
+    protected array $fillable = [
+        'name', 'description', 'image', 'schedule', 'supervisor',
+        'supervisors_json', 'schedules_json', 'achievements_json',
+        'is_active', 'sort_order',
+    ];
+
+    public function all(string $orderBy = 'id', string $direction = 'DESC'): array
+    {
+        return array_map($this->expandStructuredData(...), parent::all($orderBy, $direction));
+    }
+
+    public function find(int $id): array|false
+    {
+        $item = parent::find($id);
+        return $item === false ? false : $this->expandStructuredData($item);
+    }
 
     /**
      * Get all active ekstrakurikuler
@@ -18,7 +33,7 @@ class Ekstrakurikuler extends Model
     public function getActive(): array
     {
         $sql = "SELECT * FROM {$this->table} WHERE is_active = 1 ORDER BY sort_order ASC";
-        return $this->db->fetchAll($sql);
+        return array_map($this->expandStructuredData(...), $this->db->fetchAll($sql));
     }
 
     /**
@@ -30,7 +45,7 @@ class Ekstrakurikuler extends Model
         $stmt = $this->db->getConnection()->prepare($sql);
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return array_map($this->expandStructuredData(...), $stmt->fetchAll(PDO::FETCH_ASSOC));
     }
 
     /**
@@ -42,5 +57,42 @@ class Ekstrakurikuler extends Model
             $this->update((int) $id, ['sort_order' => $index]);
         }
         return true;
+    }
+
+    private function expandStructuredData(array $item): array
+    {
+        $item['supervisors'] = $this->decodeList($item['supervisors_json'] ?? null);
+        if ($item['supervisors'] === [] && trim((string) ($item['supervisor'] ?? '')) !== '') {
+            $item['supervisors'] = [[
+                'name' => trim((string) $item['supervisor']),
+                'role' => 'Pembina',
+            ]];
+        }
+
+        $item['schedules'] = $this->decodeList($item['schedules_json'] ?? null);
+        if ($item['schedules'] === [] && trim((string) ($item['schedule'] ?? '')) !== '') {
+            $item['schedules'] = [[
+                'day' => '',
+                'time' => trim((string) $item['schedule']),
+                'note' => '',
+            ]];
+        }
+
+        $item['achievements'] = $this->decodeList($item['achievements_json'] ?? null);
+        return $item;
+    }
+
+    private function decodeList(mixed $value): array
+    {
+        if (!is_string($value) || trim($value) === '') {
+            return [];
+        }
+
+        try {
+            $decoded = json_decode($value, true, 32, JSON_THROW_ON_ERROR);
+            return is_array($decoded) ? array_values(array_filter($decoded, 'is_array')) : [];
+        } catch (JsonException) {
+            return [];
+        }
     }
 }

@@ -393,14 +393,19 @@ if ($theme === 'cendekia-smp') {
                                         <?= e($item['name']) ?>
                                     </h3>
 
-                                    <?php if (!empty($item['schedule'])): ?>
+                                    <?php if (!empty($item['schedules']) || !empty($item['schedule'])): ?>
                                         <div class="text-xs text-slate-500 flex items-center mb-2">
                                             <svg class="w-3.5 h-3.5 mr-1 text-slate-400" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                             </svg>
-                                            <?= e($item['schedule']) ?>
+                                            <?php
+                                            $homeSchedule = $item['schedules'][0] ?? null;
+                                            echo e($homeSchedule
+                                                ? trim(($homeSchedule['day'] ?? '') . ' ' . ($homeSchedule['time'] ?? ''))
+                                                : (string) $item['schedule']);
+                                            ?>
                                         </div>
                                     <?php endif; ?>
 

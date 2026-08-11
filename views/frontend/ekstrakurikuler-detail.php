@@ -1,4 +1,9 @@
-<?php $item = $data['ekskulItem'] ?? []; ?>
+<?php
+$item = $data['ekskulItem'] ?? [];
+$supervisors = $item['supervisors'] ?? [];
+$schedules = $item['schedules'] ?? [];
+$achievements = $item['achievements'] ?? [];
+?>
 
 <article class="py-12 lg:py-16 bg-slate-50">
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -28,9 +33,9 @@
                     <?= e($item['name'] ?? '') ?>
                 </h1>
 
-                <?php if (!empty($item['schedule']) || !empty($item['supervisor'])): ?>
+                <?php if (!empty($schedules) || !empty($supervisors)): ?>
                     <div class="grid sm:grid-cols-2 gap-4 mb-9">
-                        <?php if (!empty($item['schedule'])): ?>
+                        <?php if (!empty($schedules)): ?>
                             <div class="flex gap-3 p-4 rounded-xl bg-primary-50 text-slate-700">
                                 <svg class="w-6 h-6 text-primary-600 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -38,12 +43,19 @@
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wide">Jadwal</p>
-                                    <p class="font-semibold mt-1"><?= e($item['schedule']) ?></p>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wide">Jadwal Kegiatan</p>
+                                    <ul class="mt-2 space-y-2">
+                                        <?php foreach ($schedules as $schedule): ?>
+                                            <li>
+                                                <strong class="block"><?= e($schedule['day'] ?? '') ?><?= !empty($schedule['time']) ? ', ' . e($schedule['time']) : '' ?></strong>
+                                                <?php if (!empty($schedule['note'])): ?><span class="text-sm text-slate-600"><?= e($schedule['note']) ?></span><?php endif; ?>
+                                            </li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
                             </div>
                         <?php endif; ?>
-                        <?php if (!empty($item['supervisor'])): ?>
+                        <?php if (!empty($supervisors)): ?>
                             <div class="flex gap-3 p-4 rounded-xl bg-primary-50 text-slate-700">
                                 <svg class="w-6 h-6 text-primary-600 shrink-0" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -51,8 +63,12 @@
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                                 <div>
-                                    <p class="text-xs text-slate-500 uppercase tracking-wide">Pembina</p>
-                                    <p class="font-semibold mt-1"><?= e($item['supervisor']) ?></p>
+                                    <p class="text-xs text-slate-500 uppercase tracking-wide">Pembina dan Pelatih</p>
+                                    <ul class="mt-2 space-y-2">
+                                        <?php foreach ($supervisors as $person): ?>
+                                            <li><strong><?= e($person['name'] ?? '') ?></strong><span class="block text-sm text-slate-600"><?= e($person['role'] ?? 'Pembina') ?></span></li>
+                                        <?php endforeach; ?>
+                                    </ul>
                                 </div>
                             </div>
                         <?php endif; ?>
@@ -66,6 +82,26 @@
                         <p>Informasi lengkap ekstrakurikuler ini akan segera diperbarui.</p>
                     <?php endif; ?>
                 </div>
+
+                <?php if (!empty($achievements)): ?>
+                    <section class="mt-10 pt-8 border-t border-slate-200" aria-labelledby="ekskul-achievements">
+                        <span class="text-amber-600 font-semibold text-sm uppercase tracking-wider">Pencapaian</span>
+                        <h2 id="ekskul-achievements" class="mt-2 text-2xl font-bold text-slate-900">Prestasi yang Pernah Diraih</h2>
+                        <div class="mt-5 grid sm:grid-cols-2 gap-3">
+                            <?php foreach ($achievements as $achievement): ?>
+                                <div class="flex gap-3 p-4 rounded-xl border border-amber-200 bg-amber-50 text-slate-800">
+                                    <svg class="w-6 h-6 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 21h8m-4-4v4M7 4h10v4a5 5 0 01-10 0V4zm0 2H4v1a4 4 0 004 4m9-5h3v1a4 4 0 01-4 4" />
+                                    </svg>
+                                    <div>
+                                        <strong class="block"><?= e($achievement['title'] ?? '') ?></strong>
+                                        <?php if (!empty($achievement['year'])): ?><span class="text-sm text-slate-600">Tahun <?= e($achievement['year']) ?></span><?php endif; ?>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </section>
+                <?php endif; ?>
 
                 <div class="mt-10 pt-7 border-t border-slate-200">
                     <a href="/#ekstrakurikuler"

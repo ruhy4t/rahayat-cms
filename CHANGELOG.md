@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 1.9.0 - 2026-08-11
+
+- Seluruh ekstrakurikuler aktif ditampilkan pada beranda tanpa batas enam item pada tema Cendekia SMP.
+- Data ekstrakurikuler mendukung banyak pembina atau pelatih, jadwal pada banyak hari, dan daftar prestasi beserta tahun pencapaiannya.
+- Data pembina dan jadwal lama tetap dibaca sebagai fallback selama proses upgrade schema otomatis.
+- Lebar konten tema Cendekia SMP dibatasi secara proporsional pada layar ultrawide sambil mempertahankan gaya editorial yang lebar.
+
 ## 1.8.0 - 2026-08-11
 
 - Tailwind CSS 4, font tema, CKEditor, SweetAlert, Chart.js, dan SortableJS kini dibangun atau disajikan lokal tanpa ketergantungan CDN production.

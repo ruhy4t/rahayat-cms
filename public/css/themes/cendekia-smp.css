@@ -38,11 +38,10 @@
         #f7f9ff;
 }
 
-/* Full-width shell with responsive gutters; long-form detail pages retain their
-   narrower reading widths for readability. */
+/* Keep the editorial layout wide without allowing it to stretch edge-to-edge on
+   ultrawide screens. The Tailwind max-width utilities retain their own limits. */
 .theme-cendekia-smp :is(.max-w-\[1440px\], .max-w-\[1320px\], .container) {
     width: 100%;
-    max-width: none !important;
 }
 
 .theme-cendekia-smp .cendekia-hero {

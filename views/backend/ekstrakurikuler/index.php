@@ -73,19 +73,19 @@ $flash = $data['flash'] ?? [];
                     </h3>
 
                     <div class="space-y-1 my-3">
-                        <?php if (!empty($item['supervisor'])): ?>
+                        <?php if (!empty($item['supervisors'])): ?>
                             <p class="text-xs text-slate-600 flex items-center">
                                 <svg class="w-3.5 h-3.5 mr-1.5 text-slate-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
-                                Pembina:
-                                <?= e($item['supervisor']) ?>
+                                Pembina/Pelatih:
+                                <?= e(implode(', ', array_map(static fn (array $person): string => ($person['name'] ?? '') . ' (' . ($person['role'] ?? 'Pembina') . ')', $item['supervisors']))) ?>
                             </p>
                         <?php endif; ?>
 
-                        <?php if (!empty($item['schedule'])): ?>
+                        <?php if (!empty($item['schedules'])): ?>
                             <p class="text-xs text-slate-600 flex items-center">
                                 <svg class="w-3.5 h-3.5 mr-1.5 text-slate-400" fill="none" stroke="currentColor"
                                     viewBox="0 0 24 24">
@@ -93,8 +93,12 @@ $flash = $data['flash'] ?? [];
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 Jadwal:
-                                <?= e($item['schedule']) ?>
+                                <?= e(implode(', ', array_map(static fn (array $schedule): string => trim(($schedule['day'] ?? '') . ' ' . ($schedule['time'] ?? '')), $item['schedules']))) ?>
                             </p>
+                        <?php endif; ?>
+
+                        <?php if (!empty($item['achievements'])): ?>
+                            <p class="text-xs font-medium text-amber-700"><?= count($item['achievements']) ?> prestasi tercatat</p>
                         <?php endif; ?>
                     </div>
 
@@ -102,7 +106,7 @@ $flash = $data['flash'] ?? [];
                         <?= e($item['description'] ?? '-') ?>
                     </p>
                     <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
-                        <button onclick='editItem(<?= json_encode($item) ?>)'
+                        <button onclick='editItem(<?= json_encode($item, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'
                             class="p-2 text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -149,17 +153,31 @@ $flash = $data['flash'] ?? [];
                         class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
                 </div>
 
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Nama Pembina</label>
-                        <input type="text" name="supervisor" id="supervisor"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                <div>
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <label class="block text-sm font-medium text-slate-700">Pembina dan Pelatih</label>
+                        <button type="button" onclick="addSupervisor()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Tambah orang</button>
                     </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Jadwal (cth: Jumat, 15:00)</label>
-                        <input type="text" name="schedule" id="schedule"
-                            class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors">
+                    <div id="supervisorsList" class="space-y-2"></div>
+                    <p class="text-xs text-slate-500 mt-1">Tambahkan semua pembina atau pelatih yang terlibat.</p>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <label class="block text-sm font-medium text-slate-700">Jadwal Kegiatan</label>
+                        <button type="button" onclick="addSchedule()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Tambah hari</button>
                     </div>
+                    <div id="schedulesList" class="space-y-2"></div>
+                    <p class="text-xs text-slate-500 mt-1">Satu ekstrakurikuler dapat memiliki kegiatan pada beberapa hari.</p>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <label class="block text-sm font-medium text-slate-700">Prestasi Ekstrakurikuler</label>
+                        <button type="button" onclick="addAchievement()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800">+ Tambah prestasi</button>
+                    </div>
+                    <div id="achievementsList" class="space-y-2"></div>
+                    <p class="text-xs text-slate-500 mt-1">Contoh: Juara 1 Futsal tingkat kabupaten.</p>
                 </div>
 
                 <div>
@@ -207,12 +225,68 @@ $flash = $data['flash'] ?? [];
     const overlay = document.getElementById('modalOverlay');
     const form = document.getElementById('ekskulForm');
     const modalTitle = document.getElementById('modalTitle');
+    const supervisorsList = document.getElementById('supervisorsList');
+    const schedulesList = document.getElementById('schedulesList');
+    const achievementsList = document.getElementById('achievementsList');
+    const inputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors';
+
+    function removeRow(button) {
+        button.closest('[data-repeat-row]').remove();
+    }
+
+    function addSupervisor(item = {}) {
+        const row = document.createElement('div');
+        row.dataset.repeatRow = 'supervisor';
+        row.className = 'grid grid-cols-[1fr_8rem_auto] gap-2';
+        row.innerHTML = `<input type="text" name="supervisor_names[]" maxlength="100" placeholder="Nama lengkap" class="${inputClass}">
+            <select name="supervisor_roles[]" class="${inputClass}"><option value="Pembina">Pembina</option><option value="Pelatih">Pelatih</option></select>
+            <button type="button" onclick="removeRow(this)" class="px-3 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Hapus pembina atau pelatih">&times;</button>`;
+        row.querySelector('input').value = item.name || '';
+        row.querySelector('select').value = item.role === 'Pelatih' ? 'Pelatih' : 'Pembina';
+        supervisorsList.appendChild(row);
+    }
+
+    function addSchedule(item = {}) {
+        const row = document.createElement('div');
+        row.dataset.repeatRow = 'schedule';
+        row.className = 'grid sm:grid-cols-[7rem_1fr_1fr_auto] gap-2';
+        row.innerHTML = `<select name="schedule_days[]" class="${inputClass}">${['Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu'].map(day => `<option value="${day}">${day}</option>`).join('')}</select>
+            <input type="text" name="schedule_times[]" maxlength="60" placeholder="15.00-17.00" class="${inputClass}">
+            <input type="text" name="schedule_notes[]" maxlength="120" placeholder="Tempat/keterangan" class="${inputClass}">
+            <button type="button" onclick="removeRow(this)" class="px-3 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Hapus jadwal">&times;</button>`;
+        row.querySelector('select').value = item.day || 'Senin';
+        row.querySelector('[name="schedule_times[]"]').value = item.time || '';
+        row.querySelector('[name="schedule_notes[]"]').value = item.note || '';
+        schedulesList.appendChild(row);
+    }
+
+    function addAchievement(item = {}) {
+        const row = document.createElement('div');
+        row.dataset.repeatRow = 'achievement';
+        row.className = 'grid grid-cols-[1fr_6rem_auto] gap-2';
+        row.innerHTML = `<input type="text" name="achievement_titles[]" maxlength="180" placeholder="Nama prestasi" class="${inputClass}">
+            <input type="text" name="achievement_years[]" inputmode="numeric" maxlength="4" placeholder="Tahun" class="${inputClass}">
+            <button type="button" onclick="removeRow(this)" class="px-3 text-red-600 hover:bg-red-50 rounded-lg" aria-label="Hapus prestasi">&times;</button>`;
+        row.querySelector('[name="achievement_titles[]"]').value = item.title || '';
+        row.querySelector('[name="achievement_years[]"]').value = item.year || '';
+        achievementsList.appendChild(row);
+    }
+
+    function resetRepeaters() {
+        supervisorsList.replaceChildren();
+        schedulesList.replaceChildren();
+        achievementsList.replaceChildren();
+        addSupervisor();
+        addSchedule();
+        addAchievement();
+    }
 
     function openModal() {
         form.reset();
         form.action = '/admin/ekstrakurikuler/store';
         modalTitle.textContent = 'Tambah Ekstrakurikuler';
         document.getElementById('is_active').checked = true;
+        resetRepeaters();
 
         showModal();
     }
@@ -222,11 +296,16 @@ $flash = $data['flash'] ?? [];
         modalTitle.textContent = 'Edit Ekstrakurikuler';
 
         document.getElementById('name').value = item.name;
-        document.getElementById('supervisor').value = item.supervisor || '';
-        document.getElementById('schedule').value = item.schedule || '';
         document.getElementById('sort_order').value = item.sort_order;
         document.getElementById('description').value = item.description || '';
         document.getElementById('is_active').checked = item.is_active == 1;
+
+        supervisorsList.replaceChildren();
+        schedulesList.replaceChildren();
+        achievementsList.replaceChildren();
+        (item.supervisors?.length ? item.supervisors : [{}]).forEach(addSupervisor);
+        (item.schedules?.length ? item.schedules : [{}]).forEach(addSchedule);
+        (item.achievements?.length ? item.achievements : [{}]).forEach(addAchievement);
 
         showModal();
     }

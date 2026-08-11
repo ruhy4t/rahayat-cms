@@ -101,12 +101,18 @@ $quickLinks = [
                 </div>
 
                 <div class="lg:col-span-8 border-t border-white/15">
-                    <?php foreach (array_slice($cendekiaEkskul, 0, 6) as $index => $item): ?>
+                    <?php foreach ($cendekiaEkskul as $index => $item): ?>
+                        <?php
+                        $firstSchedule = $item['schedules'][0] ?? null;
+                        $scheduleLabel = $firstSchedule
+                            ? trim(($firstSchedule['day'] ?? '') . ' ' . ($firstSchedule['time'] ?? ''))
+                            : (string) ($item['schedule'] ?? '');
+                        ?>
                         <a href="/ekstrakurikuler/<?= (int) $item['id'] ?>"
                             class="cendekia-activity group grid grid-cols-[3rem_1fr_auto] sm:grid-cols-[4rem_1fr_12rem_auto] items-center gap-3 sm:gap-6 py-5 border-b border-white/15">
                             <span class="text-xs font-black text-cyan-400"><?= str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) ?></span>
                             <span class="text-lg sm:text-xl font-extrabold group-hover:text-cyan-300 transition-colors"><?= e($item['name']) ?></span>
-                            <span class="hidden sm:block text-sm text-slate-400"><?= e($item['schedule'] ?? 'Jadwal akan diumumkan') ?></span>
+                            <span class="hidden sm:block text-sm text-slate-400"><?= e($scheduleLabel !== '' ? $scheduleLabel : 'Jadwal akan diumumkan') ?></span>
                             <span class="w-9 h-9 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-cyan-400 group-hover:text-slate-950 group-hover:border-cyan-400 transition-colors" aria-hidden="true">&#8599;</span>
                         </a>
                     <?php endforeach; ?>

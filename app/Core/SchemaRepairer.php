@@ -76,6 +76,7 @@ class SchemaRepairer
         $this->ensureNewsColumns();
         $this->ensureGalleryTablesAndColumns();
         $this->ensureAlumniColumns();
+        $this->ensureEkstrakurikulerColumns();
         $this->ensureDefaultProfile();
         $this->ensureDefaultMenus();
         $this->ensureDefaultSettings();
@@ -300,6 +301,35 @@ class SchemaRepairer
             SET continuation_type = 'Tidak Melanjutkan'
             WHERE continuation_type = 'Tidak/Belum Melanjutkan'
                OR further_education = 'Tidak/Belum Melanjutkan'");
+    }
+
+    private function ensureEkstrakurikulerColumns(): void
+    {
+        $this->safeExec("CREATE TABLE IF NOT EXISTS ekstrakurikuler (
+            id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(100) NOT NULL,
+            description TEXT NULL,
+            image VARCHAR(255) NULL,
+            schedule VARCHAR(100) NULL,
+            supervisor VARCHAR(100) NULL,
+            supervisors_json LONGTEXT NULL,
+            schedules_json LONGTEXT NULL,
+            achievements_json LONGTEXT NULL,
+            is_active TINYINT(1) DEFAULT 1,
+            sort_order INT DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_ekskul_active (is_active),
+            INDEX idx_ekskul_sort (sort_order)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        if (!$this->tableExists('ekstrakurikuler')) {
+            return;
+        }
+
+        $this->addColumn('ekstrakurikuler', 'supervisors_json', 'LONGTEXT NULL AFTER `supervisor`');
+        $this->addColumn('ekstrakurikuler', 'schedules_json', 'LONGTEXT NULL AFTER `supervisors_json`');
+        $this->addColumn('ekstrakurikuler', 'achievements_json', 'LONGTEXT NULL AFTER `schedules_json`');
     }
 
     private function ensureStaffColumns(): void
@@ -658,6 +688,7 @@ class SchemaRepairer
             'announcements' => ['type', 'content', 'image', 'start_at', 'end_at', 'is_active', 'sort_order'],
             'testimonials' => ['name', 'relationship', 'testimonial', 'photo', 'consent', 'status', 'is_featured', 'sort_order', 'submitted_ip_hash', 'approved_at'],
             'alumni' => ['name', 'graduation_year', 'continuation_type', 'continuation_status', 'continuation_institution', 'employment_status', 'contact_encrypted', 'contact_hash', 'consent', 'publish_photo', 'publish_occupation', 'publish_city', 'status', 'is_featured', 'submitted_ip_hash', 'approved_at'],
+            'ekstrakurikuler' => ['name', 'supervisor', 'schedule', 'supervisors_json', 'schedules_json', 'achievements_json', 'is_active', 'sort_order'],
         ];
 
         foreach ($requiredColumns as $table => $columns) {
