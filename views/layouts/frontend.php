@@ -178,7 +178,9 @@
         .public-text-slider__track {
             display: flex;
             width: max-content;
-            animation: publicTextSlider 32s linear infinite;
+            animation: publicTextSlider var(--public-text-slider-duration, 32s) linear infinite;
+            animation-duration: var(--public-text-slider-duration, 32s) !important;
+            animation-iteration-count: infinite !important;
             will-change: transform;
         }
 
@@ -197,17 +199,6 @@
             to { transform: translateX(-50%); }
         }
 
-        @media (prefers-reduced-motion: reduce) {
-            .public-text-slider {
-                overflow-x: auto;
-            }
-            .public-text-slider__track {
-                animation: none;
-            }
-            .public-text-slider__group[aria-hidden="true"] {
-                display: none;
-            }
-        }
     </style>
 </head>
 
@@ -575,6 +566,54 @@
             const trigger = document.querySelector('[aria-controls="mobileMenu"]');
             trigger?.setAttribute('aria-expanded', String(!menu.classList.contains('hidden')));
         }
+
+        (() => {
+            document.querySelectorAll('.public-text-slider').forEach(slider => {
+                const track = slider.querySelector('.public-text-slider__track');
+                const groups = track?.querySelectorAll('.public-text-slider__group');
+                if (!track || !groups || groups.length < 2) return;
+
+                const primaryGroup = groups[0];
+                const duplicateGroup = groups[1];
+                const sourceItems = Array.from(primaryGroup.children, item => item.cloneNode(true));
+                if (sourceItems.length === 0) return;
+
+                const appendSourceItems = (group, hidden = false) => {
+                    sourceItems.forEach(item => {
+                        const clone = item.cloneNode(true);
+                        if (hidden) clone.setAttribute('aria-hidden', 'true');
+                        group.appendChild(clone);
+                    });
+                };
+
+                const rebuildSlider = () => {
+                    primaryGroup.replaceChildren();
+                    appendSourceItems(primaryGroup);
+
+                    // Repeat short announcements until one animation cycle covers the viewport.
+                    let repeatGuard = 0;
+                    while (primaryGroup.scrollWidth < slider.clientWidth * 1.15 && repeatGuard < 30) {
+                        appendSourceItems(primaryGroup, true);
+                        repeatGuard++;
+                    }
+
+                    duplicateGroup.replaceChildren(
+                        ...Array.from(primaryGroup.children, item => item.cloneNode(true))
+                    );
+
+                    // Keep the marquee speed consistent regardless of content length.
+                    const duration = Math.max(18, primaryGroup.scrollWidth / 45);
+                    track.style.setProperty('--public-text-slider-duration', `${duration}s`);
+                };
+
+                let resizeTimer;
+                rebuildSlider();
+                window.addEventListener('resize', () => {
+                    window.clearTimeout(resizeTimer);
+                    resizeTimer = window.setTimeout(rebuildSlider, 150);
+                }, { passive: true });
+            });
+        })();
 
         (() => {
             const popup = document.getElementById('publicAnnouncementPopup');
