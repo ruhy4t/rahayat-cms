@@ -101,11 +101,13 @@ class PrestasiController extends Controller
     /**
      * Show form for creating/editing prestasi
      */
-    public function form(?int $id = null): void
+    public function form(?string $id = null): void
     {
         $prestasi = null;
-        if ($id) {
-            $prestasi = $this->prestasiModel->findById($id);
+        $prestasiId = $id !== null ? (int) $id : null;
+
+        if ($prestasiId !== null) {
+            $prestasi = $this->prestasiModel->findById($prestasiId);
             if (!$prestasi) {
                 $_SESSION['flash'] = ['type' => 'error', 'message' => 'Data prestasi tidak ditemukan'];
                 $this->redirect('/admin/prestasi');
@@ -113,7 +115,7 @@ class PrestasiController extends Controller
         }
 
         $data = [
-            'title' => $id ? 'Edit Prestasi' : 'Tambah Prestasi Baru',
+            'title' => $prestasiId !== null ? 'Edit Prestasi' : 'Tambah Prestasi Baru',
             'user' => $this->currentUser(),
             'prestasi' => $prestasi
         ];
@@ -195,7 +197,7 @@ class PrestasiController extends Controller
     /**
      * Delete prestasi
      */
-    public function delete(int $id): void
+    public function delete(string $id): void
     {
         if (!Security::isPost()) {
             $this->jsonError('Metode tidak diizinkan', 405);
@@ -203,7 +205,8 @@ class PrestasiController extends Controller
 
         $this->requireCsrf();
 
-        $prestasi = $this->prestasiModel->findById($id);
+        $prestasiId = (int) $id;
+        $prestasi = $this->prestasiModel->findById($prestasiId);
         if (!$prestasi) {
             $this->jsonError('Data tidak ditemukan', 404);
         }
@@ -216,7 +219,7 @@ class PrestasiController extends Controller
             }
         }
 
-        if ($this->prestasiModel->delete($id)) {
+        if ($this->prestasiModel->delete($prestasiId)) {
             $this->json(['success' => true, 'message' => 'Data prestasi berhasil dihapus']);
         }
 
