@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.10.2",
+  "version": "1.10.3",
   "released_at": "2026-09-07",
-  "summary": "Migrasi SQL idempoten melalui phpMyAdmin dan migrasi enkripsi bertahap dari panel admin tanpa CLI.",
+  "summary": "Migrasi keamanan sekali klik dengan proses bertahap otomatis, progres, dan opsi melanjutkan setelah koneksi terputus.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

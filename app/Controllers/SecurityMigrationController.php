@@ -27,10 +27,12 @@ final class SecurityMigrationController extends Controller
         }
         if (!$this->validateCsrf()) {
             http_response_code(403);
+            if (Security::isAjax()) { $this->json(['success' => false, 'message' => 'Sesi tidak valid. Muat ulang halaman migrasi dan coba lagi.'], 403); }
             echo 'Sesi tidak valid. Buka kembali halaman migrasi dan coba lagi.';
             return;
         }
         if (($_POST['backup_ready'] ?? '') !== '1') {
+            if (Security::isAjax()) { $this->json(['success' => false, 'message' => 'Pastikan backup lengkap database, storage, dan kunci enkripsi telah disimpan.'], 422); }
             $this->flash('error', 'Pastikan backup lengkap database, storage, dan kunci enkripsi telah disimpan.');
             $this->redirect('/admin/pembaruan/migrasi');
             return;
@@ -39,9 +41,15 @@ final class SecurityMigrationController extends Controller
             $result = SecurityDataMigration::runBatch((int) ($_SESSION['_security_migration_cursor'] ?? 0));
             $_SESSION['_security_migration_cursor'] = $result['complete'] ? 0 : $result['cursor'];
             $_SESSION['_security_migration_result'] = $result;
+            if (Security::isAjax()) {
+                $this->json(['success' => true, 'result' => $result, 'csrf_token' => Security::csrf()]);
+            }
             $this->flash('success', $result['complete'] ? 'Migrasi selesai. Backup setiap perubahan telah diverifikasi.' : 'Tahap berhasil. Klik lanjutkan untuk memproses tahap berikutnya.');
         } catch (Throwable $error) {
             error_log('Security migration batch failed: ' . get_class($error));
+            if (Security::isAjax()) {
+                $this->json(['success' => false, 'message' => 'Tahap belum selesai. Periksa struktur SQL, ruang disk, izin storage, dan kunci enkripsi hosting, lalu coba lagi.'], 500);
+            }
             $this->flash('error', 'Tahap belum selesai. Periksa struktur SQL, ruang disk, izin storage, dan kunci enkripsi hosting. Setelah diperbaiki, coba lagi; data yang sudah dienkripsi akan dilewati.');
         }
         $this->redirect('/admin/pembaruan/migrasi');

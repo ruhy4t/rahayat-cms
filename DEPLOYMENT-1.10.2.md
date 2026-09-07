@@ -1,5 +1,8 @@
 # Pembaruan hosting 1.10.2 tanpa CLI
 
+Untuk versi 1.10.3, migrasi berjalan otomatis dengan satu klik. Ikuti
+[petunjuk 1.10.3](DEPLOYMENT-1.10.3.md). SQL 1.10.2 tetap berlaku.
+
 Paket `rahayat-cms-1.10.2-hosting-update.zip` mencakup perbaikan 1.10.1 dan
 migrasi tanpa Terminal pada 1.10.2, untuk hosting yang memakai versi 1.10.0 atau
 1.10.1. PHP dan ekstensi mengikuti persyaratan proyek. CSS sudah dibangun;

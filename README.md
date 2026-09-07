@@ -21,9 +21,9 @@ https://github.com/ruhy4t/rahayat-cms
 
 ## Instalasi / Deployment
 
-Untuk memperbarui hosting tanpa akses CLI, ikuti [panduan 1.10.2](DEPLOYMENT-1.10.2.md):
+Untuk memperbarui hosting tanpa akses CLI, ikuti [panduan 1.10.3](DEPLOYMENT-1.10.3.md):
 impor SQL idempoten melalui phpMyAdmin, unggah paket, lalu jalankan migrasi
-keamanan bertahap melalui panel admin.
+keamanan otomatis sekali klik melalui panel admin.
 
 ### 1. Setup Database
 

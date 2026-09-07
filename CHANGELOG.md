@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.3 - 2026-09-07
+
+- Jalankan seluruh tahap migrasi keamanan otomatis dengan satu klik dari panel admin.
+- Tampilkan progres, perbarui token CSRF, cegah pengiriman ganda, dan sediakan tombol coba lagi jika proses terputus.
+- Tidak ada perubahan struktur database dari 1.10.2; SQL sebelumnya tetap berlaku.
+
 ## 1.10.2 - 2026-09-07
 
 - Tambahkan SQL idempoten untuk impor melalui phpMyAdmin.

@@ -80,6 +80,12 @@ try {
             verify(request($handle, '/admin/pembaruan/migrasi/run', ['backup_ready' => '1', CSRF_TOKEN_NAME => 'invalid'])['status'] === 403, 'Migration accepts invalid CSRF');
             $missingBackup = request($handle, '/admin/pembaruan/migrasi/run', [CSRF_TOKEN_NAME => token($migration['body'])]);
             verify(str_contains($missingBackup['body'], 'Pastikan backup lengkap'), 'Migration backup acknowledgement missing');
+            curl_setopt($handle, CURLOPT_HTTPHEADER, ['X-Requested-With: XMLHttpRequest']);
+            $ajaxInvalid = request($handle, '/admin/pembaruan/migrasi/run', ['backup_ready' => '1', CSRF_TOKEN_NAME => 'invalid']);
+            verify($ajaxInvalid['status'] === 403 && json_decode($ajaxInvalid['body'], true)['success'] === false, 'Migration AJAX CSRF response invalid');
+            $ajaxMissing = request($handle, '/admin/pembaruan/migrasi/run', [CSRF_TOKEN_NAME => token($migration['body'])]);
+            verify($ajaxMissing['status'] === 422 && json_decode($ajaxMissing['body'], true)['success'] === false, 'Migration AJAX acknowledgement response invalid');
+            curl_setopt($handle, CURLOPT_HTTPHEADER, []);
             $db->update('users', ['is_active' => 0], 'id = ?', [$user['id']]);
             verify(request($handle, $path)['status'] === 403, 'Disabled user still downloads');
         }
