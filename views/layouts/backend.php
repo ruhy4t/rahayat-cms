@@ -613,7 +613,7 @@
 
     <!-- JavaScript -->
     <script src="/js/form-enhancements.js?v=<?= filemtime(ROOT_PATH . '/public/js/form-enhancements.js') ?>"></script>
-    <script src="/js/admin.js"></script>
+    <script src="/js/admin.js?v=<?= filemtime(ROOT_PATH . '/public/js/admin.js') ?>"></script>
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');

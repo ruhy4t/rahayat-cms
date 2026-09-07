@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.10.0",
-  "released_at": "2026-08-11",
-  "summary": "Seluruh fasilitas aktif ditampilkan secara utuh pada semua tema dengan tata letak Cendekia SMP yang tetap proporsional.",
+  "version": "1.10.1",
+  "released_at": "2026-09-07",
+  "summary": "Perbaikan akses dokumen SPMB, sanitasi HTML, otorisasi sesi dan berita, enkripsi data pribadi, serta peningkatan kinerja dan aksesibilitas.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

@@ -68,6 +68,7 @@ class SchemaRepairer
         }
 
         $this->ensureCoreTables();
+        SecuritySchema::ensure();
         $this->ensureMenusColumns();
         $this->ensureSiteSettingsColumns();
         $this->ensureUsersColumns();
@@ -668,6 +669,8 @@ class SchemaRepairer
     private function hasRequiredSchema(): bool
     {
         $requiredColumns = [
+            'spmb_registrations' => ['private_payload', 'privacy_accepted_at'],
+            'site_visits' => ['visitor_key', 'visited_on'],
             'menus' => ['menu_location', 'target', 'is_active', 'sort_order', 'parent_id', 'icon'],
             'school_profile' => [
                 'tagline', 'spmb_link', 'welcome_message', 'principal_quote',

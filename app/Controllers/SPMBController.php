@@ -106,6 +106,10 @@ class SPMBController extends Controller
             'enableContentProtection' => true
         ];
 
+        $submissionToken = bin2hex(random_bytes(24));
+        $_SESSION['_spmb_submissions'][$submissionToken] = null;
+        $_SESSION['_spmb_submissions'] = array_slice($_SESSION['_spmb_submissions'], -10, null, true);
+        $data['submissionToken'] = $submissionToken;
         $this->view('frontend.spmb.register', $data, 'frontend');
     }
 
@@ -114,8 +118,17 @@ class SPMBController extends Controller
      */
     public function store(): void
     {
+        $documents = [];
         try {
+            if (!Security::isPost()) { $this->json(['success' => false, 'message' => 'Metode tidak diizinkan.'], 405); }
             $this->requireCsrf();
+            $submissionToken = (string) $this->post('submission_token', '');
+            if (!array_key_exists($submissionToken, $_SESSION['_spmb_submissions'] ?? [])) {
+                $this->json(['success' => false, 'message' => 'Formulir kedaluwarsa. Muat ulang halaman pendaftaran.'], 422);
+            }
+            if (is_string($_SESSION['_spmb_submissions'][$submissionToken])) {
+                $this->json(['success' => true, 'registration_number' => $_SESSION['_spmb_submissions'][$submissionToken]]);
+            }
 
             if ($this->isRateLimited('spmb-store', 5, 600)) {
                 $this->json(['success' => false, 'message' => 'Terlalu banyak percobaan. Silakan coba lagi beberapa menit lagi.'], 429);
@@ -137,6 +150,12 @@ class SPMBController extends Controller
                     'message' => 'Jawaban verifikasi keamanan tidak tepat. Silakan periksa dan coba kembali.'
                 ], 422);
                 return;
+            }
+
+            foreach ($_POST as $field => $value) {
+                if (!is_scalar($value)) {
+                    $this->json(['success' => false, 'message' => 'Isian formulir tidak valid.'], 422);
+                }
             }
 
             // Generate registration number
@@ -172,6 +191,12 @@ class SPMBController extends Controller
                 'status' => 'pending'
             ];
 
+            $errors = SPMBValidation::errors($data);
+            if ($this->post('agreement') !== 'on') { $errors['agreement'] = 'Persetujuan penggunaan data wajib diberikan.'; }
+            if ($errors) { $this->json(['success' => false, 'message' => 'Periksa kembali isian formulir.', 'errors' => $errors], 422); }
+            $data['graduation_year'] = $data['graduation_year'] === '' ? null : $data['graduation_year'];
+            $data['privacy_accepted_at'] = date('Y-m-d H:i:s');
+
             // Get dynamic documents settings
             $settings = $this->settingModel->getAll();
             $savedDocumentsRaw = $settings['spmb_documents'] ?? '[]';
@@ -186,9 +211,11 @@ class SPMBController extends Controller
             $documentMaxSize = 2 * 1024 * 1024;
 
             foreach ($documentTypes as $type) {
+                if (!is_string($type) || !preg_match('/^[a-z0-9_]+$/D', $type)) { continue; }
                 if (!empty($_FILES[$type]['name'])) {
                     $uploadPath = $this->uploadFile($_FILES[$type], 'spmb', $documentAllowedTypes, $documentMaxSize);
                     if (!$uploadPath) {
+                        $this->cleanupDocuments($documents);
                         $this->json([
                             'success' => false,
                             'message' => $this->uploadErrorMessage('Dokumen ' . str_replace('_', ' ', $type) . ' gagal diunggah')
@@ -196,6 +223,7 @@ class SPMBController extends Controller
                         return;
                     }
                     $documents[$type] = $uploadPath;
+                    PrivateDocument::encryptFile(STORAGE_PATH . '/' . $uploadPath);
                 }
             }
 
@@ -203,36 +231,27 @@ class SPMBController extends Controller
                 $data['documents'] = json_encode($documents);
             }
 
-            // Validate required fields
-            if (
-                empty($data['student_name']) || empty($data['nisn']) || empty($data['nik']) ||
-                empty($data['birth_date']) || empty($data['gender']) || empty($data['address']) ||
-                empty($data['address_village']) || empty($data['address_district']) ||
-                empty($data['address_city']) || empty($data['address_province']) ||
-                empty($data['previous_school_npsn'])
-            ) {
-                $this->json(['success' => false, 'message' => 'Mohon lengkapi data yang wajib diisi (termasuk NIK, NISN, Alamat Lengkap, dan NPSN Sekolah Asal)']);
-                return;
-            }
-
             // Save registration
-            Security::consumePublicCaptcha('spmb', (string) $this->post('captcha_token', ''));
             $id = $this->spmbModel->create($data);
 
             if ($id) {
+                $_SESSION['_spmb_submissions'][$submissionToken] = $registrationNumber;
+                Security::consumePublicCaptcha('spmb', (string) $this->post('captcha_token', ''));
                 $this->json([
                     'success' => true,
                     'message' => 'Pendaftaran berhasil!',
                     'registration_number' => $registrationNumber
                 ]);
             } else {
+                $this->cleanupDocuments($documents);
                 $this->json(['success' => false, 'message' => 'Gagal menyimpan pendaftaran']);
             }
         } catch (\Throwable $e) {
+            $this->cleanupDocuments($documents);
             error_log('SPMB registration failed: ' . $e->getMessage());
             $this->json([
                 'success' => false,
-                'message' => APP_DEBUG ? 'Terjadi kesalahan server: ' . $e->getMessage() : 'Terjadi kesalahan server. Silakan coba lagi.'
+                'message' => 'Terjadi kesalahan server. Silakan coba lagi.'
             ], 500);
         }
     }
@@ -240,30 +259,40 @@ class SPMBController extends Controller
     /**
      * Check registration status
      */
+    private function cleanupDocuments(array $documents): void
+    {
+        $root = realpath(STORAGE_PATH . '/spmb');
+        foreach ($documents as $path) {
+            $real = realpath(STORAGE_PATH . '/' . $path);
+            if ($root && $real && str_starts_with($real, $root . DIRECTORY_SEPARATOR) && is_file($real)) { unlink($real); }
+        }
+    }
+
     public function checkStatus(): void
     {
-        $registrationNumber = trim((string) ($this->get('nomor') ?? $this->post('registration_number')));
-        $profile = $this->profileModel->getProfile();
-
-        $data = [
-            'title' => 'Cek Status Pendaftaran',
-            'profile' => $profile,
-            'registration' => null,
-            'searched' => false,
-            'enableContentProtection' => true
-        ];
-
-        if ($registrationNumber) {
-            if ($this->isRateLimited('spmb-status', 20, 600)) {
+        header('Cache-Control: private, no-store');
+        header('Referrer-Policy: no-referrer');
+        $number = Security::isPost() ? strtoupper(trim((string) $this->post('registration_number', ''))) : '';
+        $data = ['title' => 'Cek Status Pendaftaran', 'profile' => $this->profileModel->getProfile(),
+            'registration' => null, 'searched' => false, 'enableContentProtection' => true,
+            'registrationNumber' => $number, 'statusError' => null];
+        if (Security::isPost()) {
+            $this->requireCsrf();
+            if ($this->isRateLimited('spmb-status', 10, 600)) {
                 http_response_code(429);
-                $this->flash('error', 'Terlalu banyak percobaan cek status. Silakan coba lagi beberapa menit lagi.');
-                $this->redirect('/spmb/cek-status');
-                return;
+                $data['statusError'] = 'Terlalu banyak percobaan. Coba lagi dalam 10 menit.';
+            } else {
+                $data['searched'] = true;
+                $registration = strlen($number) <= 50 ? $this->spmbModel->findByRegistrationNumber($number) : false;
+                if ($registration
+                    && hash_equals((string) $registration['nisn'], trim((string) $this->post('nisn', '')))
+                    && hash_equals((string) $registration['birth_date'], (string) $this->post('birth_date', ''))) {
+                    $data['registration'] = array_intersect_key($registration, array_flip([
+                        'registration_number', 'student_name', 'status', 'created_at'
+                    ]));
+                }
             }
-            $data['searched'] = true;
-            $data['registration'] = $this->spmbModel->findByRegistrationNumber($registrationNumber);
         }
-
         $this->view('frontend.spmb.status', $data, 'frontend');
     }
 }

@@ -18,7 +18,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-slate-800">Alamat</h3>
+                            <h2 class="font-semibold text-slate-800">Alamat</h2>
                             <p class="text-slate-600">
                                 <?= e($profile['address']) ?>
                             </p>
@@ -35,7 +35,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-slate-800">Telepon</h3>
+                            <h2 class="font-semibold text-slate-800">Telepon</h2>
                             <p class="text-slate-600">
                                 <?= e($profile['phone']) ?>
                             </p>
@@ -52,7 +52,7 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 class="font-semibold text-slate-800">Email</h3>
+                            <h2 class="font-semibold text-slate-800">Email</h2>
                             <p class="text-slate-600">
                                 <?= e($profile['email']) ?>
                             </p>
@@ -94,7 +94,7 @@
 
             <div class="<?= !empty($mapEmbedSrc) ? 'grid lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] gap-6 items-stretch' : '' ?>">
                 <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full">
-                    <h3 class="font-semibold text-slate-800 mb-4">Jam Operasional</h3>
+                    <h2 class="font-semibold text-slate-800 mb-4">Jam Operasional</h2>
                     <div class="space-y-3 text-slate-600">
                         <?php foreach ($days as $key => $label):
                             $isClosed = (int) ($profile["is_closed_{$key}"] ?? $defaultClosed[$key]);
@@ -105,8 +105,8 @@
                                     <span class="font-medium text-red-500">Tutup</span>
                                 <?php else: ?>
                                     <span class="font-medium text-green-700 text-right">
-                                        <?= e($profile["{$key}_open"] ?? '07:00') ?> -
-                                        <?= e($profile["{$key}_close"] ?? '15:00') ?> WIB
+                                        <?= e(substr($profile["{$key}_open"] ?? '07:00', 0, 5)) ?> -
+                                        <?= e(substr($profile["{$key}_close"] ?? '15:00', 0, 5)) ?> WIB
                                     </span>
                                 <?php endif; ?>
                             </div>
@@ -116,7 +116,7 @@
 
                 <?php if (!empty($mapEmbedSrc)): ?>
                     <div class="p-6 bg-white rounded-xl shadow-sm border border-slate-200 h-full flex flex-col">
-                        <h3 class="font-semibold text-slate-800 mb-4 flex items-center gap-3">
+                        <h2 class="font-semibold text-slate-800 mb-4 flex items-center gap-3">
                             <span class="w-9 h-9 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
                                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -126,9 +126,9 @@
                                 </svg>
                             </span>
                             Peta Lokasi
-                        </h3>
+                        </h2>
                         <div class="rounded-xl overflow-hidden border border-slate-200 flex-1 min-h-[360px]">
-                            <iframe src="<?= e($mapEmbedSrc) ?>" width="100%" height="100%" style="border:0;" allowfullscreen=""
+                            <iframe title="Peta lokasi sekolah" src="<?= e($mapEmbedSrc) ?>" width="100%" height="100%" style="border:0;" allowfullscreen=""
                                 loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="w-full h-full"></iframe>
                         </div>
                     </div>

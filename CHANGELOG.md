@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+## 1.10.1 - 2026-09-07
+
+- Tutup bypass akses dokumen SPMB, terapkan izin admin/panitia dan cache privat.
+- Perbaiki sanitasi HTML bersarang serta batasi berita publik ke konten terbit sesuai jadwal.
+- Cabut sesi setelah perubahan akun/izin/password dan tambahkan timeout serta throttle server.
+- Enkripsi data pribadi dan dokumen SPMB dengan migrasi serta cadangan terenkripsi terverifikasi.
+- Gunakan nomor registrasi acak, verifikasi NISN/tanggal lahir, dan cegah pengiriman ulang formulir.
+- Optimalkan pemeriksaan instalasi, query setting, streaming file, dan versi cache aset admin.
+- Perbaiki aksesibilitas login/kontak dan feedback formulir; blokir salin/cetak halaman pribadi tetap aktif.
+- Deployment lama memerlukan migrasi CLI; lihat `DEPLOYMENT-1.10.1.md`. Sesi lama perlu login ulang.
+
 ## 1.10.0 - 2026-08-11
 
 - Seluruh fasilitas aktif ditampilkan pada beranda di semua tema tanpa batas empat atau lima item.

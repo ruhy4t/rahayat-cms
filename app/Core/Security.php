@@ -322,6 +322,7 @@ class Security
             if ($child instanceof DOMElement) {
                 $tag = strtolower($child->tagName);
                 if (!in_array($tag, $allowedTags, true)) {
+                    self::sanitizeHtmlNode($child, $allowedTags, $allowedAttributes);
                     self::removeElementKeepText($child);
                     $child = $next;
                     continue;
@@ -387,6 +388,9 @@ class Security
 
     private static function isSafeHtmlUrl(string $url): bool
     {
+        if (preg_match('/[\x00-\x20\\\\]/', $url) || str_starts_with($url, '//')) {
+            return false;
+        }
         if ($url === '' || str_starts_with($url, '#') || str_starts_with($url, '/')) {
             return true;
         }
@@ -397,6 +401,9 @@ class Security
 
     private static function isAllowedIframeSrc(string $url): bool
     {
+        if (!str_starts_with($url, '/storage/uploads/news/') || str_contains($url, '..')) {
+            return false;
+        }
         $path = (string) (parse_url($url, PHP_URL_PATH) ?? '');
         return str_starts_with($path, '/storage/uploads/news/')
             && strtolower(pathinfo($path, PATHINFO_EXTENSION)) === 'pdf';

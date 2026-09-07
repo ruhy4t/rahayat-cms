@@ -109,7 +109,7 @@ class ApiController extends Controller
         $page = (int) ($this->get('page', 1));
         $perPage = (int) ($this->get('per_page', ITEMS_PER_PAGE));
 
-        $result = $this->newsModel->paginateWithAuthor($page, $perPage);
+        $result = $this->newsModel->paginatePublic($page, $perPage);
 
         $this->jsonSuccess($result);
     }
@@ -129,19 +129,15 @@ class ApiController extends Controller
     {
         $news = $this->newsModel->find((int) $id);
 
-        if (!$news) {
+        $viewer = $this->currentUser();
+        $canPreview = $viewer && $this->userModel->hasPermission($viewer, 'berita')
+            && (!in_array($viewer['role'], ['murid', 'ekskul'], true) || (int) ($news['author_id'] ?? 0) === (int) $viewer['id']);
+        if (!$news || (!$this->newsModel->isPublic($news) && !$canPreview)) {
             $this->jsonError('Berita tidak ditemukan', 404);
         }
 
         $originalContent = (string) ($news['content'] ?? '');
         $preparedContent = $this->prepareStoredEditorContent($originalContent);
-        if ($preparedContent !== $originalContent) {
-            try {
-                $this->newsModel->update((int) $id, ['content' => $preparedContent]);
-            } catch (\Throwable $e) {
-                error_log('News API content preparation failed: ' . $e->getMessage());
-            }
-        }
         $news['content'] = $preparedContent;
 
         $this->jsonSuccess($news);

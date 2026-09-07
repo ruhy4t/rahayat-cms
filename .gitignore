@@ -25,6 +25,7 @@ storage/**
 # Local dependency/build folders
 /vendor/
 node_modules/
+/.release/
 
 # Database dumps
 *.sql

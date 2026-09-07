@@ -18,13 +18,15 @@
     </div>
 </div>
 
-<div class="-mt-16 sm:-mt-24 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pb-20">
+<div class="relative z-10 -mt-16 sm:-mt-24 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pb-20">
     <div class="bg-white rounded-2xl shadow-2xl ring-1 ring-slate-200 overflow-hidden">
 
         <!-- Registration Form -->
         <form id="spmbForm" action="/spmb/store" method="POST" enctype="multipart/form-data"
             class="divide-y divide-slate-200">
-            <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
+            <?= Security::csrfInput() ?>
+            <input type="hidden" name="submission_token" value="<?= e($submissionToken) ?>">
+            <div id="spmbErrors" role="alert" tabindex="-1" class="hidden p-6 text-red-600"></div>
 
             <?php if ($quota > 0): ?>
                 <div class="p-6 bg-blue-50 border-b border-blue-100 flex items-start gap-4">
@@ -326,9 +328,9 @@
                         ?>
                         <div>
                             <span class="block text-sm font-medium text-slate-700 mb-2">
-                                <?= $label ?>
+                                <?= e($label) ?>
                             </span>
-                            <label for="<?= $key ?>"
+                            <label for="<?= e($key) ?>"
                                 class="mt-1 flex justify-center rounded-xl border border-dashed border-slate-300 px-6 py-4 bg-white hover:bg-slate-50 hover:border-primary-400 transition-colors cursor-pointer">
                                 <div class="text-center">
                                     <svg class="mx-auto h-8 w-8 text-slate-300" viewBox="0 0 24 24" fill="currentColor"
@@ -341,10 +343,10 @@
                                         <span class="font-semibold text-primary-600 hover:text-primary-500">Pilih
                                             File</span>
                                         <span class="text-slate-500"> atau klik area ini</span>
-                                        <input id="<?= $key ?>" name="<?= $key ?>" type="file" class="sr-only"
+                                        <input id="<?= e($key) ?>" name="<?= e($key) ?>" type="file" class="sr-only"
                                             accept=".jpg,.jpeg,.png,.pdf">
                                     </div>
-                                    <p class="text-xs leading-5 text-slate-500" id="filename_<?= $key ?>">Belum ada file
+                                    <p class="text-xs leading-5 text-slate-500" id="filename_<?= e($key) ?>">Belum ada file
                                         terpilih</p>
                                 </div>
                             </label>
@@ -367,7 +369,7 @@
                     <div class="ml-3">
                         <label for="agreement" class="text-sm text-slate-700 font-medium">
                             Dengan ini saya menyatakan bahwa seluruh data yang saya isikan adalah benar dan dapat
-                            dipertanggungjawabkan.
+                            dipertanggungjawabkan. Saya menyetujui penggunaan data dan dokumen ini oleh panitia sekolah untuk verifikasi dan proses penerimaan murid. Data tidak dipublikasikan; permintaan koreksi atau penghapusan dapat disampaikan melalui kontak sekolah.
                         </label>
                     </div>
                 </div>
@@ -403,7 +405,7 @@
 
             <div class="bg-slate-50 border border-slate-200 rounded-xl p-6 max-w-sm mx-auto mb-8">
                 <p class="text-sm text-slate-500 mb-1">Nomor Registrasi Anda:</p>
-                <div id="regNumberDisplay" class="text-2xl font-mono font-bold text-primary-600 tracking-wider"></div>
+                <div id="regNumberDisplay" class="text-lg font-mono font-bold text-primary-600 break-all"></div>
                 <p class="mt-4 text-xs text-slate-400">Harap simpan nomor registrasi ini untuk mengecek status
                     pendaftaran Anda.</p>
             </div>
@@ -424,6 +426,26 @@
 </div>
 
 <script>
+    function showSpmbErrors(message, errors = {}) {
+        const summary = document.getElementById('spmbErrors');
+        summary.textContent = message;
+        summary.classList.remove('hidden');
+        for (const [field, text] of Object.entries(errors)) {
+            const input = document.getElementById('spmbForm').elements.namedItem(field);
+            if (!input || !input.setAttribute) continue;
+            const error = document.createElement('p');
+            error.id = 'error-' + field;
+            error.dataset.fieldError = 'true';
+            error.className = 'mt-2 text-sm text-red-600';
+            error.textContent = text;
+            input.setAttribute('aria-invalid', 'true');
+            input.setAttribute('aria-describedby', error.id);
+            input.insertAdjacentElement('afterend', error);
+        }
+        summary.focus();
+        summary.scrollIntoView({ block: 'center' });
+    }
+
     // File input filename display
     document.querySelectorAll('input[type="file"]').forEach(input => {
         input.addEventListener('change', function (e) {
@@ -445,6 +467,9 @@
         spinner.classList.remove('hidden');
         btnText.textContent = 'Memproses...';
 
+        document.getElementById('spmbErrors').classList.add('hidden');
+        this.querySelectorAll('[aria-invalid]').forEach(input => { input.removeAttribute('aria-invalid'); input.removeAttribute('aria-describedby'); });
+        this.querySelectorAll('[data-field-error]').forEach(error => error.remove());
         const formData = new FormData(this);
 
         fetch(this.action, {
@@ -459,8 +484,7 @@
                     try {
                         return JSON.parse(text);
                     } catch (e) {
-                        console.error('Server response:', text);
-                        throw new Error('Server error: ' + (text.substring(0, 200) || 'Unknown error'));
+                        throw new Error('Server belum dapat memproses formulir. Silakan coba kembali.');
                     }
                 });
             })
@@ -471,13 +495,12 @@
                     document.getElementById('successScreen').classList.remove('hidden');
                     document.getElementById('regNumberDisplay').textContent = data.registration_number;
 
-                    // Set the reg number to localstorage so user can easily check status
-                    localStorage.setItem('last_spmb_reg_number', data.registration_number);
+                    // Do not persist registration credentials on shared devices.
 
                     // Scroll to top of card
                     document.getElementById('successScreen').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 } else {
-                    alert(data.message || 'Terjadi kesalahan saat menyimpan data.');
+                    showSpmbErrors(data.message || 'Terjadi kesalahan saat menyimpan data.', data.errors || {});
                     // Reset button
                     btn.disabled = false;
                     btn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -487,7 +510,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert(error.message || 'Terjadi kesalahan jaringan.');
+                showSpmbErrors(error.message || 'Terjadi kesalahan jaringan.');
 
                 // Reset button
                 btn.disabled = false;

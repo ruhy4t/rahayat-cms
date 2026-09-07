@@ -33,6 +33,9 @@ function isInstallRequest(): bool
 
 function isInstalled(): bool
 {
+    static $installed = null;
+    if ($installed !== null) { return $installed; }
+    if (is_file(STORAGE_PATH . '/cache/installed')) { return $installed = true; }
     if (file_exists(CONFIG_PATH . '/local.php') || filter_var(getenv('APP_INSTALLED') ?: false, FILTER_VALIDATE_BOOLEAN)) {
         return true;
     }
@@ -78,7 +81,12 @@ function isInstalled(): bool
         $hasProfile = (int) $pdo->query('SELECT COUNT(*) FROM school_profile')->fetchColumn() > 0;
         $hasMenu = (int) $pdo->query('SELECT COUNT(*) FROM menus')->fetchColumn() > 0;
 
-        return $hasAdmin && $hasProfile && $hasMenu;
+        $installed = $hasAdmin && $hasProfile && $hasMenu;
+        if ($installed) {
+            if (!is_dir(STORAGE_PATH . '/cache')) { @mkdir(STORAGE_PATH . '/cache', 0750, true); }
+            @file_put_contents(STORAGE_PATH . '/cache/installed', 'installed', LOCK_EX);
+        }
+        return $installed;
     } catch (\Throwable) {
         return false;
     }
@@ -197,6 +205,28 @@ if (!isInstalled() && !isInstallRequest()) {
     exit;
 }
 
+// Setup autoloader
+spl_autoload_register(function ($class) {
+    $paths = [
+        APP_PATH . '/Core/',
+        APP_PATH . '/Controllers/',
+        APP_PATH . '/Models/',
+    ];
+
+    foreach ($paths as $path) {
+        $file = $path . $class . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
+    }
+});
+
+
+// Load Security class for helper functions (e.g., e() for XSS filtering)
+require_once APP_PATH . '/Core/Security.php';
+
+
 // Serve storage files through the app so private folders can be protected.
 if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
     $file = substr($_GET['url'], 8); // Remove 'storage/' prefix
@@ -204,7 +234,19 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
     // Security: prevent directory traversal
     if (strpos($file, '..') === false && strpos($file, '~') === false && !str_starts_with($file, '/')) {
         $normalizedFile = str_replace('\\', '/', $file);
-        if (str_starts_with($normalizedFile, 'spmb/') && empty($_SESSION['user_id'])) {
+        // Reject ambiguous paths before filesystem resolution, including Windows aliases.
+        foreach (explode('/', $normalizedFile) as $segment) {
+            if ($segment === '' || $segment[0] === '.' || preg_match('/[\x00-\x1f:]/', $segment)
+                || rtrim($segment, ' .') !== $segment) {
+                http_response_code(404); exit('File not found');
+            }
+        }
+        $privateFile = strtolower(explode('/', $normalizedFile)[0]) === 'spmb';
+        if (in_array(strtolower(explode('/', $normalizedFile)[0]), ['cache', 'rate_limits', 'backups', 'logs'], true)) {
+            http_response_code(404); exit('File not found');
+        }
+        if ($privateFile) { header('Cache-Control: private, no-store'); }
+        if ($privateFile && !AuthSession::canReadSpmb(AuthSession::current())) {
             http_response_code(403);
             exit('Forbidden');
         }
@@ -220,6 +262,10 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
             && str_starts_with($realPath, $storagePrefix)
             && is_file($realPath)
         ) {
+            // Canonical classification also protects symlinks into private storage.
+            $relativePath = str_replace('\\', '/', substr($realPath, strlen($storagePrefix)));
+            $canonicalPrivate = str_starts_with(strtolower($relativePath), 'spmb/');
+            if ($canonicalPrivate !== $privateFile) { http_response_code(404); exit('File not found'); }
             // Determine content type
             $ext = strtolower(pathinfo($realPath, PATHINFO_EXTENSION));
             $types = [
@@ -241,7 +287,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
 
             // Set headers
             header('Cache-Control: public, max-age=2592000');
-            if (str_starts_with($normalizedFile, 'spmb/')) {
+            if ($privateFile) {
                 header('Cache-Control: private, no-store');
             }
             header('Content-Type: ' . $contentType);
@@ -251,10 +297,19 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
                 header('Content-Disposition: attachment; filename="' . basename($realPath) . '"');
                 header("Content-Security-Policy: default-src 'none'; sandbox");
             }
-            header('Content-Length: ' . filesize($realPath));
+            try {
+                $privateBody = $privateFile ? PrivateDocument::read($realPath) : null;
+            } catch (Throwable $error) {
+                error_log('Private document read failed.');
+                http_response_code(500); header('Content-Type: text/plain; charset=utf-8'); exit('Dokumen tidak dapat dibuka.');
+            }
+            if ($privateFile) { SecurityAudit::record('spmb.document.read', (int) AuthSession::current()['id'], $relativePath); }
+            header('Content-Length: ' . ($privateBody !== null ? strlen($privateBody) : filesize($realPath)));
+            if ($privateFile) { header('Content-Disposition: inline; filename="' . basename($realPath) . '"'); }
 
             // Stream file
-            readfile($realPath);
+            session_write_close();
+            if ($privateBody !== null) { echo $privateBody; } else { readfile($realPath); }
             exit;
         }
     }
@@ -262,27 +317,6 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
     http_response_code(404);
     exit('File not found');
 }
-
-// Setup autoloader
-spl_autoload_register(function ($class) {
-    $paths = [
-        APP_PATH . '/Core/',
-        APP_PATH . '/Controllers/',
-        APP_PATH . '/Models/',
-    ];
-
-    foreach ($paths as $path) {
-        $file = $path . $class . '.php';
-        if (file_exists($file)) {
-            require_once $file;
-            return;
-        }
-    }
-});
-
-
-// Load Security class for helper functions (e.g., e() for XSS filtering)
-require_once APP_PATH . '/Core/Security.php';
 
 if (isInstalled() && !isInstallRequest()) {
     try {

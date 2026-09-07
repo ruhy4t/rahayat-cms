@@ -42,7 +42,7 @@ class NewsController extends Controller
                 'category' => $category,
             ]);
         } else {
-            $result = $this->newsModel->paginateWithAuthor($page);
+            $result = $this->newsModel->paginatePublic($page);
             $data = array_merge($baseData, [
                 'title' => 'Berita',
                 'news' => $result['data'],
@@ -60,7 +60,7 @@ class NewsController extends Controller
     {
         $news = $this->newsModel->findBySlug($slug);
 
-        if (!$news || ($news['status'] ?? '') !== 'published') {
+        if (!$news || !$this->newsModel->isPublic($news)) {
             http_response_code(404);
             $this->view('errors.404', ['title' => 'Tidak Ditemukan'], 'frontend');
             return;
@@ -68,13 +68,6 @@ class NewsController extends Controller
 
         $originalContent = (string) ($news['content'] ?? '');
         $preparedContent = $this->prepareStoredEditorContent($originalContent);
-        if ($preparedContent !== $originalContent) {
-            try {
-                $this->newsModel->update((int) $news['id'], ['content' => $preparedContent]);
-            } catch (\Throwable $e) {
-                error_log('Public news content preparation failed: ' . $e->getMessage());
-            }
-        }
         $news['content'] = $preparedContent;
 
         // Increment view count (fail silently if column missing on hosting)

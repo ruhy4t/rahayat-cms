@@ -34,7 +34,7 @@ Options -Indexes
 # through the application with an authenticated admin session.
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^spmb/ - [F,L]
+    RewriteRule ^(spmb|cache|rate_limits|backups|logs)(/|$) - [F,L,NC]
 </IfModule>
 
 # Security - Block access to hidden files

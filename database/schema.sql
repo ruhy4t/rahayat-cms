@@ -426,6 +426,8 @@ CREATE TABLE IF NOT EXISTS contact_messages (
 CREATE TABLE IF NOT EXISTS spmb_registrations (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     registration_number VARCHAR(50) UNIQUE,
+    private_payload LONGTEXT NULL,
+    privacy_accepted_at DATETIME NULL,
     
     -- Student Data
     student_name VARCHAR(100) NOT NULL,

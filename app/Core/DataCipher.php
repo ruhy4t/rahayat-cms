@@ -85,27 +85,35 @@ final class DataCipher
 
         $environmentKey = trim((string) getenv('DATA_ENCRYPTION_KEY'));
         if ($environmentKey !== '') {
+            if (strlen($environmentKey) < 32) { throw new RuntimeException('Kunci enkripsi harus minimal 32 karakter.'); }
             self::$key = hash('sha256', $environmentKey, true);
             return self::$key;
         }
 
         $keyFile = STORAGE_PATH . '/.data-encryption-key';
-        if (is_file($keyFile)) {
-            $encoded = trim((string) file_get_contents($keyFile));
-            $decoded = base64_decode($encoded, true);
-            if ($decoded !== false && strlen($decoded) === 32) {
-                self::$key = $decoded;
-                return self::$key;
+        $existed = is_file($keyFile);
+        $handle = fopen($keyFile, 'c+');
+        if (!$handle) { throw new RuntimeException('Kunci enkripsi tidak dapat dibuka.'); }
+        try {
+            if (!flock($handle, LOCK_EX)) { throw new RuntimeException('Kunci enkripsi tidak dapat dikunci.'); }
+            @chmod($keyFile, 0600);
+            $encoded = trim(stream_get_contents($handle));
+            if ($encoded !== '') {
+                $key = base64_decode($encoded, true);
+                if ($key === false || strlen($key) !== 32) { throw new RuntimeException('Kunci enkripsi lokal tidak valid.'); }
+            } else {
+                if ($existed) { throw new RuntimeException('Kunci enkripsi lokal kosong. Pulihkan kunci dari cadangan.'); }
+                $key = random_bytes(32);
+                $value = base64_encode($key);
+                rewind($handle);
+                if (fwrite($handle, $value) !== strlen($value) || !fflush($handle)) {
+                    throw new RuntimeException('Kunci enkripsi tidak dapat disimpan.');
+                }
             }
-            throw new RuntimeException('Kunci enkripsi lokal tidak valid.');
+            return self::$key = $key;
+        } finally {
+            flock($handle, LOCK_UN);
+            fclose($handle);
         }
-
-        $key = random_bytes(32);
-        if (file_put_contents($keyFile, base64_encode($key), LOCK_EX) === false) {
-            throw new RuntimeException('Kunci enkripsi data pribadi tidak dapat dibuat.');
-        }
-        @chmod($keyFile, 0600);
-        self::$key = $key;
-        return self::$key;
     }
 }

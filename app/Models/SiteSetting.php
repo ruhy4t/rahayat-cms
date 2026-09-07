@@ -10,6 +10,7 @@ declare(strict_types=1);
 class SiteSetting extends Model
 {
     protected string $table = 'site_settings';
+    private static ?array $requestSettings = null;
     protected array $fillable = ['setting_key', 'setting_value', 'setting_type', 'description'];
 
     /**
@@ -17,14 +18,7 @@ class SiteSetting extends Model
      */
     public function get(string $key, mixed $default = null): mixed
     {
-        $sql = "SELECT setting_value, setting_type FROM {$this->table} WHERE setting_key = ?";
-        $result = $this->db->fetch($sql, [$key]);
-
-        if (!$result) {
-            return $default;
-        }
-
-        return $this->castValue($result['setting_value'], $result['setting_type']);
+        return $this->getAll()[$key] ?? $default;
     }
 
     /**
@@ -32,6 +26,7 @@ class SiteSetting extends Model
      */
     public function set(string $key, mixed $value): bool
     {
+        self::$requestSettings = null;
         $existing = $this->db->fetch("SELECT id FROM {$this->table} WHERE setting_key = ?", [$key]);
 
         if ($existing) {
@@ -55,6 +50,7 @@ class SiteSetting extends Model
      */
     public function getAll(): array
     {
+        if (self::$requestSettings !== null) { return self::$requestSettings; }
         $sql = "SELECT setting_key, setting_value, setting_type FROM {$this->table}";
         $results = $this->db->fetchAll($sql);
 
@@ -63,7 +59,7 @@ class SiteSetting extends Model
             $settings[$row['setting_key']] = $this->castValue($row['setting_value'], $row['setting_type']);
         }
 
-        return $settings;
+        return self::$requestSettings = $settings;
     }
 
     /**

@@ -215,7 +215,7 @@
                         <input type="password" id="password" name="password" required autocomplete="current-password"
                             class="w-full pl-10 pr-12 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
                             placeholder="Masukkan password">
-                        <button type="button" onclick="togglePassword()"
+                        <button type="button" onclick="togglePassword()" id="togglePasswordButton" aria-label="Tampilkan password" aria-pressed="false"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center">
                             <svg id="eyeIcon" class="w-5 h-5 text-slate-400 hover:text-slate-600" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
@@ -262,11 +262,7 @@
                 <?php endif; ?>
 
                 <div class="flex items-center justify-between">
-                    <label class="flex items-center">
-                        <input type="checkbox" name="remember"
-                            class="w-4 h-4 text-primary-600 border-slate-300 rounded focus:ring-primary-500">
-                        <span class="ml-2 text-sm text-slate-600">Ingat saya</span>
-                    </label>
+
                 </div>
 
                 <button type="submit"
@@ -290,6 +286,10 @@
         function togglePassword() {
             const input = document.getElementById('password');
             const icon = document.getElementById('eyeIcon');
+            const button = document.getElementById('togglePasswordButton');
+            const show = input.type === 'password';
+            button.setAttribute('aria-label', show ? 'Sembunyikan password' : 'Tampilkan password');
+            button.setAttribute('aria-pressed', String(show));
 
             if (input.type === 'password') {
                 input.type = 'text';

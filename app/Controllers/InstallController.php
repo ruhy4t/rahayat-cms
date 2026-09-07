@@ -54,6 +54,7 @@ class InstallController extends Controller
 
     private function isInstalled(): bool
     {
+        if (is_file(STORAGE_PATH . '/cache/installed')) { return true; }
         if (file_exists($this->localConfigPath) || filter_var(getenv('APP_INSTALLED') ?: false, FILTER_VALIDATE_BOOLEAN)) {
             return true;
         }

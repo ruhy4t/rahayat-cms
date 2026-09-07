@@ -119,6 +119,64 @@ Commit `package-lock.json`, `public/css/tailwind.min.css`, `public/css/fonts.css
 ## Login Admin
 Segera ganti password admin setelah import database pertama kali.
 
+### Pembaruan keamanan September 2026
+
+Dokumen SPMB hanya dapat dibuka oleh admin atau GTK panitia yang memiliki izin
+SPMB. Data pribadi pendaftaran disimpan dalam `private_payload` terenkripsi,
+dan dokumen baru dienkripsi sebelum pendaftaran disimpan. Kunci yang digunakan
+sama dengan `DATA_ENCRYPTION_KEY` atau `storage/.data-encryption-key`; jangan
+mengganti/menghapus kunci yang masih digunakan. Simpan cadangan kunci secara
+terpisah dari cadangan data, dengan akses terbatas.
+
+Untuk deployment yang sudah memiliki data, sesudah mengunggah kode jalankan:
+
+```bash
+php scripts/migrate-security-data.php
+php scripts/migrate-security-data.php --apply
+php scripts/verify-security-backup.php storage/backups/security-YYYYMMDD-HHMMSS-xxxxxxxx
+```
+
+Perintah pertama memeriksa/melengkapi struktur database dan menampilkan jumlah
+data yang perlu dimigrasikan. `--apply` membuat cadangan terenkripsi yang
+diverifikasi sebelum mengenkripsi data lama dan membersihkan HTML berita.
+Nama direktori cadangan sebenarnya dicetak oleh perintah migrasi. Verifikasi
+cadangan tidak menulis ke database atau membuka data pribadi ke terminal.
+Backup ini khusus data yang disentuh migrasi; tetap buat backup database,
+storage, dan kunci secara lengkap serta simpan salinannya di lokasi terpisah.
+
+Pembaruan ini meminta sesi lama login kembali. Perubahan password, role, izin,
+status aktif, atau penghapusan akun mencabut sesi lama pada request berikutnya.
+Timeout bawaan adalah 30 menit tanpa aktivitas dan maksimum 8 jam; gunakan
+`SESSION_IDLE_SECONDS` dan `SESSION_MAX_SECONDS` untuk mengaturnya.
+
+Throttle menggunakan alamat peer `REMOTE_ADDR` dan penyimpanan server. Jika
+memakai reverse proxy/Cloudflare, konfigurasikan trusted proxy di web server
+(misalnya `mod_remoteip` dengan daftar proxy tepercaya), serta batasi akses
+langsung origin. Aplikasi tidak mempercayai header IP kiriman klien.
+
+Cek status SPMB sekarang menggunakan POST, CSRF, nomor registrasi, NISN, dan
+tanggal lahir. Nomor lama tetap dapat digunakan dengan verifikasi tersebut;
+nomor baru acak. Nomor tidak lagi disimpan di localStorage. Blokir salin/cetak
+untuk halaman dengan data pribadi tetap aktif.
+
+Uji regresi pada lingkungan development yang memakai database lokal:
+
+```bash
+php scripts/test-security.php
+php scripts/test-http-security.php
+npm run build:css
+```
+
+Uji pertama memakai transaksi yang di-rollback; uji HTTP menggunakan akun,
+berita, dokumen, dan pendaftaran sintetis yang dihapus setelah pengujian, dengan
+target tetap `http://rahayat-cms.test`. Jalankan pada development, bukan sebagai
+load test produksi. Pada PowerShell yang membatasi skrip, gunakan `npm.cmd`.
+
+Audit akses dokumen/detail dan perubahan status SPMB disimpan di
+`storage/logs/security-YYYY-MM-DD.jsonl` tanpa isi dokumen, NIK, atau nama murid.
+Tentukan kebijakan retensi pendaftaran, log, dan backup sesuai kebutuhan sekolah;
+pembaruan ini tidak menghapus data pribadi lama secara otomatis.
+
 ## Kontribusi
 
 Kontribusi publik diterima melalui pull request. Baca [CONTRIBUTING.md](CONTRIBUTING.md)

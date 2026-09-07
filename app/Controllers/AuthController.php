@@ -87,6 +87,12 @@ class AuthController extends Controller
             $this->redirect('/login');
         }
 
+        if (RateLimiter::hit('login-ip|' . RateLimiter::clientIp(), 30, 600)
+            || RateLimiter::hit('login-account|' . strtolower($username), 15, 600)) {
+            $this->flash('error', 'Terlalu banyak percobaan login. Silakan coba lagi dalam 10 menit.');
+            $this->redirect('/login');
+        }
+
         $rateLimit = $this->loginRateLimitStatus(
             $username,
             self::LOGIN_MAX_ATTEMPTS,
@@ -157,9 +163,7 @@ class AuthController extends Controller
         );
 
         // Set session
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user'] = $user;
-        session_regenerate_id(true);
+        AuthSession::establish($user);
 
         // Redirect to intended URL or dashboard
         $redirectUrl = $_SESSION['redirect_after_login'] ?? '/admin';

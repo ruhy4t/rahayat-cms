@@ -256,7 +256,7 @@ class App
 
             if ($isMaintenance) {
                 // If user is logged in as admin/staff, allow access
-                if (isset($_SESSION['user']) && in_array($_SESSION['user']['role'], ['admin', 'gtk'])) {
+                if (($maintenanceUser = AuthSession::current()) && in_array($maintenanceUser['role'], ['admin', 'gtk'])) {
                     return;
                 }
 

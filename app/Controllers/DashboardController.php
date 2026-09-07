@@ -741,6 +741,7 @@ class DashboardController extends Controller
     public function spmbDetail(string $id): void
     {
         $registration = $this->spmbModel->find((int) $id);
+        if ($registration) { SecurityAudit::record('spmb.registration.read', (int) $this->currentUser()['id'], (string) $id); }
 
         if (!$registration) {
             $this->flash('error', 'Data pendaftaran tidak ditemukan');
@@ -773,6 +774,7 @@ class DashboardController extends Controller
         }
 
         $this->spmbModel->updateStatus((int) $id, $status, $userId, $notes);
+        SecurityAudit::record('spmb.status.update', $userId, (string) $id);
 
         $this->json(['success' => true, 'message' => 'Status berhasil diubah']);
     }

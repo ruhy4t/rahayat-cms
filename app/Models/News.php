@@ -30,11 +30,11 @@ class News extends Model
      */
     public function getPublished(int $limit = 10): array
     {
-        $sql = "SELECT n.*, u.name as author_name 
-                FROM {$this->table} n 
-                LEFT JOIN users u ON n.author_id = u.id 
+        $sql = "SELECT n.*, u.name as author_name
+                FROM {$this->table} n
+                LEFT JOIN users u ON n.author_id = u.id
                 WHERE n.status = 'published' AND n.published_at <= NOW()
-                ORDER BY n.published_at DESC 
+                ORDER BY n.published_at DESC
                 LIMIT ?";
         return $this->db->fetchAll($sql, [$limit]);
     }
@@ -44,9 +44,9 @@ class News extends Model
      */
     public function findBySlug(string $slug): array|false
     {
-        $sql = "SELECT n.*, u.name as author_name 
-                FROM {$this->table} n 
-                LEFT JOIN users u ON n.author_id = u.id 
+        $sql = "SELECT n.*, u.name as author_name
+                FROM {$this->table} n
+                LEFT JOIN users u ON n.author_id = u.id
                 WHERE n.slug = ?";
         return $this->db->fetch($sql, [$slug]);
     }
@@ -59,9 +59,9 @@ class News extends Model
         $allowedSorts = ['id', 'title', 'created_at', 'updated_at', 'published_at', 'status', 'views'];
         $orderBy = in_array($orderBy, $allowedSorts, true) ? $orderBy : 'created_at';
         $direction = $this->safeDirection($direction);
-        $sql = "SELECT n.*, u.name as author_name 
-                FROM {$this->table} n 
-                LEFT JOIN users u ON n.author_id = u.id 
+        $sql = "SELECT n.*, u.name as author_name
+                FROM {$this->table} n
+                LEFT JOIN users u ON n.author_id = u.id
                 ORDER BY n.{$orderBy} {$direction}";
         return $this->db->fetchAll($sql);
     }
@@ -71,9 +71,9 @@ class News extends Model
      */
     public function getByCategory(string $category, int $limit = 10): array
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE category = ? AND status = 'published' 
-                ORDER BY published_at DESC 
+        $sql = "SELECT * FROM {$this->table}
+                WHERE category = ? AND status = 'published' AND published_at <= NOW()
+                ORDER BY published_at DESC
                 LIMIT ?";
         return $this->db->fetchAll($sql, [$category, $limit]);
     }
@@ -122,9 +122,9 @@ class News extends Model
      */
     public function searchNews(string $term, int $limit = 10): array
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE (title LIKE ? OR content LIKE ?) AND status = 'published'
-                ORDER BY published_at DESC 
+        $sql = "SELECT * FROM {$this->table}
+                WHERE (title LIKE ? OR content LIKE ?) AND status = 'published' AND published_at <= NOW()
+                ORDER BY published_at DESC
                 LIMIT ?";
         $term = '%' . $term . '%';
         return $this->db->fetchAll($sql, [$term, $term, $limit]);
@@ -144,9 +144,9 @@ class News extends Model
      */
     public function getPopular(int $limit = 5): array
     {
-        $sql = "SELECT * FROM {$this->table} 
-                WHERE status = 'published' 
-                ORDER BY views DESC 
+        $sql = "SELECT * FROM {$this->table}
+                WHERE status = 'published' AND published_at <= NOW()
+                ORDER BY views DESC
                 LIMIT ?";
         return $this->db->fetchAll($sql, [$limit]);
     }
@@ -178,10 +178,10 @@ class News extends Model
         $total = $this->count();
         $totalPages = (int) ceil($total / $perPage);
 
-        $sql = "SELECT n.*, u.name as author_name 
-                FROM {$this->table} n 
-                LEFT JOIN users u ON n.author_id = u.id 
-                ORDER BY n.created_at DESC 
+        $sql = "SELECT n.*, u.name as author_name
+                FROM {$this->table} n
+                LEFT JOIN users u ON n.author_id = u.id
+                ORDER BY n.created_at DESC
                 LIMIT ? OFFSET ?";
         $data = $this->db->fetchAll($sql, [$perPage, $offset]);
 
@@ -193,5 +193,27 @@ class News extends Model
             'total_pages' => $totalPages,
             'has_more' => $page < $totalPages
         ];
+    }
+
+    public function isPublic(array $news): bool
+    {
+        return ($news['status'] ?? '') === 'published'
+            && !empty($news['published_at'])
+            && strtotime($news['published_at']) <= time();
+    }
+
+    public function paginatePublic(int $page = 1, int $perPage = ITEMS_PER_PAGE): array
+    {
+        $page = max(1, $page);
+        $perPage = min(100, max(1, $perPage));
+        $where = "n.status = 'published' AND n.published_at <= NOW()";
+        $total = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM {$this->table} n WHERE {$where}");
+        $data = $this->db->fetchAll("SELECT n.id, n.title, n.slug, n.excerpt, n.image,
+            n.category, n.published_at, u.name AS author_name FROM {$this->table} n
+            LEFT JOIN users u ON n.author_id = u.id WHERE {$where}
+            ORDER BY n.published_at DESC, n.id DESC LIMIT ? OFFSET ?", [$perPage, ($page - 1) * $perPage]);
+        $pages = (int) ceil($total / $perPage);
+        return ['data' => $data, 'total' => $total, 'per_page' => $perPage,
+            'current_page' => $page, 'total_pages' => $pages, 'has_more' => $page < $pages];
     }
 }

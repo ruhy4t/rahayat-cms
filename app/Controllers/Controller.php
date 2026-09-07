@@ -767,7 +767,7 @@ abstract class Controller
      */
     protected function isLoggedIn(): bool
     {
-        return isset($_SESSION['user_id']);
+        return AuthSession::current() !== null;
     }
 
     /**
@@ -778,7 +778,7 @@ abstract class Controller
         if (!$this->isLoggedIn()) {
             return null;
         }
-        return $_SESSION['user'] ?? null;
+        return AuthSession::current();
     }
 
     /**
@@ -815,25 +815,7 @@ abstract class Controller
 
     protected function isRateLimited(string $action, int $maxAttempts, int $windowSeconds): bool
     {
-        $ip = $_SERVER['HTTP_CF_CONNECTING_IP']
-            ?? $_SERVER['HTTP_X_FORWARDED_FOR']
-            ?? $_SERVER['REMOTE_ADDR']
-            ?? 'unknown';
-        $ip = explode(',', (string) $ip)[0];
-        $key = hash('sha256', $action . '|' . trim($ip));
-        $now = time();
-
-        $_SESSION['_rate_limits'][$key] = array_values(array_filter(
-            $_SESSION['_rate_limits'][$key] ?? [],
-            fn($timestamp) => ($now - (int) $timestamp) < $windowSeconds
-        ));
-
-        if (count($_SESSION['_rate_limits'][$key]) >= $maxAttempts) {
-            return true;
-        }
-
-        $_SESSION['_rate_limits'][$key][] = $now;
-        return false;
+        return RateLimiter::hit($action . '|' . RateLimiter::clientIp(), $maxAttempts, $windowSeconds);
     }
 
     /**
@@ -948,7 +930,7 @@ abstract class Controller
 
         // REMOTE_ADDR is server-controlled, unlike a freely spoofable
         // X-Forwarded-For header.
-        $ip = (string) ($_SERVER['HTTP_CF_CONNECTING_IP'] ?? $_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $ip = RateLimiter::clientIp();
         $key = hash('sha256', strtolower(trim($username)) . '|' . trim($ip));
 
         return $directory . '/login_' . $key . '.json';
