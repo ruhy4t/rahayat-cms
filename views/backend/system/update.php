@@ -14,6 +14,8 @@ $flash = $data['flash'] ?? null;
         <p class="text-slate-500 mt-1">Cek pembaruan aplikasi dari GitHub dan pilih update otomatis atau manual.</p>
     </div>
 
+    <a href="/admin/pembaruan/migrasi" class="block p-4 bg-white border rounded-lg text-indigo-600 underline">Migrasi keamanan data melalui panel admin (tanpa Terminal)</a>
+
     <?php if ($flash): ?>
         <div
             class="p-4 rounded-lg whitespace-pre-wrap <?= $flash['type'] === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' ?>">

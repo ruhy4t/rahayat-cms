@@ -72,7 +72,14 @@ try {
             verify($result['body'] === $bytes, 'Decrypted HTTP document differs');
             verify(str_contains($result['headers'], 'private, no-store'), 'Private cache header missing');
         }
+        $migration = request($handle, '/admin/pembaruan/migrasi');
+        verify(str_contains($migration['body'], 'name="backup_ready"') === ($label === 'admin'), 'Migration admin isolation failed');
         if ($label === 'admin') {
+            verify($migration['status'] === 200, 'Migration page failed to render');
+            verify(request($handle, '/admin/pembaruan/migrasi/run')['status'] === 405, 'Migration permits GET mutation');
+            verify(request($handle, '/admin/pembaruan/migrasi/run', ['backup_ready' => '1', CSRF_TOKEN_NAME => 'invalid'])['status'] === 403, 'Migration accepts invalid CSRF');
+            $missingBackup = request($handle, '/admin/pembaruan/migrasi/run', [CSRF_TOKEN_NAME => token($migration['body'])]);
+            verify(str_contains($missingBackup['body'], 'Pastikan backup lengkap'), 'Migration backup acknowledgement missing');
             $db->update('users', ['is_active' => 0], 'id = ?', [$user['id']]);
             verify(request($handle, $path)['status'] === 403, 'Disabled user still downloads');
         }

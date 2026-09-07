@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 1.10.2 - 2026-09-07
+
+- Tambahkan SQL idempoten untuk impor melalui phpMyAdmin.
+- Migrasi enkripsi data dan dokumen lama tersedia melalui panel admin, bertahap dan dapat diulang dengan backup terverifikasi.
+- Panduan hosting tanpa CLI: `DEPLOYMENT-1.10.2.md`. Blokir salin/cetak halaman data pribadi tetap dipertahankan.
+
 ## 1.10.1 - 2026-09-07
 
 - Tutup bypass akses dokumen SPMB, terapkan izin admin/panitia dan cache privat.

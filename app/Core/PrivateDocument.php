@@ -6,6 +6,14 @@ final class PrivateDocument
 {
     private const PREFIX = 'RAHAYAT-PRIVATE-V1:';
 
+    public static function isEncrypted(string $path): bool
+    {
+        $handle = fopen($path, 'rb');
+        if ($handle === false) { throw new RuntimeException('Dokumen tidak dapat dibaca.'); }
+        try { return fread($handle, strlen(self::PREFIX)) === self::PREFIX; }
+        finally { fclose($handle); }
+    }
+
     public static function read(string $path): string
     {
         $data = file_get_contents($path);

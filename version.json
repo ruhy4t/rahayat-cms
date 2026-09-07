@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.10.1",
+  "version": "1.10.2",
   "released_at": "2026-09-07",
-  "summary": "Perbaikan akses dokumen SPMB, sanitasi HTML, otorisasi sesi dan berita, enkripsi data pribadi, serta peningkatan kinerja dan aksesibilitas.",
+  "summary": "Migrasi SQL idempoten melalui phpMyAdmin dan migrasi enkripsi bertahap dari panel admin tanpa CLI.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

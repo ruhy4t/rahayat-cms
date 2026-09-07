@@ -165,6 +165,8 @@ class App
         $this->router->add('admin/pengguna/spmb-committee/{id:[0-9]+}', ['controller' => 'Dashboard', 'action' => 'toggleSPMBCommittee']);
 
         // Admin - System Updates
+        $this->router->add('admin/pembaruan/migrasi', ['controller' => 'SecurityMigration', 'action' => 'index']);
+        $this->router->add('admin/pembaruan/migrasi/run', ['controller' => 'SecurityMigration', 'action' => 'run']);
         $this->router->add('admin/pembaruan', ['controller' => 'Dashboard', 'action' => 'systemUpdate']);
         $this->router->add('admin/pembaruan/run', ['controller' => 'Dashboard', 'action' => 'systemUpdateRun']);
 
