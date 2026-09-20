@@ -1007,6 +1007,7 @@ class DashboardController extends Controller
             'title' => 'Profil Sekolah',
             'user' => $this->currentUser(),
             'profile' => $profile,
+            'messageSettings' => $this->settingModel->getAll(),
             'flash' => $this->getFlash()
         ];
 
@@ -1077,7 +1078,22 @@ class DashboardController extends Controller
                 $data['principal_photo'] = $photoPath;
             }
 
-            $this->profileModel->saveProfile($data);
+            $messageSettings = [
+                'principal_message_title' => mb_substr(trim((string) $this->post('principal_message_title', 'Pesan Kepala Sekolah')), 0, 100) ?: 'Pesan Kepala Sekolah',
+                'principal_message_summary' => mb_substr(trim((string) $this->post('principal_message_summary', '')), 0, 1000),
+                'principal_message_button' => mb_substr(trim((string) $this->post('principal_message_button', 'Baca Selengkapnya')), 0, 60) ?: 'Baca Selengkapnya',
+                'principal_message_enabled' => $this->post('principal_message_enabled') === '1' ? '1' : '0',
+            ];
+            $connection = Database::getInstance()->getConnection();
+            $connection->beginTransaction();
+            try {
+                $this->profileModel->saveProfile($data);
+                foreach ($messageSettings as $key => $value) { $this->settingModel->set($key, $value); }
+                $connection->commit();
+            } catch (\Throwable $e) {
+                if ($connection->inTransaction()) { $connection->rollBack(); }
+                throw $e;
+            }
             $this->flash('success', 'Profil sekolah berhasil diperbarui');
         } catch (\Throwable $e) {
             error_log('Profile update failed: ' . $e->getMessage());

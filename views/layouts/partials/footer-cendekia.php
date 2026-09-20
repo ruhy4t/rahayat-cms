@@ -1,6 +1,5 @@
 <?php
 $schoolName = $profile['name'] ?? SCHOOL_NAME;
-$footerColumns = array_chunk($footerMenus ?? [], max(1, (int) ceil(count($footerMenus ?? []) / 2)));
 $socialLinks = [
     ['key' => 'social_facebook', 'label' => 'Facebook', 'mark' => 'f'],
     ['key' => 'social_instagram', 'label' => 'Instagram', 'mark' => 'IG'],
@@ -12,7 +11,7 @@ $socialLinks = [
     <div class="h-1 bg-gradient-to-r from-primary-600 via-purple-600 to-cyan-400"></div>
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         <div class="grid md:grid-cols-12 gap-10 lg:gap-14">
-            <div class="md:col-span-5">
+            <div class="md:col-span-6">
                 <div class="flex items-center gap-3">
                     <?php if (!empty($profile['logo'])): ?>
                         <span class="w-12 h-12 rounded-xl bg-white p-1.5">
@@ -36,26 +35,17 @@ $socialLinks = [
                 </div>
             </div>
 
-            <div class="md:col-span-4 grid grid-cols-2 gap-8">
-                <?php foreach ($footerColumns as $columnIndex => $column): ?>
-                    <div>
-                        <h2 class="text-xs font-extrabold uppercase tracking-[0.18em] text-white"><?= $columnIndex === 0 ? 'Navigasi' : 'Tautan' ?></h2>
-                        <ul class="mt-5 space-y-3 text-sm">
-                            <?php foreach ($column as $menu): ?>
-                                <?php $target = ($menu['target'] ?? '_self') === '_blank' ? '_blank' : '_self'; ?>
-                                <li>
-                                    <a href="<?= e($menu['url']) ?>" target="<?= $target ?>"
-                                        <?= $target === '_blank' ? 'rel="noopener noreferrer"' : '' ?>
-                                        class="hover:text-cyan-300 transition-colors"><?= e($menu['title']) ?></a>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endforeach; ?>
+            <div class="md:col-span-3">
+                <h2 class="text-xs font-extrabold uppercase tracking-[0.18em] text-white">Tautan Penting</h2>
+                <ul class="mt-5 space-y-3 text-sm">
+                    <?php foreach ($footerMenus ?? [] as $menu): ?>
+                        <li><a href="<?= e($menu['url']) ?>" <?= ($menu['target'] ?? '_self') === '_blank' ? 'target="_blank" rel="noopener noreferrer"' : '' ?> class="hover:text-cyan-300 transition-colors"><?= e($menu['title']) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
 
             <div class="md:col-span-3">
-                <h2 class="text-xs font-extrabold uppercase tracking-[0.18em] text-white">Media sosial</h2>
+                <h2 class="text-xs font-extrabold uppercase tracking-[0.18em] text-white">Ikuti Kami</h2>
                 <p class="mt-5 text-sm leading-6">Ikuti akun resmi sekolah untuk mendapatkan informasi terbaru.</p>
                 <div class="mt-5 flex flex-wrap gap-2">
                     <?php foreach ($socialLinks as $social): ?>
@@ -68,6 +58,7 @@ $socialLinks = [
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
+                    <?php include __DIR__ . '/visitor-statistics.php'; ?>
             </div>
         </div>
 

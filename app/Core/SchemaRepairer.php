@@ -68,6 +68,15 @@ class SchemaRepairer
         }
 
         $this->ensureCoreTables();
+        $academicFile = ROOT_PATH . '/database/migrations/academic_features_1_11_0_idempotent.sql';
+        $academicSql = is_file($academicFile) ? file_get_contents($academicFile) : false;
+        if ($academicSql !== false) {
+            foreach (explode(';', preg_replace('/^\s*--.*$/m', '', $academicSql)) as $statement) {
+                if (trim($statement) !== '') { $this->safeExec($statement); }
+            }
+        } else {
+            error_log('Academic schema migration file is missing or unreadable.');
+        }
         SecuritySchema::ensure();
         $this->ensureMenusColumns();
         $this->ensureSiteSettingsColumns();
@@ -669,6 +678,8 @@ class SchemaRepairer
     private function hasRequiredSchema(): bool
     {
         $requiredColumns = [
+            'academic_years' => ['start_year', 'is_published', 'pdf_path'],
+            'school_events' => ['academic_year_id', 'kind', 'title', 'category', 'start_date', 'end_date', 'event_time', 'location', 'description', 'show_in_calendar', 'status'],
             'spmb_registrations' => ['private_payload', 'privacy_accepted_at'],
             'site_visits' => ['visitor_key', 'visited_on'],
             'menus' => ['menu_location', 'target', 'is_active', 'sort_order', 'parent_id', 'icon'],

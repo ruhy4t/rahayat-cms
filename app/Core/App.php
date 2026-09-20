@@ -29,6 +29,16 @@ class App
         $this->router->add('', ['controller' => 'Home', 'action' => 'index']);
         $this->router->add('berita', ['controller' => 'News', 'action' => 'index']);
         $this->router->add('berita/{slug}', ['controller' => 'News', 'action' => 'show']);
+        $this->router->add('pesan-kepala-sekolah', ['controller' => 'Home', 'action' => 'principalMessage']);
+        $this->router->add('agenda', ['controller' => 'Academic', 'action' => 'agenda']);
+        $this->router->add('agenda/{id:[0-9]+}', ['controller' => 'Academic', 'action' => 'show']);
+        $this->router->add('kalender-pendidikan', ['controller' => 'Academic', 'action' => 'calendar']);
+        $this->router->add('kalender-pendidikan/pdf/{id:[0-9]+}', ['controller' => 'Academic', 'action' => 'pdf']);
+        $this->router->add('admin/agenda', ['controller' => 'Academic', 'action' => 'agendaAdmin']);
+        $this->router->add('admin/kalender-pendidikan', ['controller' => 'Academic', 'action' => 'calendarAdmin']);
+        $this->router->add('admin/kegiatan/save', ['controller' => 'Academic', 'action' => 'save']);
+        $this->router->add('admin/kegiatan/delete/{id:[0-9]+}', ['controller' => 'Academic', 'action' => 'delete']);
+        $this->router->add('admin/kalender-pendidikan/tahun/save', ['controller' => 'Academic', 'action' => 'saveYear']);
         $this->router->add('profil', ['controller' => 'Home', 'action' => 'profile']);
         $this->router->add('profil/gtk', ['controller' => 'Home', 'action' => 'gtk']);
         $this->router->add('galeri', ['controller' => 'Home', 'action' => 'gallery']);

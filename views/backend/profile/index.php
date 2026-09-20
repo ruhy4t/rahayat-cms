@@ -47,12 +47,15 @@ $flash = $data['flash'] ?? [];
 
         <!-- Tabs -->
         <div class="border-b border-slate-100">
-            <nav class="flex gap-4 px-6" aria-label="Tabs">
+            <nav class="flex gap-4 px-6 overflow-x-auto" aria-label="Tabs">
                 <button type="button"
                     class="tab-btn active px-4 pb-4 pt-6 text-sm font-medium border-b-2 border-transparent hover:border-slate-300 focus:outline-none"
                     data-tab="info">
                     Informasi Umum
                 </button>
+                <button type="button"
+                    class="tab-btn px-4 pb-4 pt-6 text-sm font-medium border-b-2 border-transparent hover:border-slate-300 focus:outline-none"
+                    data-tab="pesan">Pesan Kepala Sekolah</button>
                 <button type="button"
                     class="tab-btn px-4 pb-4 pt-6 text-sm font-medium border-b-2 border-transparent hover:border-slate-300 focus:outline-none"
                     data-tab="visi">
@@ -243,15 +246,26 @@ $flash = $data['flash'] ?? [];
                 </div>
             </div>
 
-            <!-- Tab: Visi, Misi & Sambutan -->
-            <div id="tab-visi" class="tab-content hidden">
+            <!-- Tab: Visi, Misi & Pesan -->
+            <div id="tab-pesan" class="tab-content hidden">
                 <div class="space-y-6">
                     <div class="bg-indigo-50 border border-indigo-200 rounded-lg p-4 mb-6">
-                        <h3 class="font-bold text-indigo-800 mb-2">Sambutan & Quote Kepala Sekolah</h3>
+                        <h3 class="font-bold text-indigo-800 mb-2">Pesan Kepala Sekolah</h3>
                         <div class="grid grid-cols-1 gap-6">
+                            <p class="text-sm text-slate-600">Foto dan nama mengikuti profil/GTK kepala sekolah yang sudah tersedia. Pesan singkat muncul di beranda, pesan lengkap dibuka melalui tombol.</p>
+                            <label class="flex items-center gap-2"><input type="checkbox" name="principal_message_enabled" value="1" <?= !empty($messageSettings['principal_message_enabled']) ? 'checked' : '' ?>> Tampilkan pesan di beranda</label>
+                            <label class="block text-sm font-medium">Judul bagian
+                                <input class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" name="principal_message_title" maxlength="100" value="<?= e($messageSettings['principal_message_title'] ?? 'Pesan Kepala Sekolah') ?>">
+                            </label>
+                            <label class="block text-sm font-medium">Pesan singkat di beranda (disarankan 50?80 kata)
+                                <textarea class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" name="principal_message_summary" rows="4" maxlength="1000"><?= e($messageSettings['principal_message_summary'] ?? '') ?></textarea>
+                            </label>
+                            <label class="block text-sm font-medium">Teks tombol
+                                <input class="mt-1 w-full border border-slate-200 rounded-lg px-3 py-2" name="principal_message_button" maxlength="60" value="<?= e($messageSettings['principal_message_button'] ?? 'Baca Selengkapnya') ?>">
+                            </label>
+
                             <div>
-                                <label for="welcome_message" class="block text-sm font-medium text-slate-700 mb-1">Kata
-                                    Sambutan Kepala Sekolah</label>
+                                <label for="welcome_message" class="block text-sm font-medium text-slate-700 mb-1">Pesan lengkap kepala sekolah</label>
                                 <textarea id="welcome_message" name="welcome_message" rows="6"
                                     class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors resize-none"><?= e($profile['welcome_message'] ?? '') ?></textarea>
                             </div>
@@ -267,6 +281,10 @@ $flash = $data['flash'] ?? [];
                         </div>
                     </div>
 
+                </div>
+            </div>
+            <div id="tab-visi" class="tab-content hidden">
+                <div class="space-y-6">
                     <h3 class="font-bold text-slate-800 border-b pb-2">Visi, Misi & Sejarah</h3>
 
                     <div>

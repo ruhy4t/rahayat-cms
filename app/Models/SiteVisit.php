@@ -33,6 +33,29 @@ class SiteVisit extends Model
         return (int) $this->db->fetchColumn($sql);
     }
 
+    /** Unique session visitors per calendar period; total counts all recorded page views. */
+    public function getPublicStatistics(?DateTimeImmutable $now = null): array
+    {
+        $now ??= new DateTimeImmutable('today');
+        $today = $now->format('Y-m-d');
+        $weekStart = $now->modify('monday this week')->format('Y-m-d');
+        $monthStart = $now->format('Y-m-01');
+        $period = $this->db->fetch(
+            "SELECT COUNT(DISTINCT CASE WHEN visited_on = ? THEN visitor_key END) AS today,
+                    COUNT(DISTINCT CASE WHEN visited_on >= ? THEN visitor_key END) AS week,
+                    COUNT(DISTINCT CASE WHEN visited_on >= ? THEN visitor_key END) AS month
+             FROM {$this->table} WHERE visited_on >= ? AND visited_on <= ?",
+            [$today, $weekStart, $monthStart, min($weekStart, $monthStart), $today]
+        );
+
+        return [
+            'today' => (int) ($period['today'] ?? 0),
+            'week' => (int) ($period['week'] ?? 0),
+            'month' => (int) ($period['month'] ?? 0),
+            'total' => (int) $this->db->fetchColumn("SELECT COUNT(*) FROM {$this->table}"),
+        ];
+    }
+
     public function countPageViewsToday(): int
     {
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE visited_on = CURDATE()";

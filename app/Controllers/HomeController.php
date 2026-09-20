@@ -43,6 +43,8 @@ class HomeController extends Controller
 
         $data = [
             'title' => 'Beranda',
+            'upcomingEvents' => $this->safeValue(fn () => (new SchoolEvent())->publicAgenda(false, 1, 3), []),
+            'calendarData' => $this->safeValue(fn () => (new SchoolEvent())->calendarData(), []),
             'news' => $this->safeValue(fn () => $this->newsModel->getRecent(6), []),
             'profile' => $profile,
             'slides' => $this->safeValue(fn () => $this->slideModel->getActive(), []),
@@ -55,6 +57,21 @@ class HomeController extends Controller
         ];
 
         $this->view('frontend.home', $data, 'frontend');
+    }
+
+    public function principalMessage(): void
+    {
+        $profile = $this->profileModel->getProfile() ?: [];
+        $settings = $this->settingModel->getAll();
+        if (empty($settings['principal_message_enabled']) || trim(strip_tags($profile['welcome_message'] ?? '')) === '') {
+            http_response_code(404);
+            echo 'Pesan kepala sekolah belum tersedia.';
+            return;
+        }
+        $this->view('frontend.academic.principal', [
+            'title' => $settings['principal_message_title'] ?? 'Pesan Kepala Sekolah',
+            'profile' => $profile, 'settings' => $settings,
+        ], 'frontend');
     }
 
     /**

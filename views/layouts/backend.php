@@ -289,6 +289,23 @@
                         </a>
                     <?php endif; ?>
 
+                    <?php if ($userRole === 'admin'): ?>
+                        <?php $academicMenuPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: ''; ?>
+                        <?php foreach ([
+                            ['/admin/agenda', 'Agenda Kegiatan', 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01'],
+                            ['/admin/kalender-pendidikan', 'Kalender Pendidikan', 'M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2zM8 14h2m4 0h2m-8 4h2'],
+                        ] as [$academicMenuUrl, $academicMenuLabel, $academicMenuIcon]): ?>
+                            <?php $academicMenuActive = $academicMenuPath === $academicMenuUrl || str_starts_with($academicMenuPath, $academicMenuUrl . '/'); ?>
+                            <a href="<?= $academicMenuUrl ?>" <?= $academicMenuActive ? 'aria-current="page"' : '' ?>
+                                class="flex items-center px-4 py-3 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg transition-colors group <?= $academicMenuActive ? 'bg-slate-800 text-white' : '' ?>">
+                                <svg class="w-5 h-5 mr-3 flex-shrink-0 text-slate-400 group-hover:text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="<?= $academicMenuIcon ?>" />
+                                </svg>
+                                <?= $academicMenuLabel ?>
+                            </a>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
                     <?php if (in_array('profil', $userPerms) || in_array('fasilitas', $userPerms) || in_array('staff', $userPerms)): ?>
                         <div class="px-4 mt-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Sekolah
                         </div>

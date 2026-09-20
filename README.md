@@ -21,9 +21,10 @@ https://github.com/ruhy4t/rahayat-cms
 
 ## Instalasi / Deployment
 
-Untuk memperbarui hosting tanpa akses CLI, ikuti [panduan 1.10.3](DEPLOYMENT-1.10.3.md):
-impor SQL idempoten melalui phpMyAdmin, unggah paket, lalu jalankan migrasi
-keamanan otomatis sekali klik melalui panel admin.
+Untuk pembaruan Pesan Kepala Sekolah, Agenda Kegiatan, Kalender Pendidikan,
+dan statistik pengunjung, ikuti [panduan 1.11.0](DEPLOYMENT-1.11.0.md).
+Hosting yang belum menerapkan pembaruan keamanan 1.10.x tetap perlu mengikuti
+[panduan migrasi keamanan 1.10.3](DEPLOYMENT-1.10.3.md).
 
 ### 1. Setup Database
 

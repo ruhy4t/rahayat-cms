@@ -242,7 +242,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
             }
         }
         $privateFile = strtolower(explode('/', $normalizedFile)[0]) === 'spmb';
-        if (in_array(strtolower(explode('/', $normalizedFile)[0]), ['cache', 'rate_limits', 'backups', 'logs'], true)) {
+        if (in_array(strtolower(explode('/', $normalizedFile)[0]), ['cache', 'rate_limits', 'backups', 'logs', 'academic_documents'], true)) {
             http_response_code(404); exit('File not found');
         }
         if ($privateFile) { header('Cache-Control: private, no-store'); }
@@ -264,6 +264,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
         ) {
             // Canonical classification also protects symlinks into private storage.
             $relativePath = str_replace('\\', '/', substr($realPath, strlen($storagePrefix)));
+            if (str_starts_with(strtolower($relativePath), 'academic_documents/')) { http_response_code(404); exit('File not found'); }
             $canonicalPrivate = str_starts_with(strtolower($relativePath), 'spmb/');
             if ($canonicalPrivate !== $privateFile) { http_response_code(404); exit('File not found'); }
             // Determine content type

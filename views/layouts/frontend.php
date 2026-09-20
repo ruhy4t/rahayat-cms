@@ -113,6 +113,8 @@
     </style>
 
     <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/academic.css?v=<?= filemtime(ROOT_PATH . '/public/css/academic.css') ?>">
+    <script src="/js/academic-calendar.js?v=<?= filemtime(ROOT_PATH . '/public/js/academic-calendar.js') ?>" defer></script>
     <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
     <?php if ($themeName === 'cendekia-smp'): ?>
         <link rel="stylesheet"
@@ -490,6 +492,7 @@
                             </a>
                         <?php endif; ?>
                     </div>
+                    <?php include __DIR__ . '/partials/visitor-statistics.php'; ?>
                 </div>
             </div>
 

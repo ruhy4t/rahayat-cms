@@ -181,6 +181,8 @@ if ($theme === 'cendekia-smp') {
     </section>
 <?php endif; ?>
 
+<?php include __DIR__ . '/academic/principal-card.php'; ?>
+
 <!-- News Section -->
 <?php if ($theme === 'emerald-campus'): ?>
     <?php include __DIR__ . '/home/partials/news-emerald.php'; ?>
@@ -273,6 +275,8 @@ if ($theme === 'cendekia-smp') {
         </div>
     </section>
 <?php endif; ?>
+
+<?php include __DIR__ . '/academic/home-section.php'; ?>
 
 <!-- Fasilitas Section (All non-Cendekia themes) -->
 <?php if (!empty($facilities)): ?>

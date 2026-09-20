@@ -30,6 +30,10 @@ $quickLinks = [
     </div>
 </section>
 
+<?php include __DIR__ . '/../../academic/principal-card.php'; ?>
+<?php include __DIR__ . '/news-cendekia.php'; ?>
+<?php include __DIR__ . '/../../academic/home-section.php'; ?>
+
 <?php if (!empty($cendekiaFacilities)): ?>
     <section class="py-16 lg:py-24 bg-white overflow-hidden">
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -150,7 +154,7 @@ $quickLinks = [
     </section>
 <?php endif; ?>
 
-<?php include __DIR__ . '/news-cendekia.php'; ?>
+
 
 <section class="py-16 lg:py-24 bg-white">
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">

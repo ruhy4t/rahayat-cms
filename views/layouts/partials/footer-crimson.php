@@ -16,7 +16,7 @@
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-12">
 
-            <div class="md:col-span-5 text-center md:text-left">
+            <div class="md:col-span-6 text-center md:text-left">
                 <a href="/" class="inline-flex items-center space-x-3 group mb-8">
                     <?php if (!empty($profile['logo'])): ?>
                         <div
@@ -61,49 +61,15 @@
                 </div>
             </div>
 
-            <div class="md:col-span-7">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                    <div>
-                        <h4
-                            class="text-white font-black mb-6 text-sm tracking-widest uppercase border-b-2 border-primary-600 inline-block pb-2">
-                            Informasi Utama</h4>
-                        <ul class="space-y-4">
-                            <?php if (!empty($footerMenus)): ?>
-                                <?php foreach (array_slice($footerMenus, 0, ceil(count($footerMenus) / 2)) as $menu): ?>
-                                    <li><a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?> class="flex items-center text-slate-400 hover:text-white transition-colors group
-                                    text-sm font-medium">
-                                            <svg class="w-4 h-4 mr-3 text-primary-500 group-hover:translate-x-1 transition-transform"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
-                                            <?= e($menu['title']) ?>
-                                        </a></li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4
-                            class="text-white font-black mb-6 text-sm tracking-widest uppercase border-b-2 border-primary-600 inline-block pb-2">
-                            Tautan Lainnya</h4>
-                        <ul class="space-y-4">
-                            <?php if (!empty($footerMenus)): ?>
-                                <?php foreach (array_slice($footerMenus, ceil(count($footerMenus) / 2)) as $menu): ?>
-                                    <li><a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?> class="flex items-center text-slate-400 hover:text-white transition-colors group
-                                    text-sm font-medium">
-                                            <svg class="w-4 h-4 mr-3 text-primary-500 group-hover:translate-x-1 transition-transform"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
-                                            <?= e($menu['title']) ?>
-                                        </a></li>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
-                    <div class="p-6 bg-slate-800/50 rounded-2xl border border-slate-700 backdrop-blur-sm text-center lg:text-right">
+            <div class="md:col-span-3">
+                <h4 class="text-white font-black mb-6 text-sm tracking-widest uppercase">Tautan Penting</h4>
+                <ul class="space-y-3 text-sm">
+                    <?php foreach ($footerMenus ?? [] as $menu): ?>
+                        <li><a href="<?= e($menu['url']) ?>" <?= ($menu['target'] ?? '_self') === '_blank' ? 'target="_blank" rel="noopener noreferrer"' : '' ?> class="text-slate-400 hover:text-white transition-colors"><?= e($menu['title']) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+                    <div class="md:col-span-3 p-6 bg-slate-800/50 rounded-2xl border border-slate-700 backdrop-blur-sm text-center lg:text-right">
                         <h4
                             class="text-white font-black mb-6 text-sm tracking-widest uppercase border-b-2 border-primary-600 inline-block pb-2">
                             Ikuti Kami</h4>
@@ -129,9 +95,8 @@
                                 </a>
                             <?php endif; ?>
                         </div>
+                    <?php include __DIR__ . '/visitor-statistics.php'; ?>
                     </div>
-                </div>
-            </div>
         </div>
 
         <div

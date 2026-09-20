@@ -5,7 +5,7 @@
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-12 mb-12">
             <!-- Brand -->
-            <div class="md:col-span-4">
+            <div class="md:col-span-6">
                 <div class="flex items-center space-x-3 mb-6">
                     <?php if (!empty($profile['logo'])): ?>
                         <img src="/storage/<?= e($profile['logo']) ?>" alt="Logo" class="h-14 w-auto object-contain">
@@ -40,41 +40,15 @@
                 </div>
             </div>
 
-            <!-- Links -->
-            <div class="md:col-span-8 grid grid-cols-2 md:grid-cols-3 gap-8">
-                <div>
-                    <h4 class="text-slate-800 font-bold mb-6 uppercase tracking-wider text-sm flex items-center">
-                        <span class="w-2 h-2 bg-primary-500 rounded-full mr-2"></span> Navigasi
-                    </h4>
-                    <ul class="space-y-3">
-                        <?php if (!empty($footerMenus)): ?>
-                            <?php foreach (array_slice($footerMenus, 0, ceil(count($footerMenus) / 2)) as $menu): ?>
-                                <li><a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?>
-                                        class="hover:text-primary-600 transition-colors inline-block transform
-                                hover:translate-x-1 duration-200">
-                                        <?= e($menu['title']) ?>
-                                    </a></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-slate-800 font-bold mb-6 uppercase tracking-wider text-sm flex items-center">
-                        <span class="w-2 h-2 bg-primary-500 rounded-full mr-2"></span> Tautan Lain
-                    </h4>
-                    <ul class="space-y-3">
-                        <?php if (!empty($footerMenus)): ?>
-                            <?php foreach (array_slice($footerMenus, ceil(count($footerMenus) / 2)) as $menu): ?>
-                                <li><a href="<?= e($menu['url']) ?>" <?= $menu['target'] === '_blank' ? 'target="_blank"' : '' ?>
-                                        class="hover:text-primary-600 transition-colors inline-block transform
-                                hover:translate-x-1 duration-200">
-                                        <?= e($menu['title']) ?>
-                                    </a></li>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </ul>
-                </div>
-                <div class="md:text-right">
+            <div class="md:col-span-3">
+                <h4 class="text-slate-800 font-bold mb-6 uppercase tracking-wider text-sm">Tautan Penting</h4>
+                <ul class="space-y-3 text-sm">
+                    <?php foreach ($footerMenus ?? [] as $menu): ?>
+                        <li><a href="<?= e($menu['url']) ?>" <?= ($menu['target'] ?? '_self') === '_blank' ? 'target="_blank" rel="noopener noreferrer"' : '' ?> class="hover:text-primary-600 transition-colors"><?= e($menu['title']) ?></a></li>
+                    <?php endforeach; ?>
+                </ul>
+            </div>
+                <div class="md:col-span-3 md:text-right">
                     <h4 class="text-slate-800 font-bold mb-6 uppercase tracking-wider text-sm flex items-center md:justify-end">
                         <span class="w-2 h-2 bg-primary-500 rounded-full mr-2"></span> Ikuti Kami
                     </h4>
@@ -100,8 +74,8 @@
                             </a>
                         <?php endif; ?>
                     </div>
+                    <?php include __DIR__ . '/visitor-statistics.php'; ?>
                 </div>
-            </div>
         </div>
 
         <div

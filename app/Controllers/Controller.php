@@ -135,6 +135,13 @@ abstract class Controller
 
         if ($layout === 'frontend') {
             $this->trackFrontendVisit($view, $data);
+            $visitorStatistics = null;
+            try {
+                $visitorStatistics = (new SiteVisit())->getPublicStatistics();
+            } catch (\Throwable $e) {
+                // Analytics must never prevent the public page from rendering.
+                error_log('Visitor statistics load failed: ' . $e->getMessage());
+            }
         }
 
         // If layout is specified, wrap content in layout

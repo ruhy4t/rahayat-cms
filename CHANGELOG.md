@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.11.0 - 2026-09-20
+
+- Tambahkan Pesan Kepala Sekolah di beranda seluruh tema, memakai foto/nama yang sudah ada. Judul, ringkasan, pesan lengkap, tombol, dan visibilitas dikelola dari tab Pesan Kepala Sekolah pada Profil Sekolah.
+- Tambahkan Agenda Kegiatan dengan draft/publikasi, kegiatan mendatang, detail, arsip otomatis, dan opsi ditampilkan di kalender tanpa input ganda.
+- Tambahkan Kalender Pendidikan bulanan interaktif, rentang tanggal, kategori, arsip Juli–Juni per tahun pelajaran, dan PDF terpisah per tahun pelajaran.
+- Lindungi pengelolaan agenda/kalender dengan akses admin, POST dan CSRF. Validasi tanggal dan PDF, sembunyikan draft, serta blokir akses langsung ke dokumen kalender.
+- Tambahkan statistik pengunjung di footer seluruh tema berdasarkan data kunjungan yang sudah tersedia.
+- Samakan footer semua tema menjadi tiga bagian: identitas sekolah, Tautan Penting, serta Ikuti Kami dan statistik. Tempatkan menu admin Agenda dan Kalender Pendidikan pada kelompok Konten dengan ikon dan penanda aktif.
+- SQL idempoten dan panduan produksi tersedia di `DEPLOYMENT-1.11.0.md`.
+
 ## 1.10.3 - 2026-09-07
 
 - Jalankan seluruh tahap migrasi keamanan otomatis dengan satu klik dari panel admin.

@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.10.3",
-  "released_at": "2026-09-07",
-  "summary": "Migrasi keamanan sekali klik dengan proses bertahap otomatis, progres, dan opsi melanjutkan setelah koneksi terputus.",
+  "version": "1.11.0",
+  "released_at": "2026-09-20",
+  "summary": "Pesan Kepala Sekolah, Agenda Kegiatan, Kalender Pendidikan dan arsip tahun pelajaran Juli?Juni, serta statistik pengunjung di footer.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

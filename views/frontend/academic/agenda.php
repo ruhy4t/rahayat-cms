@@ -1,0 +1,9 @@
+<section class="academic-section"><div class="academic-shell academic-detail">
+    <div class="academic-heading"><div><p class="academic-eyebrow">Kehidupan sekolah</p><h1>Agenda Kegiatan</h1><p><?= $archive ? 'Arsip kegiatan yang telah berlangsung.' : 'Kegiatan mendatang dan yang sedang berlangsung.' ?></p></div><a href="/kalender-pendidikan">Kalender Pendidikan →</a></div>
+    <nav class="academic-actions" aria-label="Jenis agenda"><a class="academic-button<?= !$archive ? '' : ' academic-button--quiet' ?>" href="/agenda">Mendatang</a><a class="academic-button<?= $archive ? '' : ' academic-button--quiet' ?>" href="/agenda?arsip=1">Arsip</a></nav>
+    <div class="academic-card">
+        <?php if (!$events): ?><p class="academic-empty">Belum ada kegiatan pada daftar ini.</p><?php endif; ?>
+        <?php foreach ($events as $event): ?><article class="academic-event"><div><span class="academic-tag"><?= e(AcademicCalendar::CATEGORIES[$event['category']] ?? 'Kegiatan') ?></span><h2><a href="/agenda/<?= (int) $event['id'] ?>"><?= e($event['title']) ?></a></h2><p><?= e(date('d/m/Y', strtotime($event['start_date']))) ?> – <?= e(date('d/m/Y', strtotime($event['end_date']))) ?><?= $event['event_time'] ? ' · ' . e(substr($event['event_time'], 0, 5)) : '' ?></p><?php if ($event['location']): ?><p><?= e($event['location']) ?></p><?php endif; ?></div><a href="/agenda/<?= (int) $event['id'] ?>" class="academic-button academic-button--quiet">Detail →</a></article><?php endforeach; ?>
+    </div>
+    <nav class="academic-actions" aria-label="Halaman agenda"><?php if ($page > 1): ?><a href="/agenda?arsip=<?= (int) $archive ?>&amp;page=<?= $page - 1 ?>">← Sebelumnya</a><?php endif; ?><?php if (count($events) === 12): ?><a href="/agenda?arsip=<?= (int) $archive ?>&amp;page=<?= $page + 1 ?>">Berikutnya →</a><?php endif; ?></nav>
+</div></section>
