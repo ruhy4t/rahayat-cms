@@ -62,15 +62,8 @@
             </div>
 
             <?php
-            $mapEmbedSrc = '';
-            $embedCode = $profile['google_maps_embed'] ?? '';
-            if (!empty($embedCode)) {
-                if (preg_match('/src=["\']([^"\']+)["\']/i', $embedCode, $mMatches)) {
-                    $mapEmbedSrc = $mMatches[1];
-                } elseif (filter_var($embedCode, FILTER_VALIDATE_URL)) {
-                    $mapEmbedSrc = $embedCode;
-                }
-            }
+            // Only a Google Maps URL may reach the iframe src.
+            $mapEmbedSrc = Security::safeEmbedSrc($profile['google_maps_embed'] ?? '');
 
             $days = [
                 'monday' => 'Senin',

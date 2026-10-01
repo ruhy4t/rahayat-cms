@@ -165,8 +165,9 @@ class AuthController extends Controller
         // Set session
         AuthSession::establish($user);
 
-        // Redirect to intended URL or dashboard
-        $redirectUrl = $_SESSION['redirect_after_login'] ?? '/admin';
+        // Redirect to the intended local URL or dashboard. Only same-site paths
+        // are honoured, so a crafted request URI cannot bounce the user offsite.
+        $redirectUrl = Security::safeLocalPath($_SESSION['redirect_after_login'] ?? null) ?? '/admin';
         unset($_SESSION['redirect_after_login']);
 
         $this->flash('success', 'Selamat datang, ' . $user['name']);

@@ -143,14 +143,18 @@ class DashboardController extends Controller
             }
 
             $requiredPerm = $permissionMap[$action] ?? null;
-            if ($requiredPerm) {
-                if (!$this->userModel->hasPermission($user, $requiredPerm)) {
-                    $this->flash('error', 'Anda tidak memiliki akses ke halaman ini');
-                    $this->redirect('/admin');
-                    return false;
-                }
+            if ($requiredPerm === null) {
+                // Deny by default: a GTK account only reaches actions that are
+                // explicitly permission-mapped above.
+                $this->flash('error', 'Anda tidak memiliki akses ke halaman ini');
+                $this->redirect('/admin');
+                return false;
             }
-            // GTK can also delete news only if has berita permission
+            if (!$this->userModel->hasPermission($user, $requiredPerm)) {
+                $this->flash('error', 'Anda tidak memiliki akses ke halaman ini');
+                $this->redirect('/admin');
+                return false;
+            }
             return true;
         }
 
@@ -338,6 +342,10 @@ class DashboardController extends Controller
             $this->redirect('/admin/berita');
         }
 
+        if ($this->denyForeignNewsForRestrictedRole($news)) {
+            return;
+        }
+
         $originalContent = (string) ($news['content'] ?? '');
         $preparedContent = $this->prepareStoredEditorContent($originalContent);
         if ($preparedContent !== $originalContent) {
@@ -372,6 +380,10 @@ class DashboardController extends Controller
         if (!$news) {
             $this->flash('error', 'Berita tidak ditemukan');
             $this->redirect('/admin/berita');
+        }
+
+        if ($this->denyForeignNewsForRestrictedRole($news)) {
+            return;
         }
 
         $data = [
@@ -424,10 +436,35 @@ class DashboardController extends Controller
         $this->requireCsrf();
 
         $newsId = (int) $id;
+        $news = $this->newsModel->find($newsId);
+        if ($news && $this->denyForeignNewsForRestrictedRole($news)) {
+            return;
+        }
+
         $this->newsModel->delete($newsId);
 
         $this->flash('success', 'Berita berhasil dihapus');
         $this->redirect('/admin/berita');
+    }
+
+    /**
+     * Murid/Ekskul contributors may only read, edit or delete their own articles.
+     *
+     * Returns true when the request was already rejected (and redirected).
+     */
+    private function denyForeignNewsForRestrictedRole(array $news): bool
+    {
+        $user = $this->currentUser();
+        if (!in_array($user['role'] ?? '', ['murid', 'ekskul'], true)) {
+            return false;
+        }
+        if ((int) ($news['author_id'] ?? 0) === (int) ($user['id'] ?? 0)) {
+            return false;
+        }
+
+        $this->flash('error', 'Anda tidak memiliki akses ke berita ini');
+        $this->redirect('/admin/berita');
+        return true;
     }
 
     // ===================================================
@@ -1031,13 +1068,14 @@ class DashboardController extends Controller
                 'principal_name' => $this->postSafe('principal_name'),
                 'principal_nip' => $this->postSafe('principal_nip'),
 
-                // Visi & Misi
-                'vision' => $this->post('vision'),
-                'mission' => $this->post('mission'),
-                'motto' => $this->post('motto'),
-                'history' => $this->post('history'),
-                'welcome_message' => $this->post('welcome_message'),
-                'principal_quote' => $this->post('principal_quote'),
+                // Visi & Misi (rich text: sanitised with the shared allow-list
+                // because these fields are printed as HTML on the public site)
+                'vision' => Security::sanitizeHtml((string) $this->post('vision', '')),
+                'mission' => Security::sanitizeHtml((string) $this->post('mission', '')),
+                'motto' => Security::sanitizeHtml((string) $this->post('motto', '')),
+                'history' => Security::sanitizeHtml((string) $this->post('history', '')),
+                'welcome_message' => Security::sanitizeHtml((string) $this->post('welcome_message', '')),
+                'principal_quote' => Security::sanitizeHtml((string) $this->post('principal_quote', '')),
 
                 // Kontak
                 'address' => $this->postSafe('address'),

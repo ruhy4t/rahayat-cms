@@ -1,4 +1,10 @@
 <?php
+// CLI only: never executable over HTTP.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 

@@ -284,9 +284,15 @@ class SPMBController extends Controller
             } else {
                 $data['searched'] = true;
                 $registration = strlen($number) <= 50 ? $this->spmbModel->findByRegistrationNumber($number) : false;
+                // Both stored credentials must be non-empty: for a legacy row
+                // with NULL/empty NISN and birth date, two empty inputs would
+                // otherwise compare equal and disclose the record.
+                $storedNisn = trim((string) ($registration['nisn'] ?? ''));
+                $storedBirthDate = trim((string) ($registration['birth_date'] ?? ''));
                 if ($registration
-                    && hash_equals((string) $registration['nisn'], trim((string) $this->post('nisn', '')))
-                    && hash_equals((string) $registration['birth_date'], (string) $this->post('birth_date', ''))) {
+                    && $storedNisn !== '' && $storedBirthDate !== ''
+                    && hash_equals($storedNisn, trim((string) $this->post('nisn', '')))
+                    && hash_equals($storedBirthDate, trim((string) $this->post('birth_date', '')))) {
                     $data['registration'] = array_intersect_key($registration, array_flip([
                         'registration_number', 'student_name', 'status', 'created_at'
                     ]));

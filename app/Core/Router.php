@@ -15,6 +15,13 @@ class Router
     private string $action = DEFAULT_ACTION;
 
     /**
+     * Declared method names keyed by "Controller::lowercaseaction".
+     *
+     * @var array<string, string>
+     */
+    private static array $actionNames = [];
+
+    /**
      * Add a route
      */
     public function add(string $route, array $params = []): void
@@ -116,16 +123,19 @@ class Router
 
         $controller = new $controllerClass();
 
-        // Check if action method exists
-        $actionMethod = $this->action;
-        if (!method_exists($controller, $actionMethod)) {
-            $this->error404('Action not found: ' . $actionMethod);
+        // Resolve the declared method name before authorization. PHP method
+        // dispatch is case-insensitive, while controller authorization maps are
+        // not, so an action reached through the fallback parser must be
+        // canonicalised or its case-sensitive checks would be skipped.
+        $actionMethod = self::canonicalAction($controllerClass, $this->action);
+        if ($actionMethod === null) {
+            $this->error404('Action not found: ' . $this->action);
             return;
         }
 
         // Check for middleware (auth check)
         if (method_exists($controller, 'before')) {
-            if ($controller->before($this->action) === false) {
+            if ($controller->before($actionMethod) === false) {
                 return;
             }
         }
@@ -143,8 +153,28 @@ class Router
 
         // After hook
         if (method_exists($controller, 'after')) {
-            $controller->after($this->action);
+            $controller->after($actionMethod);
         }
+    }
+
+    /**
+     * Resolve the declared method name for an action, or null when it is absent.
+     *
+     * Keeping the declared spelling means before()/after() and the served method
+     * always agree, even when the request lower-cased the action name.
+     */
+    private static function canonicalAction(string $controllerClass, string $action): ?string
+    {
+        if (!method_exists($controllerClass, $action)) {
+            return null;
+        }
+
+        $cacheKey = $controllerClass . '::' . strtolower($action);
+        if (isset(self::$actionNames[$cacheKey])) {
+            return self::$actionNames[$cacheKey];
+        }
+
+        return self::$actionNames[$cacheKey] = (new ReflectionMethod($controllerClass, $action))->getName();
     }
 
     /**

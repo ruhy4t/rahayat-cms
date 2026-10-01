@@ -10,12 +10,41 @@ declare(strict_types=1);
 class UploadController extends Controller
 {
     /**
+     * Editor uploads are part of the news workflow: require the matching
+     * permission and a coarse abuse limit (generous enough for normal editing,
+     * including several editors behind one school NAT address).
+     */
+    private function requireEditorUploadAccess(string $scope): bool
+    {
+        $user = $this->currentUser();
+        if (!(new User())->hasPermission($user ?? [], 'berita')) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Anda tidak memiliki akses untuk mengunggah berkas.']);
+            return false;
+        }
+
+        if ($this->isRateLimited('editor-upload-' . $scope, 100, 600)) {
+            http_response_code(429);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => false, 'message' => 'Terlalu banyak unggahan. Silakan coba lagi beberapa menit lagi.']);
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
      * Handle Image Upload from CKEditor
      */
     public function image(): void
     {
         // Require authentication
         $this->requireAuth();
+
+        if (!$this->requireEditorUploadAccess('image')) {
+            return;
+        }
 
         header('Content-Type: application/json');
 
@@ -64,6 +93,10 @@ class UploadController extends Controller
     public function pdf(): void
     {
         $this->requireAuth();
+
+        if (!$this->requireEditorUploadAccess('pdf')) {
+            return;
+        }
 
         header('Content-Type: application/json');
 

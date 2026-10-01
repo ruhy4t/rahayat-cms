@@ -6,9 +6,11 @@ Options -Indexes
     RewriteEngine On
 
     RewriteRule ^(\.git|\.sixth)(/|$) - [F,L]
-    RewriteRule ^(app|config|database|views)(/|$) - [F,L]
+    RewriteRule ^(app|config|database|views|scripts)(/|$) - [F,L]
+    # Deny active content in storage BEFORE the catch-all rewrite below, which
+    # would otherwise match first and make a later deny rule unreachable.
+    RewriteRule ^storage/.*\.(svg|php\d*|phtml|phar|cgi|pl|py|sh|asp|aspx|jsp)$ - [F,L,NC]
     RewriteRule ^storage/(.*)$ public/index.php?url=storage/$1 [QSA,L,NC]
-    RewriteRule ^storage/.*\.svg$ - [F,L,NC]
 
     # Otomatis mencari file statis di folder public jika tidak ditemukan di root
     RewriteCond %{REQUEST_URI} !^/public/
@@ -28,7 +30,12 @@ Options -Indexes
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
 </IfModule>
 
-<FilesMatch "^(user\.txt|README\.md)$">
+<FilesMatch "^(user\.txt|README\.md|CHANGELOG\.md|CONTRIBUTING\.md|SECURITY\.md|DEPLOYMENT-.*\.md|package\.json|package-lock\.json|version\.json)$">
+    Require all denied
+</FilesMatch>
+
+# Nothing in the project may serve a backup copy produced by a security patch.
+<FilesMatch "(\.bak|\.bak-|~)$">
     Require all denied
 </FilesMatch>
 

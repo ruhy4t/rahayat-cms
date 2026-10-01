@@ -26,6 +26,11 @@ dan statistik pengunjung, ikuti [panduan 1.11.0](DEPLOYMENT-1.11.0.md).
 Hosting yang belum menerapkan pembaruan keamanan 1.10.x tetap perlu mengikuti
 [panduan migrasi keamanan 1.10.3](DEPLOYMENT-1.10.3.md).
 
+Untuk **patch keamanan 1.11.1** (tanpa perubahan database), ikuti
+[panduan 1.11.1](DEPLOYMENT-1.11.1.md). Jalankan
+`php scripts/test-security-patch.php` pada lingkungan development untuk
+memeriksa ulang hasil perbaikannya.
+
 ### 1. Setup Database
 
 Untuk development lokal:

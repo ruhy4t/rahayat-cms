@@ -1,4 +1,10 @@
 <?php
+// CLI only: never executable over HTTP.
+if (PHP_SAPI !== 'cli') {
+    http_response_code(404);
+    exit;
+}
+
 require_once __DIR__ . '/config/database.php';
 
 try {

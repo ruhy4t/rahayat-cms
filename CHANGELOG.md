@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 1.11.1 - 2026-10-01
+
+- Perbaiki resolusi nama aksi pada router sehingga daftar otorisasi yang peka huruf besar/kecil tidak lagi dapat dilewati. Ini menutup jalur eskalasi hak akses ke administrator melalui endpoint API.
+- Terapkan penolakan secara default pada otorisasi panel admin dan API: aksi yang tidak dipetakan ke izin eksplisit tidak lagi dapat dijalankan akun non-admin.
+- Pindahkan otorisasi pengelolaan prestasi dari pemeriksaan URI ke filter aksi, sehingga jalur simpan dan hapus tidak lagi dapat dijalankan tanpa login.
+- Sanitasi rich text profil sekolah saat disimpan dan dijaga saat dibaca, menutup stored XSS dari akun GTK ke sesi administrator.
+- Cegah nilai ter-escape dipakai di dalam string JavaScript pada tombol admin kategori dan menu.
+- Batasi penyuntingan serta penghapusan berita penulis lain bagi peran murid/ekskul, baik lewat API maupun panel admin.
+- Validasi skema URL pada tautan SPMB, embed peta, dan tautan manifes pembaruan; redirect pasca-login hanya menerima path lokal.
+- Rotasi token CSRF saat login, izin `berita` dan batas laju pada unggahan editor, kredensial status SPMB tidak boleh kosong, dan `UPDATE_BRANCH` diperketat agar tidak menjadi argumen Git.
+- Guard CLI pada migrasi PHP, aturan tolak berkas aktif serta folder internal pada Apache, dan uji regresi baru `scripts/test-security-patch.php` (60 pemeriksaan).
+- Tidak ada perubahan struktur database. Panduan unggah tersedia di `DEPLOYMENT-1.11.1.md`.
+
 ## 1.11.0 - 2026-09-20
 
 - Tambahkan Pesan Kepala Sekolah di beranda seluruh tema, memakai foto/nama yang sudah ada. Judul, ringkasan, pesan lengkap, tombol, dan visibilitas dikelola dari tab Pesan Kepala Sekolah pada Profil Sekolah.

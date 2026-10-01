@@ -13,28 +13,40 @@ class PrestasiController extends Controller
 
     public function __construct()
     {
-        // We need auth and permission check for all methods EXCEPT publicIndex
-        // The router sets 'action' in the URL parsing, but inside the controller we might not know it easily.
-        // A simple check is the URI.
-        $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $uri = trim($uri, '/');
-
         $this->prestasiModel = new Prestasi();
+    }
 
-        // If not accessing admin routes, bypass auth
-        if (!str_starts_with($uri, 'admin/prestasi')) {
-            return;
+    /**
+     * Deny-by-default authorization for the admin actions.
+     *
+     * Authorization used to be inferred from the request URI inside the
+     * constructor, so any other URL (for example /prestasi/save) reached the
+     * write actions without authenticating. The router now passes the declared
+     * action name, which is the only reliable source for this decision.
+     */
+    public function before(string $action): bool
+    {
+        if (in_array($action, ['publicIndex', 'show'], true)) {
+            return true;
         }
 
         $this->requireAuth();
 
-        // Ensure user has prestasi permission array
         $user = $this->currentUser();
         $userModel = new User();
 
         if (!$userModel->hasPermission($user, 'prestasi')) {
+            $this->flash('error', 'Anda tidak memiliki akses ke halaman ini');
             $this->redirect('/admin');
+            return false;
         }
+
+        if ($action === 'delete' && ($user['role'] ?? '') !== 'admin') {
+            $this->jsonError('Anda tidak memiliki akses', 403);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -148,7 +160,7 @@ class PrestasiController extends Controller
 
         $data = [
             'title' => Security::sanitize($title),
-            'description' => $description, // Keep HTML for rich text if defined
+            'description' => Security::sanitizeHtml((string) $description), // rich text, shared allow-list
             'category' => $category,
             'date' => $date
         ];

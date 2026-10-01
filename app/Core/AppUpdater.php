@@ -14,7 +14,11 @@ class AppUpdater
     public function __construct()
     {
         $branch = (string) UPDATE_BRANCH;
-        $this->branch = preg_match('/^[A-Za-z0-9._\/-]+$/', $branch) ? $branch : 'main';
+        // The branch becomes a git argument, so it must start with an
+        // alphanumeric character (no leading "-") and contain no "..".
+        $this->branch = (preg_match('#^[A-Za-z0-9][A-Za-z0-9._/-]*$#', $branch) && !str_contains($branch, '..'))
+            ? $branch
+            : 'main';
     }
 
     public function getStatus(): array

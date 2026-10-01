@@ -6,6 +6,12 @@ $title = $data['title'] ?? 'Pembaruan Sistem';
 $status = $data['updateStatus'] ?? [];
 $manual = $status['manual_update'] ?? [];
 $flash = $data['flash'] ?? null;
+
+// The manifest comes from a remote host, so every link is scheme-validated
+// before it can reach an href.
+$manualDownloadUrl = Security::safeLinkUrl($manual['download_url'] ?? '') ?: Security::safeLinkUrl(UPDATE_DOWNLOAD_URL);
+$manualNotesUrl = Security::safeLinkUrl($manual['notes_url'] ?? '') ?: 'https://github.com/ruhy4t/rahayat-cms/commits/main';
+$manualRepositoryUrl = Security::safeLinkUrl($manual['repository_url'] ?? '') ?: 'https://github.com/ruhy4t/rahayat-cms';
 ?>
 
 <div class="space-y-6">
@@ -123,17 +129,17 @@ $flash = $data['flash'] ?? null;
 
         <div class="p-6 space-y-5 text-sm text-slate-700">
             <div class="grid md:grid-cols-3 gap-4">
-                <a href="<?= e($manual['download_url'] ?? UPDATE_DOWNLOAD_URL) ?>" target="_blank"
+                <a href="<?= e($manualDownloadUrl) ?>" target="_blank"
                     class="block border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors">
                     <div class="font-semibold text-slate-800">1. Download ZIP</div>
                     <div class="text-slate-500 mt-1">Ambil source terbaru dari GitHub.</div>
                 </a>
-                <a href="<?= e($manual['notes_url'] ?? 'https://github.com/ruhy4t/rahayat-cms/commits/main') ?>" target="_blank"
+                <a href="<?= e($manualNotesUrl) ?>" target="_blank"
                     class="block border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors">
                     <div class="font-semibold text-slate-800">2. Baca Perubahan</div>
                     <div class="text-slate-500 mt-1">Lihat commit terbaru sebelum update.</div>
                 </a>
-                <a href="<?= e($manual['repository_url'] ?? 'https://github.com/ruhy4t/rahayat-cms') ?>" target="_blank"
+                <a href="<?= e($manualRepositoryUrl) ?>" target="_blank"
                     class="block border border-slate-200 rounded-lg p-4 hover:bg-slate-50 transition-colors">
                     <div class="font-semibold text-slate-800">3. Buka Repository</div>
                     <div class="text-slate-500 mt-1">Sumber resmi Rahayat CMS.</div>

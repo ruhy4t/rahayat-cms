@@ -227,7 +227,9 @@ abstract class Controller
         }
 
         $schoolType = strtolower((string) ($profile['school_type'] ?? 'negeri'));
-        $spmbLink = trim((string) ($profile['spmb_link'] ?? ''));
+        // Never publish a stored javascript:/data: link: an unsafe value simply
+        // hides the public SPMB entry point instead.
+        $spmbLink = Security::safeLinkUrl($profile['spmb_link'] ?? '');
         $url = '';
         $target = '_self';
 

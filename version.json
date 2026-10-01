@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.11.0",
-  "released_at": "2026-09-20",
-  "summary": "Pesan Kepala Sekolah, Agenda Kegiatan, Kalender Pendidikan dan arsip tahun pelajaran Juli?Juni, serta statistik pengunjung di footer.",
+  "version": "1.11.1",
+  "released_at": "2026-10-01",
+  "summary": "Patch keamanan: menutup eskalasi hak akses, penulisan data tanpa login, dan stored XSS; pengerasan unggahan, redirect, migrasi, dan konfigurasi Apache.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

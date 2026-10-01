@@ -410,6 +410,113 @@ class Security
     }
 
     /**
+     * True when a URL is safe to place in an href/src attribute.
+     *
+     * Accepts site-relative references and the http/https/mailto/tel schemes,
+     * and rejects protocol-relative URLs, control characters/backslashes and
+     * every other scheme (javascript:, data:, vbscript:, ...). Entities are
+     * decoded first so an encoded scheme cannot slip through.
+     */
+    public static function isSafeLinkUrl(?string $url): bool
+    {
+        $url = self::plainText(trim((string) $url));
+        if ($url === '') {
+            return false;
+        }
+        if (preg_match('/[\x00-\x20\\\\]/', $url)) {
+            return false;
+        }
+        if (str_starts_with($url, '#')) {
+            return true;
+        }
+        if (str_starts_with($url, '/')) {
+            return !str_starts_with($url, '//');
+        }
+
+        $scheme = strtolower((string) parse_url($url, PHP_URL_SCHEME));
+
+        return $scheme === '' || in_array($scheme, ['http', 'https', 'mailto', 'tel'], true);
+    }
+
+    /**
+     * Return the URL when it is safe for an href/src, otherwise an empty string.
+     */
+    public static function safeLinkUrl(?string $url): string
+    {
+        $url = trim((string) $url);
+
+        return self::isSafeLinkUrl($url) ? $url : '';
+    }
+
+    /**
+     * Extract a Google Maps embed URL from pasted embed code.
+     *
+     * Returns an empty string unless the value resolves to an allowed maps host,
+     * so a stored javascript:/data: URL can never reach an iframe src.
+     */
+    public static function safeEmbedSrc(?string $code): string
+    {
+        $code = (string) $code;
+        $src = '';
+
+        if (preg_match('/src=["\']([^"\']+)["\']/i', $code, $matches)) {
+            $src = $matches[1];
+        } elseif (filter_var(trim($code), FILTER_VALIDATE_URL)) {
+            $src = trim($code);
+        }
+
+        if ($src === '' || !self::isSafeLinkUrl($src)) {
+            return '';
+        }
+
+        $host = strtolower((string) parse_url($src, PHP_URL_HOST));
+        if ($host === '') {
+            return '';
+        }
+
+        foreach (['google.com', 'google.co.id', 'googleusercontent.com'] as $allowed) {
+            if ($host === $allowed || str_ends_with($host, '.' . $allowed)) {
+                return $src;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * Return a request path that is guaranteed to stay on this host.
+     */
+    public static function safeLocalPath(?string $path): ?string
+    {
+        $path = trim((string) $path);
+        if ($path === '' || !str_starts_with($path, '/') || str_starts_with($path, '//')
+            || str_contains($path, '\\') || preg_match('/[\x00-\x1f]/', $path)) {
+            return null;
+        }
+
+        return $path;
+    }
+
+    /**
+     * Sanitise stored rich text on output, but only when it can still contain
+     * active markup. Already-clean content is returned untouched, so normal
+     * page rendering does not pay for a DOM parse.
+     */
+    public static function sanitizeRichTextIfNeeded(?string $html): string
+    {
+        $html = (string) $html;
+        if ($html === '') {
+            return '';
+        }
+
+        if (!preg_match('/<\s*(script|iframe|svg|math|object|embed|style|form|meta|link|base)\b|on[a-z]+\s*=|javascript\s*:|data\s*:\s*text\//i', $html)) {
+            return $html;
+        }
+
+        return self::sanitizeHtml($html);
+    }
+
+    /**
      * Validate and sanitize email
      */
     public static function sanitizeEmail(string $email): string|false

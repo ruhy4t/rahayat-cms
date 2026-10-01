@@ -9,6 +9,18 @@ declare(strict_types=1);
 
 class SchoolProfile extends Model
 {
+    /**
+     * Columns rendered as HTML on the public site.
+     */
+    private const RICH_TEXT_FIELDS = [
+        'vision',
+        'mission',
+        'motto',
+        'history',
+        'welcome_message',
+        'principal_quote',
+    ];
+
     protected string $table = 'school_profile';
     protected array $fillable = [
         'name',
@@ -80,6 +92,15 @@ class SchoolProfile extends Model
             }
         } catch (\Throwable) {
             // Older schemas are repaired automatically; keep the saved profile as fallback.
+        }
+
+        // These columns are printed as HTML on the public site. New writes are
+        // sanitised in profileUpdate(); this guards rows stored before that fix
+        // and costs nothing for content that is already clean.
+        foreach (self::RICH_TEXT_FIELDS as $field) {
+            if (isset($profile[$field]) && is_string($profile[$field])) {
+                $profile[$field] = Security::sanitizeRichTextIfNeeded($profile[$field]);
+            }
         }
 
         return $profile;

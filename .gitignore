@@ -27,6 +27,9 @@ storage/**
 node_modules/
 /.release/
 
+# Local security-patch backups (keep them out of the repository)
+/security-patch-*/
+
 # Database dumps
 *.sql
 !database/schema.sql

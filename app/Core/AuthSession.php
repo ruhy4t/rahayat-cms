@@ -14,6 +14,9 @@ final class AuthSession
             throw new RuntimeException('Akun tidak aktif.');
         }
         session_regenerate_id(true);
+        // Rotate the CSRF token with the session: a token minted before the
+        // privilege change must not stay valid afterwards.
+        unset($_SESSION[CSRF_TOKEN_NAME], $_SESSION['_csrf_time']);
         $_SESSION['_auth_fingerprint'] = self::fingerprint($fresh);
         $_SESSION['_auth_started'] = $_SESSION['_auth_seen'] = time();
         unset($fresh['password']);

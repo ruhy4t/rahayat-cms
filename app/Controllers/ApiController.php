@@ -34,68 +34,81 @@ class ApiController extends Controller
     public function before(string $action): bool
     {
         // Public endpoints
-        $publicActions = ['news', 'newsShow'];
+        if (in_array($action, ['news', 'newsShow'], true)) {
+            return true;
+        }
 
-        if (!in_array($action, $publicActions)) {
-            if (!$this->isLoggedIn()) {
-                $this->jsonError('Unauthorized', 401);
-                return false;
-            }
+        if (!$this->isLoggedIn()) {
+            $this->jsonError('Unauthorized', 401);
+            return false;
+        }
 
-            $user = $this->currentUser();
-            $role = $user['role'] ?? '';
+        $user = $this->currentUser();
+        $role = $user['role'] ?? '';
 
-            // Admin has full access
-            if ($role === 'admin') {
-                return true;
-            }
+        // Admin has full access
+        if ($role === 'admin') {
+            return true;
+        }
 
-            // Admin-only endpoints
-            $adminOnly = [
-                'userStore',
-                'userUpdate',
-                'userDelete',
-                'menuStore',
-                'menuUpdate',
-                'menuDelete',
-            ];
-            if (in_array($action, $adminOnly)) {
-                $this->jsonError('Anda tidak memiliki akses', 403);
-                return false;
-            }
+        // Admin-only endpoints
+        $adminOnly = [
+            'userStore',
+            'userUpdate',
+            'userDelete',
+            'menuStore',
+            'menuUpdate',
+            'menuDelete',
+        ];
+        if (in_array($action, $adminOnly, true)) {
+            $this->jsonError('Anda tidak memiliki akses', 403);
+            return false;
+        }
 
-            // Permission-mapped endpoints
-            $permissionMap = [
-                'categoryStore' => 'kategori',
-                'categoryUpdate' => 'kategori',
-                'categoryDelete' => 'kategori',
-                'slideStore' => 'slider',
-                'slideUpdate' => 'slider',
-                'slideDelete' => 'slider',
-                'slideToggle' => 'slider',
-                'galleryStore' => 'galeri',
-                'galleryUpdate' => 'galeri',
-                'galleryDelete' => 'galeri',
-                'albumStore' => 'galeri',
-                'albumUpdate' => 'galeri',
-                'albumDelete' => 'galeri',
-                'videoStore' => 'galeri',
-                'newsStore' => 'berita',
-                'newsUpdate' => 'berita',
-                'newsDelete' => 'berita',
-            ];
+        // Endpoints every authenticated account may use: its own password, its
+        // own CSRF token, and the read-only category list used by the editor.
+        if (in_array($action, ['csrfToken', 'changePassword', 'categories'], true)) {
+            return true;
+        }
 
-            $requiredPerm = $permissionMap[$action] ?? null;
-            if ($requiredPerm && !$this->userModel->hasPermission($user, $requiredPerm)) {
-                $this->jsonError('Anda tidak memiliki akses', 403);
-                return false;
-            }
+        // Murid/Ekskul cannot delete news
+        if (in_array($role, ['murid', 'ekskul'], true) && $action === 'newsDelete') {
+            $this->jsonError('Anda tidak memiliki akses untuk menghapus berita', 403);
+            return false;
+        }
 
-            // Murid/Ekskul cannot delete news
-            if (in_array($role, ['murid', 'ekskul']) && $action === 'newsDelete') {
-                $this->jsonError('Anda tidak memiliki akses untuk menghapus berita', 403);
-                return false;
-            }
+        // Permission-mapped endpoints
+        $permissionMap = [
+            'categoryStore' => 'kategori',
+            'categoryUpdate' => 'kategori',
+            'categoryDelete' => 'kategori',
+            'slideStore' => 'slider',
+            'slideUpdate' => 'slider',
+            'slideDelete' => 'slider',
+            'slideToggle' => 'slider',
+            'galleryStore' => 'galeri',
+            'galleryUpdate' => 'galeri',
+            'galleryDelete' => 'galeri',
+            'albumStore' => 'galeri',
+            'albumUpdate' => 'galeri',
+            'albumDelete' => 'galeri',
+            'videoStore' => 'galeri',
+            'newsStore' => 'berita',
+            'newsUpdate' => 'berita',
+            'newsDelete' => 'berita',
+        ];
+
+        $requiredPerm = $permissionMap[$action] ?? null;
+        if ($requiredPerm === null) {
+            // Deny by default: an action that is not explicitly mapped above is
+            // never reachable by a non-admin account.
+            $this->jsonError('Anda tidak memiliki akses', 403);
+            return false;
+        }
+
+        if (!$this->userModel->hasPermission($user, $requiredPerm)) {
+            $this->jsonError('Anda tidak memiliki akses', 403);
+            return false;
         }
 
         return true;
@@ -233,6 +246,14 @@ class ApiController extends Controller
 
         if (!$news) {
             $this->jsonError('Berita tidak ditemukan', 404);
+        }
+
+        // Murid/Ekskul may only edit their own article. Without this check any
+        // contributor could rewrite or unpublish another author's news.
+        $viewer = $this->currentUser();
+        if (in_array($viewer['role'] ?? '', ['murid', 'ekskul'], true)
+            && (int) ($news['author_id'] ?? 0) !== (int) ($viewer['id'] ?? 0)) {
+            $this->jsonError('Anda tidak memiliki akses ke berita ini', 403);
         }
 
         // Validate input
