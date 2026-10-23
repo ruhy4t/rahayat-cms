@@ -1,0 +1,16 @@
+.theme-wibawa-crimson {
+    --theme-accent: #d4a72c;
+    --theme-ink: #071a2e;
+    --theme-surface: #fffdfa;
+    background: var(--theme-surface);
+    color: #27272a;
+}
+.theme-wibawa-crimson main h1,
+.theme-wibawa-crimson main h2 { letter-spacing: -.035em; font-weight: 800; }
+.theme-wibawa-crimson main section { border-bottom: 1px solid #e7e5e4; }
+.theme-wibawa-crimson main article,
+.theme-wibawa-crimson .academic-card { border-radius: .25rem; border-left: 4px solid rgb(var(--primary-rgb-600)); box-shadow: 0 7px 0 rgba(7,26,46,.06); }
+.theme-wibawa-crimson .bg-primary-600 { background-color: #991b1b; }
+.theme-wibawa-crimson footer { background: var(--theme-ink); border-top: 5px solid var(--theme-accent); }
+.theme-wibawa-crimson :focus-visible { outline: 3px solid var(--theme-accent); outline-offset: 3px; }
+

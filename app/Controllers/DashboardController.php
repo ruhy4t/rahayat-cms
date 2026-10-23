@@ -650,6 +650,7 @@ class DashboardController extends Controller
             'user' => $this->currentUser(),
             'settings' => $this->settingModel->getAll(),
             'themes' => $this->settingModel->getAvailableThemes(),
+            'fonts' => $this->settingModel->getAvailableFonts(),
             'currentTheme' => $this->settingModel->getTheme(),
             'profile' => $this->profileModel->getProfile(),
             'flash' => $this->getFlash()
@@ -690,12 +691,39 @@ class DashboardController extends Controller
             'whatsapp_number',
             'whatsapp_message',
             'maintenance_mode',
-            'maintenance_message'
+            'maintenance_message',
+            'theme_font_body',
+            'theme_font_heading',
+            'home_hero_eyebrow',
+            'home_hero_title_prefix',
+            'home_primary_button_label',
+            'home_contact_button_label',
+            'home_students_label',
+            'home_teachers_label',
+            'home_accreditation_label',
+            'home_graduation_label',
+            'home_news_eyebrow',
+            'home_news_title',
+            'home_facilities_eyebrow',
+            'home_facilities_title',
+            'home_facilities_description',
+            'home_extracurricular_eyebrow',
+            'home_extracurricular_title',
+            'home_testimonials_eyebrow',
+            'home_testimonials_title',
+            'home_testimonials_description',
+            'home_cta_title',
+            'home_cta_description',
         ];
 
         foreach ($keys as $key) {
             $value = $this->post($key);
             if ($value !== null) {
+                if (in_array($key, ['theme_font_body', 'theme_font_heading'], true)
+                    && !array_key_exists((string) $value, $this->settingModel->getAvailableFonts())) {
+                    $this->json(['success' => false, 'message' => 'Pilihan tipografi tidak valid'], 422);
+                    return;
+                }
                 // For boolean toggles that might be absent if unchecked (handled in JS but safe to handle '0' here if generic)
                 // The DashboardController::settingsUpdate logic checks if value !== null.
                 // Our JS for maintenance form appends '0' if missing, so it sends '0'.

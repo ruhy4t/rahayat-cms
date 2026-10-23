@@ -1,0 +1,16 @@
+.theme-arunika-emerald {
+    --theme-accent: #c6922d;
+    --theme-ink: #064e3b;
+    --theme-surface: #fffdf7;
+    background: var(--theme-surface);
+    color: #18392f;
+}
+.theme-arunika-emerald main { background-image: radial-gradient(circle at 95% 5%, rgba(5,150,105,.08), transparent 24rem); }
+.theme-arunika-emerald main section:nth-of-type(even) { background-color: #f2f8f3 !important; }
+.theme-arunika-emerald main article,
+.theme-arunika-emerald .academic-card { border-radius: 1rem; border-color: rgba(4,120,87,.18); box-shadow: 0 8px 22px rgba(6,78,59,.07); }
+.theme-arunika-emerald main h1,
+.theme-arunika-emerald main h2 { color: var(--theme-ink); letter-spacing: -.025em; }
+.theme-arunika-emerald footer { background: var(--theme-ink); }
+.theme-arunika-emerald :focus-visible { outline: 3px solid var(--theme-accent); outline-offset: 3px; }
+

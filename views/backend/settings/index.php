@@ -8,6 +8,9 @@ $themes = $data['themes'] ?? [];
 $currentTheme = $data['currentTheme'] ?? 'indigo-modern';
 $profile = $data['profile'] ?? [];
 $flash = $data['flash'] ?? null;
+$fonts = $data['fonts'] ?? [];
+$defaultThemeFonts = ['emerald-campus' => 'Poppins', 'crimson-bold' => 'Plus Jakarta Sans', 'cendekia-smp' => 'Manrope'];
+$defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
 ?>
 
 <div class="space-y-6">
@@ -91,6 +94,14 @@ $flash = $data['flash'] ?? null;
                                             </div>
                                         </div>
                                     </div>
+                                <?php else: ?>
+                                    <div class="w-full max-w-[120px] opacity-70 space-y-1">
+                                        <div class="h-2 bg-white rounded-sm"></div>
+                                        <div class="grid grid-cols-3 gap-1 h-10">
+                                            <div class="col-span-2 bg-white/90 rounded-sm"></div>
+                                            <div class="bg-white/50 rounded-sm"></div>
+                                        </div>
+                                    </div>
                                 <?php endif; ?>
 
                                 <?php if ($currentTheme === $key): ?>
@@ -150,6 +161,68 @@ $flash = $data['flash'] ?? null;
                     Gunakan <code>{year}</code> untuk tahun otomatis dan <code>{school}</code> untuk nama sekolah.
                     <br>Contoh: <i>&copy; {year} {school}. All rights reserved.</i>
                 </p>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <h3 class="font-semibold text-slate-800">Tipografi website</h3>
+                <p class="text-sm text-slate-500 mt-1 mb-4">Berlaku pada seluruh halaman publik dan semua tema.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <?php foreach (['theme_font_body' => 'Font isi', 'theme_font_heading' => 'Font judul'] as $fontKey => $fontLabel): ?>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1"><?= e($fontLabel) ?></label>
+                            <select name="<?= e($fontKey) ?>" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                                <?php foreach ($fonts as $fontValue => $fontName): ?>
+                                    <option value="<?= e($fontValue) ?>" <?= (trim((string) ($settings[$fontKey] ?? '')) ?: $defaultThemeFont) === $fontValue ? 'selected' : '' ?>><?= e($fontName) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-100">
+                <h3 class="font-semibold text-slate-800">Teks halaman beranda</h3>
+                <p class="text-sm text-slate-500 mt-1 mb-4">Konten utama tema baru dapat diubah tanpa menyunting template.</p>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <?php
+                    $homeFields = [
+                        'home_hero_eyebrow' => ['Label hero', 'Info SPMB Tersedia'],
+                        'home_hero_title_prefix' => ['Awalan judul hero', 'Selamat Datang di'],
+                        'home_primary_button_label' => ['Tombol profil', 'Tentang Kami'],
+                        'home_contact_button_label' => ['Tombol kontak', 'Hubungi Kami'],
+                        'home_students_label' => ['Label jumlah murid', 'Murid Aktif'],
+                        'home_teachers_label' => ['Label jumlah guru', 'Guru Profesional'],
+                        'home_accreditation_label' => ['Label akreditasi', 'Akreditasi'],
+                        'home_graduation_label' => ['Label kelulusan', 'Kelulusan'],
+                        'home_news_eyebrow' => ['Label berita', 'Informasi Terkini'],
+                        'home_news_title' => ['Judul berita', 'Berita & Pengumuman'],
+                        'home_facilities_eyebrow' => ['Label fasilitas', 'Infrastruktur'],
+                        'home_facilities_title' => ['Judul fasilitas', 'Fasilitas Sekolah'],
+                        'home_extracurricular_eyebrow' => ['Label ekstrakurikuler', 'Pengembangan Diri'],
+                        'home_extracurricular_title' => ['Judul ekstrakurikuler', 'Ekstrakurikuler'],
+                        'home_testimonials_eyebrow' => ['Label testimoni', 'Cerita Mereka'],
+                        'home_testimonials_title' => ['Judul testimoni', 'Testimoni'],
+                        'home_cta_title' => ['Judul ajakan', 'Bergabunglah Bersama Kami'],
+                    ];
+                    foreach ($homeFields as $fieldKey => [$fieldLabel, $placeholder]): ?>
+                        <div>
+                            <label class="block text-sm font-medium text-slate-700 mb-1"><?= e($fieldLabel) ?></label>
+                            <input type="text" name="<?= e($fieldKey) ?>" value="<?= e($settings[$fieldKey] ?? '') ?>"
+                                placeholder="<?= e($placeholder) ?>" class="w-full px-4 py-2 border border-slate-300 rounded-lg">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php foreach ([
+                    'home_facilities_description' => ['Deskripsi fasilitas', 'Fasilitas pendukung kegiatan belajar dan pengembangan murid.'],
+                    'home_testimonials_description' => ['Deskripsi testimoni', 'Pengalaman keluarga besar dan mitra sekolah bersama kami.'],
+                    'home_cta_description' => ['Deskripsi ajakan', 'Hubungi sekolah untuk memperoleh informasi selengkapnya.'],
+                ] as $fieldKey => [$fieldLabel, $placeholder]): ?>
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-1"><?= e($fieldLabel) ?></label>
+                        <textarea name="<?= e($fieldKey) ?>" rows="2" placeholder="<?= e($placeholder) ?>"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg"><?= e($settings[$fieldKey] ?? '') ?></textarea>
+                    </div>
+                <?php endforeach; ?>
             </div>
 
             <div class="pt-4 border-t border-slate-100">

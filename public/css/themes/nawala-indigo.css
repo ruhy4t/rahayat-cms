@@ -1,0 +1,16 @@
+.theme-nawala-indigo {
+    --theme-accent: #06b6d4;
+    --theme-ink: #0b1f49;
+    --theme-surface: #f7faff;
+    background: var(--theme-surface);
+    color: #172554;
+}
+.theme-nawala-indigo nav { border-bottom: 3px solid var(--theme-accent); }
+.theme-nawala-indigo main section { scroll-margin-top: 5rem; }
+.theme-nawala-indigo main article,
+.theme-nawala-indigo .academic-card { border-radius: .75rem; box-shadow: 0 8px 24px rgba(15, 23, 42, .07); }
+.theme-nawala-indigo main h1,
+.theme-nawala-indigo main h2 { letter-spacing: -.035em; }
+.theme-nawala-indigo footer { background: var(--theme-ink); }
+.theme-nawala-indigo :focus-visible { outline: 3px solid var(--theme-accent); outline-offset: 3px; }
+

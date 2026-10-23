@@ -8,6 +8,7 @@ $news = $data['news'] ?? [];
 $slides = $data['slides'] ?? [];
 $theme = $data['theme'] ?? 'indigo-modern';
 $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
+$copy = static fn (string $key, string $fallback): string => trim((string) ($settings[$key] ?? '')) ?: $fallback;
 
 // Cendekia SMP owns its complete homepage composition. Keeping it in a
 // dedicated partial prevents layout changes from leaking into older themes.
@@ -57,12 +58,12 @@ if ($theme === 'cendekia-smp') {
                         <div
                             class="inline-flex items-center px-4 py-2 bg-white/10 rounded-full text-sm font-medium backdrop-blur-sm">
                             <span class="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></span>
-                            Info SPMB Tersedia
+                            <?= e($copy('home_hero_eyebrow', 'Info SPMB Tersedia')) ?>
                         </div>
                     <?php endif; ?>
 
                     <h1 class="text-4xl lg:text-6xl font-bold leading-tight">
-                        Selamat Datang di
+                        <?= e($copy('home_hero_title_prefix', 'Selamat Datang di')) ?>
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-200 to-white">
                             <?= e($profile['name'] ?? SCHOOL_NAME) ?>
                         </span>
@@ -84,7 +85,7 @@ if ($theme === 'cendekia-smp') {
                     <div class="flex flex-wrap gap-4 pt-4">
                         <a href="/profil"
                             class="inline-flex items-center px-6 py-3 bg-white text-primary-700 font-semibold rounded-lg hover:bg-primary-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
-                            Tentang Kami
+                            <?= e($copy('home_primary_button_label', 'Tentang Kami')) ?>
                             <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -107,7 +108,7 @@ if ($theme === 'cendekia-smp') {
                             <!-- Fallback button if no SPMB logic applies (e.g. Negeri with no link) -->
                             <a href="/kontak"
                                 class="inline-flex items-center px-6 py-3 border-2 border-white/30 text-white font-semibold rounded-lg hover:bg-white/10 backdrop-blur-sm transition-all duration-200">
-                                Hubungi Kami
+                                <?= e($copy('home_contact_button_label', 'Hubungi Kami')) ?>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -121,7 +122,7 @@ if ($theme === 'cendekia-smp') {
                             <div class="text-4xl font-bold">
                                 <?= e($profile['total_students']) ?>+
                             </div>
-                            <div class="text-primary-200 mt-1">Murid Aktif</div>
+                            <div class="text-primary-200 mt-1"><?= e($copy('home_students_label', 'Murid Aktif')) ?></div>
                         </div>
                     <?php endif; ?>
 
@@ -131,7 +132,7 @@ if ($theme === 'cendekia-smp') {
                             <div class="text-4xl font-bold">
                                 <?= e($profile['total_teachers']) ?>+
                             </div>
-                            <div class="text-primary-200 mt-1">Guru Profesional</div>
+                            <div class="text-primary-200 mt-1"><?= e($copy('home_teachers_label', 'Guru Profesional')) ?></div>
                         </div>
                     <?php endif; ?>
 
@@ -141,7 +142,7 @@ if ($theme === 'cendekia-smp') {
                             <div class="text-4xl font-bold">
                                 <?= e($profile['accreditation']) ?>
                             </div>
-                            <div class="text-primary-200 mt-1">Akreditasi</div>
+                            <div class="text-primary-200 mt-1"><?= e($copy('home_accreditation_label', 'Akreditasi')) ?></div>
                         </div>
                     <?php endif; ?>
 
@@ -151,7 +152,7 @@ if ($theme === 'cendekia-smp') {
                             <div class="text-4xl font-bold">
                                 <?= e($profile['graduation_rate']) ?>%
                             </div>
-                            <div class="text-primary-200 mt-1">Kelulusan</div>
+                            <div class="text-primary-200 mt-1"><?= e($copy('home_graduation_label', 'Kelulusan')) ?></div>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -193,8 +194,8 @@ if ($theme === 'cendekia-smp') {
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                 <div>
-                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Informasi Terkini</span>
-                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2">Berita & Pengumuman</h2>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider"><?= e($copy('home_news_eyebrow', 'Informasi Terkini')) ?></span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2"><?= e($copy('home_news_title', 'Berita & Pengumuman')) ?></h2>
                 </div>
                 <a href="/berita"
                     class="mt-4 md:mt-0 inline-flex items-center text-primary-600 hover:text-primary-700 font-medium">
@@ -296,10 +297,9 @@ if ($theme === 'cendekia-smp') {
 
             <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div class="text-center max-w-3xl mx-auto mb-16">
-                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Infrastruktur</span>
-                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2 mb-4">Fasilitas Sekolah</h2>
-                    <p class="text-slate-600">Kami menyediakan berbagai fasilitas pendukung untuk menunjang kegiatan belajar
-                        mengajar secara optimal.</p>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider"><?= e($copy('home_facilities_eyebrow', 'Infrastruktur')) ?></span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2 mb-4"><?= e($copy('home_facilities_title', 'Fasilitas Sekolah')) ?></h2>
+                    <p class="text-slate-600"><?= e($copy('home_facilities_description', 'Fasilitas pendukung kegiatan belajar dan pengembangan murid.')) ?></p>
                 </div>
 
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -361,8 +361,8 @@ if ($theme === 'cendekia-smp') {
             <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-12">
                     <div>
-                        <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Pengembangan Diri</span>
-                        <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2">Ekstrakurikuler</h2>
+                        <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider"><?= e($copy('home_extracurricular_eyebrow', 'Pengembangan Diri')) ?></span>
+                        <h2 class="text-3xl lg:text-4xl font-bold text-slate-800 mt-2"><?= e($copy('home_extracurricular_title', 'Ekstrakurikuler')) ?></h2>
                     </div>
                 </div>
 
@@ -430,9 +430,9 @@ if ($theme === 'cendekia-smp') {
         <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-5 mb-10">
                 <div>
-                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider">Cerita Mereka</span>
-                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mt-2">Testimoni</h2>
-                    <p class="text-slate-600 mt-3 max-w-2xl">Pengalaman keluarga besar dan mitra sekolah bersama kami.</p>
+                    <span class="text-primary-600 font-semibold text-sm uppercase tracking-wider"><?= e($copy('home_testimonials_eyebrow', 'Cerita Mereka')) ?></span>
+                    <h2 class="text-3xl lg:text-4xl font-bold text-slate-900 mt-2"><?= e($copy('home_testimonials_title', 'Testimoni')) ?></h2>
+                    <p class="text-slate-600 mt-3 max-w-2xl"><?= e($copy('home_testimonials_description', 'Pengalaman keluarga besar dan mitra sekolah bersama kami.')) ?></p>
                 </div>
                 <div class="flex flex-wrap items-center gap-4">
                     <a href="/alumni"
@@ -509,9 +509,8 @@ if (!empty($spmbPublic['active'])) {
 <!-- CTA Section -->
 <section class="py-16 lg:py-24 bg-gradient-to-r from-primary-600 to-primary-800">
     <div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4">Bergabunglah Bersama Kami</h2>
-        <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto">Daftarkan putra-putri Anda untuk mendapatkan
-            pendidikan berkualitas dan masa depan yang cerah.</p>
+        <h2 class="text-3xl lg:text-4xl font-bold text-white mb-4"><?= e($copy('home_cta_title', 'Bergabunglah Bersama Kami')) ?></h2>
+        <p class="text-xl text-primary-100 mb-8 max-w-2xl mx-auto"><?= e($copy('home_cta_description', 'Hubungi sekolah untuk memperoleh informasi selengkapnya.')) ?></p>
         <a href="<?= e($ctaHref) ?>" target="<?= e($ctaTarget) ?>"
             class="inline-flex items-center px-8 py-4 bg-white text-primary-700 font-semibold rounded-lg hover:bg-primary-50 transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5">
             <?= e($ctaText) ?>

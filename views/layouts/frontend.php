@@ -35,11 +35,11 @@
 
             // Base Border Radius by Theme
             $baseRadius = '0.5rem'; // Default: indigo-modern
-            if ($themeName === 'emerald-campus') {
+            if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)) {
                 $baseRadius = '1.5rem'; // Highly rounded
-            } else if ($themeName === 'crimson-bold') {
+            } else if (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)) {
                 $baseRadius = '0rem'; // Sharp edges
-            } else if ($themeName === 'cendekia-smp') {
+            } else if (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)) {
                 $baseRadius = '1rem';
             }
 
@@ -116,23 +116,29 @@
     <link rel="stylesheet" href="/css/academic.css?v=<?= filemtime(ROOT_PATH . '/public/css/academic.css') ?>">
     <script src="/js/academic-calendar.js?v=<?= filemtime(ROOT_PATH . '/public/js/academic-calendar.js') ?>" defer></script>
     <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
-    <?php if ($themeName === 'cendekia-smp'): ?>
-        <link rel="stylesheet"
-            href="/css/themes/cendekia-smp.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/cendekia-smp.css') ?>">
+    <?php $themeStylesheet = ROOT_PATH . '/public/css/themes/' . $themeName . '.css'; ?>
+    <?php if (($themeName === 'cendekia-smp' || str_contains($themeName, 'nawala-') || str_contains($themeName, 'arunika-') || str_contains($themeName, 'wibawa-') || str_contains($themeName, 'samudra-')) && is_file($themeStylesheet)): ?>
+        <link rel="stylesheet" href="/css/themes/<?= e($themeName) ?>.css?v=<?= filemtime($themeStylesheet) ?>">
     <?php endif; ?>
 
     <style>
         body {
-            <?php if ($themeName === 'emerald-campus'): ?>
-            font-family: 'Poppins', sans-serif;
-            <?php elseif ($themeName === 'crimson-bold'): ?>
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            <?php elseif ($themeName === 'cendekia-smp'): ?>
-            font-family: 'Manrope', sans-serif;
-            <?php else: ?>
-            font-family: 'Inter', sans-serif;
-            <?php endif; ?>
-            <?php if ($themeName === 'emerald-campus'): ?>
+            <?php
+            $availableFonts = (new SiteSetting())->getAvailableFonts();
+            $themeDefaultFonts = [
+                'emerald-campus' => 'Poppins',
+                'crimson-bold' => 'Plus Jakarta Sans',
+                'cendekia-smp' => 'Manrope',
+            ];
+            $defaultThemeFont = $themeDefaultFonts[$themeName] ?? 'Inter';
+            $bodyFont = trim((string) ($settings['theme_font_body'] ?? '')) ?: $defaultThemeFont;
+            $headingFont = (string) ($settings['theme_font_heading'] ?? $bodyFont);
+            $headingFont = trim($headingFont) ?: $bodyFont;
+            $bodyFont = array_key_exists($bodyFont, $availableFonts) ? $bodyFont : 'Inter';
+            $headingFont = array_key_exists($headingFont, $availableFonts) ? $headingFont : $bodyFont;
+            ?>
+            font-family: '<?= e($bodyFont) ?>', sans-serif;
+            <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
                 --base-radius-sm: 0.5rem;
                 --base-radius: 0.75rem;
                 --base-radius-md: 1rem;
@@ -140,7 +146,7 @@
                 --base-radius-xl: 1.5rem;
                 --base-radius-2xl: 2rem;
                 --base-radius-3xl: 2.5rem;
-            <?php elseif ($themeName === 'crimson-bold'): ?>
+            <?php elseif (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)): ?>
                 --base-radius-sm: 0;
                 --base-radius: 0;
                 --base-radius-md: 0;
@@ -148,7 +154,7 @@
                 --base-radius-xl: 0;
                 --base-radius-2xl: 0;
                 --base-radius-3xl: 0;
-            <?php elseif ($themeName === 'cendekia-smp'): ?>
+            <?php elseif (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)): ?>
                 --base-radius-sm: 0.375rem;
                 --base-radius: 0.625rem;
                 --base-radius-md: 0.75rem;
@@ -166,6 +172,7 @@
                 --base-radius-3xl: 1.5rem;
             <?php endif; ?>
         }
+        h1, h2, h3, h4, h5, h6 { font-family: '<?= e($headingFont) ?>', sans-serif; }
         
         <?php if ($themeName === 'crimson-bold'): ?>
         .shadow-lg, .shadow-xl, .shadow-2xl {
@@ -206,11 +213,11 @@
 
 <body class="bg-slate-50 min-h-screen flex flex-col theme-<?= e($themeName) ?>">
     <!-- Navigation -->
-    <?php if ($themeName === 'emerald-campus'): ?>
+    <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
         <?php include __DIR__ . '/partials/nav-emerald.php'; ?>
-    <?php elseif ($themeName === 'crimson-bold'): ?>
+    <?php elseif (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)): ?>
         <?php include __DIR__ . '/partials/nav-crimson.php'; ?>
-    <?php elseif ($themeName === 'cendekia-smp'): ?>
+    <?php elseif (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)): ?>
         <?php include __DIR__ . '/partials/nav-cendekia.php'; ?>
     <?php else: ?>
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200">
@@ -400,11 +407,11 @@
     <?php endif; ?>
 
     <!-- Footer -->
-    <?php if ($themeName === 'emerald-campus'): ?>
+    <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
         <?php include __DIR__ . '/partials/footer-emerald.php'; ?>
-    <?php elseif ($themeName === 'crimson-bold'): ?>
+    <?php elseif (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)): ?>
         <?php include __DIR__ . '/partials/footer-crimson.php'; ?>
-    <?php elseif ($themeName === 'cendekia-smp'): ?>
+    <?php elseif (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)): ?>
         <?php include __DIR__ . '/partials/footer-cendekia.php'; ?>
     <?php else: ?>
     <footer class="bg-slate-900 text-slate-400">

@@ -121,7 +121,37 @@ class SiteSetting extends Model
                 'name' => 'Cendekia SMP',
                 'primary' => '#2563EB',
                 'description' => 'Tampilan modern bernuansa biru, ungu, navy, ocean, dan cyan'
+            ],
+            'nawala-indigo' => [
+                'name' => 'Nawala Indigo',
+                'primary' => '#1D4ED8',
+                'description' => 'Institusional modern, tegas, ringan, dan aksesibel'
+            ],
+            'arunika-emerald' => [
+                'name' => 'Arunika Emerald',
+                'primary' => '#047857',
+                'description' => 'Nuansa kampus segar dengan aksen hijau dan emas'
+            ],
+            'wibawa-crimson' => [
+                'name' => 'Wibawa Crimson',
+                'primary' => '#991B1B',
+                'description' => 'Editorial formal dengan karakter merah marun yang kuat'
+            ],
+            'samudra-cendekia' => [
+                'name' => 'Samudra Cendekia',
+                'primary' => '#0369A1',
+                'description' => 'Akademis dinamis dalam palet biru bahari dan cyan'
             ]
+        ];
+    }
+
+    public function getAvailableFonts(): array
+    {
+        return [
+            'Inter' => 'Inter',
+            'Poppins' => 'Poppins',
+            'Plus Jakarta Sans' => 'Plus Jakarta Sans',
+            'Manrope' => 'Manrope',
         ];
     }
 

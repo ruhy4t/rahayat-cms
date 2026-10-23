@@ -59,7 +59,10 @@ try {
     $upcomingEvents = [$model->find($id)];
     $news = $slides = $facilities = $ekskul = $testimonials = [];
     $spmbPublic = ['active' => false];
-    foreach (['indigo-modern', 'emerald-campus', 'crimson-bold', 'cendekia-smp'] as $theme) {
+    foreach ([
+        'indigo-modern', 'emerald-campus', 'crimson-bold', 'cendekia-smp',
+        'nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia',
+    ] as $theme) {
         $data = compact('profile', 'settings', 'theme', 'news', 'slides', 'facilities', 'ekskul', 'testimonials', 'upcomingEvents', 'calendarData');
         ob_start(); include VIEW_PATH . '/frontend/home.php'; $home = ob_get_clean();
         academicCheck(substr_count($home, 'id="principal-message-title"') === 1, 'Principal card on ' . $theme);
