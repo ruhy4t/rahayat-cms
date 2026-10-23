@@ -16,3 +16,18 @@ body .next-stat span,body .next-meta,body .next-card-body>p:last-child,body .nex
 body .next-button--ghost{background:var(--theme-ink)}
 body.theme-arunika-emerald .next-button--primary{color:#071a2e}
 body.theme-arunika-emerald .next-event time{color:#fff}
+
+/* Shared public pages: readable secondary text on light surfaces. */
+body :is(main,nav,#mobileMenu) :is(.text-slate-400,.text-gray-400){color:#475569}
+body main :is(.text-red-500){color:#b91c1c}
+body main :is(input,textarea,select){color:#0f172a;background-color:#fff;border-color:#64748b}
+body main :is(input,textarea)::placeholder{color:#475569;opacity:1}
+body main :is(input,textarea,select):disabled{color:#475569;background:#f1f5f9;opacity:1}
+body nav :is(a,button):is(:hover,:focus-visible),body #mobileMenu a:is(:hover,:focus-visible){color:#fff;background:var(--theme-ink)}
+body nav .group:focus-within>.invisible{visibility:visible;opacity:1}
+body :is(a,button,input,textarea,select,summary):focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 6px #0f172a}
+/* The Emerald footer template has light-surface text; retain its light surface. */
+body.theme-arunika-emerald>footer{background:#fff;color:#334155}
+body:is(.theme-nawala-indigo,.theme-wibawa-crimson,.theme-samudra-cendekia)>footer :is(.text-slate-500,.text-slate-400,.text-primary-500,.text-primary-600,.text-primary-400){color:#e2e8f0}
+body:is(.theme-nawala-indigo,.theme-wibawa-crimson,.theme-samudra-cendekia)>footer a:is(:hover,:focus-visible){color:#fff;background:#0f172a}
+body main .text-white:is(h1,h2,h3,h4){color:#fff}
