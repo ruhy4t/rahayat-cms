@@ -19,6 +19,21 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+    const desktopPointer = window.matchMedia('(min-width: 1101px) and (hover: hover) and (pointer: fine)');
+    header.querySelectorAll('.next-desktop-nav .next-menu-parent').forEach(parent => {
+        const branch = parent.querySelector(':scope > details');
+        if (!branch) return;
+        parent.addEventListener('pointerenter', event => {
+            if (desktopPointer.matches && event.pointerType !== 'touch') branch.open = true;
+        });
+        parent.addEventListener('pointerleave', () => {
+            if (desktopPointer.matches && !parent.contains(document.activeElement)) branch.open = false;
+        });
+        parent.addEventListener('focusin', () => { branch.open = true; });
+        parent.addEventListener('focusout', event => {
+            if (!parent.contains(event.relatedTarget)) branch.open = false;
+        });
+    });
     const form = document.querySelector('form[action="/alumni/kirim"]');
     const continuation = form?.querySelector('[name="further_education"]');
     const updateContinuation = () => {
