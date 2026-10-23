@@ -8,7 +8,6 @@ $renderNextMenus = static function (array $items) use (&$renderNextMenus): void 
         echo '<li>';
         if (!empty($item['children'])) {
             echo '<details class="next-menu-branch"><summary>' . e($item['title']) . '</summary><div class="next-submenu">';
-            echo '<a href="' . e($href) . '"' . ($external ? ' target="_blank" rel="noopener noreferrer"' : '') . '>' . e($item['title']) . '</a>';
             $renderNextMenus($item['children']);
             echo '</div></details>';
         } else {

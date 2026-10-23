@@ -362,7 +362,6 @@
             && !str_starts_with($themePublicPage, 'berita')
             && $themePublicPage !== 'profil'): ?>
             <div class="next-module-layout next-shell">
-                <aside class="next-module-nav"><a class="next-module-school" href="/"><?= e($profile['name'] ?? SCHOOL_NAME) ?></a><nav aria-label="Navigasi halaman"><?php $renderNextMenus($headerMenus ?? []); ?></nav></aside>
                 <div class="next-module-content"><?= $content ?></div>
             </div>
         <?php elseif ($themeName === 'cendekia-smp'): ?>
