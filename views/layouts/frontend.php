@@ -216,11 +216,13 @@
 
 <body class="bg-slate-50 min-h-screen flex flex-col theme-<?= e($themeName) ?>">
     <!-- Navigation -->
-    <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
+    <?php if (in_array($themeName, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)): ?>
+        <?php include __DIR__ . '/partials/nav-next.php'; ?>
+    <?php elseif ($themeName === 'emerald-campus'): ?>
         <?php include __DIR__ . '/partials/nav-emerald.php'; ?>
-    <?php elseif (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)): ?>
+    <?php elseif ($themeName === 'crimson-bold'): ?>
         <?php include __DIR__ . '/partials/nav-crimson.php'; ?>
-    <?php elseif (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)): ?>
+    <?php elseif ($themeName === 'cendekia-smp'): ?>
         <?php include __DIR__ . '/partials/nav-cendekia.php'; ?>
     <?php else: ?>
     <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-slate-200">
@@ -355,7 +357,15 @@
     ?>
     <!-- Main Content -->
     <main class="flex-1" data-public-page="<?= e($themePublicPage) ?>">
-        <?php if ($themeName === 'cendekia-smp'): ?>
+        <?php if (in_array($themeName, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)
+            && $themePublicPage !== 'home'
+            && !str_starts_with($themePublicPage, 'berita')
+            && $themePublicPage !== 'profil'): ?>
+            <div class="next-module-layout next-shell">
+                <aside class="next-module-nav"><a class="next-module-school" href="/"><?= e($profile['name'] ?? SCHOOL_NAME) ?></a><nav aria-label="Navigasi halaman"><?php $renderNextMenus($headerMenus ?? []); ?></nav></aside>
+                <div class="next-module-content"><?= $content ?></div>
+            </div>
+        <?php elseif ($themeName === 'cendekia-smp'): ?>
             <div class="cendekia-page-surface">
                 <?= $content ?>
             </div>
@@ -410,11 +420,13 @@
     <?php endif; ?>
 
     <!-- Footer -->
-    <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
+    <?php if (in_array($themeName, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)): ?>
+        <?php include __DIR__ . '/partials/footer-next.php'; ?>
+    <?php elseif ($themeName === 'emerald-campus'): ?>
         <?php include __DIR__ . '/partials/footer-emerald.php'; ?>
-    <?php elseif (in_array($themeName, ['crimson-bold', 'wibawa-crimson'], true)): ?>
+    <?php elseif ($themeName === 'crimson-bold'): ?>
         <?php include __DIR__ . '/partials/footer-crimson.php'; ?>
-    <?php elseif (in_array($themeName, ['cendekia-smp', 'samudra-cendekia'], true)): ?>
+    <?php elseif ($themeName === 'cendekia-smp'): ?>
         <?php include __DIR__ . '/partials/footer-cendekia.php'; ?>
     <?php else: ?>
     <footer class="bg-slate-900 text-slate-400">

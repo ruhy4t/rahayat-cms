@@ -126,6 +126,18 @@ abstract class Controller
 
         // Include the view file
         $viewFile = VIEW_PATH . '/' . str_replace('.', '/', $view) . '.php';
+        if ($layout === 'frontend' && in_array($this->data['themeName'] ?? '', [
+            'nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia',
+        ], true)) {
+            $modernViews = [
+                'frontend.profile' => 'profile',
+                'frontend.news.index' => 'news-index',
+                'frontend.news.show' => 'news-show',
+            ];
+            if (isset($modernViews[$view])) {
+                $viewFile = VIEW_PATH . '/frontend/next/' . $modernViews[$view] . '.php';
+            }
+        }
         if (!file_exists($viewFile)) {
             throw new RuntimeException("View not found: {$view}");
         }
