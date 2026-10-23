@@ -3,6 +3,9 @@
 .next-menu-parent>.next-menu-branch { position:static; }
 .next-menu-parent summary { list-style:none; padding:.8rem .5rem; min-width:36px; }
 .next-menu-parent summary::-webkit-details-marker { display:none; }
+@media(min-width:1101px) and (hover:hover) and (pointer:fine) {
+    .next-desktop-nav .next-menu-parent summary { position:absolute; width:1px; min-width:0; height:1px; padding:0; overflow:hidden; clip-path:inset(50%); }
+}
 .next-menu-parent .next-submenu { left:0; }
 .next-submenu .next-menu-parent { flex-wrap:wrap; }
 .next-submenu .next-menu-branch { flex:1; }
