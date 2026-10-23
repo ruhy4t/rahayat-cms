@@ -14,6 +14,13 @@ ID tema baru.
 | Wibawa Crimson | Masthead institusional, navigasi gelap, kartu horizontal |
 | Samudra Cendekia | Hero asimetris, statistik mengambang, berita unggulan lebar |
 
+Komposisi beranda masing-masing berada pada `home/partials/next/portal.php`,
+`campus.php`, `editorial.php`, dan `explore.php`. Masing-masing menentukan
+struktur hero serta urutan blok kontennya sendiri. Blok data bersama berada
+di subfolder `blocks/`, sedangkan susunan visual memakai `compositions.css`.
+Berbagi blok mempertahankan perilaku CMS tanpa memaksa empat tema memakai
+satu pohon layout yang sama. Fixture memeriksa identitas komposisi per tema.
+
 View khusus mencakup profil, arsip/detail berita, galeri/album, GTK, kontak,
 prestasi/detail, agenda/detail, kalender, program ekstrakurikuler, sambutan,
 testimoni, dan direktori/detail alumni. Formulir transaksi SPMB tetap memakai

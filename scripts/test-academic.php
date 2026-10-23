@@ -70,7 +70,7 @@ try {
         academicCheck(strpos($home, 'id="principal-message-title"') < strpos($home, 'id="academic-home-title"'), 'Section order on ' . $theme);
         academicCheck(!str_contains($home, '<script>alert(1)</script>'), 'Escaped summary on ' . $theme);
         if (in_array($theme, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)) {
-            academicCheck(substr_count($home, 'class="next-hero"') === 1, 'Dedicated modern hero on ' . $theme);
+            academicCheck(substr_count($home, 'data-home-layout=') === 1, 'Dedicated home composition on ' . $theme);
             academicCheck(str_contains($home, 'next-news-layout'), 'Dedicated news and agenda composition on ' . $theme);
         }
     }

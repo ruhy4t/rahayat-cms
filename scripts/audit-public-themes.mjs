@@ -64,6 +64,7 @@ try{
       results.push({theme,page,width,state,...evaluated.result.value});
     }
     if(page==='home'){
+      for(const nodeId of interactive.nodeIds)await call('CSS.forcePseudoState',{nodeId,forcedPseudoClasses:[]});
       await call('Runtime.evaluate',{expression:'document.querySelectorAll(".next-header details").forEach(e=>e.open=false)'});
       const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(join(root,`${theme}-${width}.png`),Buffer.from(shot.data,'base64'));

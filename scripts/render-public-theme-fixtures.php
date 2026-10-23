@@ -4,6 +4,8 @@ require __DIR__ . '/security-bootstrap.php';
 require_once APP_PATH . '/Core/Security.php';
 $output = STORAGE_PATH . '/cache/theme-preview';
 if (!is_dir($output)) { mkdir($output, 0755, true); }
+$illustration='<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><rect width="1200" height="700" fill="#dbeafe"/><circle cx="960" cy="130" r="70" fill="#fde68a"/><path d="M0 550Q300 420 600 560T1200 490V700H0Z" fill="#86a99b"/><path d="M160 310L600 120L1040 310Z" fill="#334155"/><rect x="200" y="310" width="800" height="280" fill="#f8fafc"/><g fill="#5a7c98"><path d="M240 350H350V440H240ZM410 350H520V440H410ZM680 350H790V440H680ZM850 350H960V440H850Z"/></g><path d="M560 410H640V590H560Z" fill="#334155"/><rect x="150" y="590" width="900" height="20" fill="#64748b"/></svg>';
+file_put_contents($output.'/school-fixture.svg',$illustration);
 $profile = ['name'=>'Sekolah Uji Nusantara','motto'=>'Berilmu, Berkarakter, Berprestasi','tagline'=>'Belajar untuk masa depan','address'=>'Alamat sekolah pengujian','phone'=>'021123456','email'=>'sekolah@example.invalid','vision'=>'<p>Pendidikan yang berkualitas untuk semua.</p>','mission'=>'<p>Belajar dan mengembangkan potensi.</p>','history'=>'<p>Riwayat sekolah dari data admin.</p>','total_students'=>1024,'total_teachers'=>78,'accreditation'=>'A','graduation_rate'=>98,'npsn'=>'00000000','principal_name'=>'Kepala Sekolah Uji'];
 $settings = ['whatsapp_enabled'=>'0','footer_text'=>'© {year} {school}','principal_message_enabled'=>'0'];
 $headerMenus = [['title'=>'Beranda','url'=>'/','children'=>[]],['title'=>'Profil','url'=>'/profil','children'=>[['title'=>'Visi & Misi','url'=>'/profil#profile-vision','children'=>[]],['title'=>'GTK','url'=>'/gtk','children'=>[]]]],['title'=>'Informasi','url'=>'/berita','children'=>[['title'=>'Berita','url'=>'/berita','children'=>[]],['title'=>'Agenda','url'=>'/agenda','children'=>[]],['title'=>'Kalender','url'=>'/kalender-pendidikan','children'=>[]]]],['title'=>'Galeri','url'=>'/galeri','children'=>[]],['title'=>'Kontak','url'=>'/kontak','children'=>[]]];
@@ -20,6 +22,8 @@ $calendarData=['year'=>$calendarYearFixture,'years'=>[$calendarYearFixture],'mon
 $searched=false; $registration=null; $submissionToken=str_repeat('a',64); $selectedDocuments=[];
 $themes=(new SiteSetting())->getAvailableThemes();
 $sampleItem=$item;
+$sampleItem['image']='__theme-fixture.svg';
+$slides=[['image'=>'__theme-fixture.svg']];
 $pages=['home'=>'frontend/home.php','profile'=>'frontend/next/profile.php','news'=>'frontend/next/news-index.php','article'=>'frontend/next/news-show.php','gallery'=>'frontend/next/gallery.php','gtk'=>'frontend/next/gtk.php','contact'=>'frontend/next/contact.php','agenda'=>'frontend/next/agenda.php','calendar'=>'frontend/next/calendar.php','achievements'=>'frontend/next/achievements.php'];
 $pages += ['album'=>'frontend/next/gallery-detail.php','event'=>'frontend/next/event-detail.php','achievement'=>'frontend/next/achievement-detail.php','program'=>'frontend/next/program-detail.php','principal'=>'frontend/next/principal.php','alumni-detail'=>'frontend/next/alumni-detail.php','testimonials'=>'frontend/testimonials.php','alumni'=>'frontend/alumni/index.php','spmb'=>'frontend/spmb/index.php','register'=>'frontend/spmb/register.php','status'=>'frontend/spmb/status.php'];
 $pages['testimonials']='frontend/next/testimonials.php';
@@ -39,12 +43,15 @@ foreach (PublicTheme::NAMES as $themeName) {
         ob_start(); require VIEW_PATH.'/'.$template; $content=ob_get_clean();
         ob_start(); require VIEW_PATH.'/layouts/frontend.php'; $html=ob_get_clean();
         $html=str_replace('<head>','<head><base href="http://rahayat-cms.test/">',$html);
+        $html=str_replace('/storage/__theme-fixture.svg','file:///' . str_replace('\\','/',$output) . '/school-fixture.svg',$html);
         $dom=new DOMDocument(); @$dom->loadHTML($html); $xpath=new DOMXPath($dom);
         if ($xpath->query('//header[contains(@class,"next-header")]')->length !== 1) { throw new RuntimeException('Header missing: '.$themeName.'/'.$pageName); }
         if ($xpath->query('//nav[contains(@class,"next-desktop-nav")]//a[@href="/profil"]')->length !== 1) { throw new RuntimeException('Parent link duplicated or missing'); }
         if ($xpath->query('//*[contains(@class,"next-submenu")]/a[@href="/profil"]')->length !== 0) { throw new RuntimeException('Duplicate parent in submenu'); }
         if (str_contains($html,'nav-cendekia') || str_contains($html,'cendekia-header')) { throw new RuntimeException('Legacy header leaked'); }
         if ($pageName === 'home') {
+            $expectedLayout=['nawala-indigo'=>'portal','arunika-emerald'=>'campus','wibawa-crimson'=>'editorial','samudra-cendekia'=>'explore'][$themeName];
+            if ($xpath->query('//*[@data-home-layout="'.$expectedLayout.'"]')->length!==1) { throw new RuntimeException('Distinct theme composition missing'); }
             $stats=$xpath->query('//div[contains(@class,"next-stat")]/strong');
             $values=[]; foreach ($stats as $stat) { $values[]=trim($stat->textContent); }
             if ($values!==['1024+','78+','A','98%']) { throw new RuntimeException('Statistic units are incorrect: '.json_encode($values)); }
