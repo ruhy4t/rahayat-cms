@@ -23,7 +23,7 @@ $renderNextMenus = static function (array $items) use (&$renderNextMenus, $curre
 };
 ?>
 <header class="next-header">
-    <div class="next-utility"><div class="next-shell"><span><?= e($profile['motto'] ?? '') ?></span><div><?php if (!empty($profile['phone'])): ?><a href="tel:<?= e(preg_replace('/[^+0-9]/', '', (string) $profile['phone'])) ?>"><?= e($profile['phone']) ?></a><?php endif; ?><?php if (!empty($profile['email'])): ?><span><?= e($profile['email']) ?></span><?php endif; ?></div></div></div>
+    <div class="next-utility"><div class="next-shell"><span><?= e(PublicTheme::summary($profile['motto'] ?? '')) ?></span><div><?php if (!empty($profile['phone'])): ?><a href="tel:<?= e(preg_replace('/[^+0-9]/', '', (string) $profile['phone'])) ?>"><?= e($profile['phone']) ?></a><?php endif; ?><?php if (!empty($profile['email'])): ?><span><?= e($profile['email']) ?></span><?php endif; ?></div></div></div>
     <div class="next-shell next-masthead"><a class="next-brand" href="/">
         <?php if (!empty($profile['logo'])): ?><img src="/storage/<?= e($profile['logo']) ?>" alt=""><?php endif; ?>
         <?php if (empty($profile['logo'])): ?><span class="next-brand-monogram" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($schoolName,0,1))) ?></span><?php endif; ?>

@@ -29,6 +29,12 @@ $pages += ['album'=>'frontend/next/gallery-detail.php','event'=>'frontend/next/e
 $pages['testimonials']='frontend/next/testimonials.php';
 $pages['alumni']='frontend/next/alumni.php';
 foreach (PublicTheme::NAMES as $themeName) {
+    // Cover editor HTML and legacy entity-encoded content without modifying DB.
+    $mottoHtml = '<p><strong>Berilmu, Berkarakter, Berprestasi</strong></p>';
+    $profile['motto'] = in_array($themeName, ['arunika-emerald', 'samudra-cendekia'], true)
+        ? htmlspecialchars($mottoHtml, ENT_QUOTES | ENT_HTML5, 'UTF-8') : $mottoHtml;
+    $sampleItem['excerpt'] = '&lt;p&gt;Ringkasan &lt;strong&gt;kegiatan sekolah&lt;/strong&gt;&lt;/p&gt;';
+    $facilities[0]['description'] = '&lt;p&gt;Fasilitas &lt;strong&gt;belajar&lt;/strong&gt;&lt;/p&gt;';
     $theme=$themeName; $themeConfig=$themes[$themeName];
     foreach ($pages as $pageName=>$template) {
         $item=$sampleItem;
@@ -49,6 +55,14 @@ foreach (PublicTheme::NAMES as $themeName) {
         if ($xpath->query('//nav[contains(@class,"next-desktop-nav")]//a[@href="/profil"]')->length !== 1) { throw new RuntimeException('Parent link duplicated or missing'); }
         if ($xpath->query('//*[contains(@class,"next-submenu")]/a[@href="/profil"]')->length !== 0) { throw new RuntimeException('Duplicate parent in submenu'); }
         if (str_contains($html,'nav-cendekia') || str_contains($html,'cendekia-header')) { throw new RuntimeException('Legacy header leaked'); }
+        foreach ($xpath->query('//body//text()[not(ancestor::script) and not(ancestor::style) and not(ancestor::textarea)]') as $textNode) {
+            if (preg_match('/<\/?(?:p|strong|span|div|br)\b/i', $textNode->textContent)) {
+                throw new RuntimeException('HTML published as visible text: ' . $themeName . '/' . $pageName);
+            }
+        }
+        if (!str_contains($xpath->query('//header[contains(@class,"next-header")]')->item(0)->textContent, 'Berilmu, Berkarakter, Berprestasi')) {
+            throw new RuntimeException('School motto missing from header');
+        }
         if ($pageName === 'home') {
             $expectedLayout=['nawala-indigo'=>'portal','arunika-emerald'=>'campus','wibawa-crimson'=>'editorial','samudra-cendekia'=>'explore'][$themeName];
             if ($xpath->query('//*[@data-home-layout="'.$expectedLayout.'"]')->length!==1) { throw new RuntimeException('Distinct theme composition missing'); }

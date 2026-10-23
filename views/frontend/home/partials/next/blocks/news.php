@@ -8,7 +8,7 @@
                         <a href="/berita/<?= e($item['slug']) ?>" class="next-media">
                             <?php if (!empty($item['image'])): ?><img src="/storage/<?= e($item['image']) ?>" alt="<?= e($item['title']) ?>" loading="lazy" decoding="async"><?php endif; ?>
                         </a>
-                        <div class="next-card-body"><p class="next-meta"><time datetime="<?= e(date('Y-m-d', strtotime($item['published_at'] ?? $item['created_at']))) ?>"><?= e(date('d M Y', strtotime($item['published_at'] ?? $item['created_at']))) ?></time><span><?= e(ucfirst($item['category'] ?? 'Berita')) ?></span></p><h3><a href="/berita/<?= e($item['slug']) ?>"><?= e($item['title']) ?></a></h3><p><?= e($item['excerpt'] ?? '') ?></p><a class="next-story-link" href="/berita/<?= e($item['slug']) ?>" aria-label="<?= e($item['title']) ?>"><span aria-hidden="true">↗</span></a></div>
+                        <div class="next-card-body"><p class="next-meta"><time datetime="<?= e(date('Y-m-d', strtotime($item['published_at'] ?? $item['created_at']))) ?>"><?= e(date('d M Y', strtotime($item['published_at'] ?? $item['created_at']))) ?></time><span><?= e(ucfirst($item['category'] ?? 'Berita')) ?></span></p><h3><a href="/berita/<?= e($item['slug']) ?>"><?= e($item['title']) ?></a></h3><p><?= e(PublicTheme::summary($item['excerpt'] ?? '')) ?></p><a class="next-story-link" href="/berita/<?= e($item['slug']) ?>" aria-label="<?= e($item['title']) ?>"><span aria-hidden="true">↗</span></a></div>
                     </article>
                 <?php endforeach; ?>
             </div>

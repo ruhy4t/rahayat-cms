@@ -10,6 +10,19 @@ final class PublicTheme
         return in_array($name, self::NAMES, true);
     }
 
+    /** Plain display text for rich-text fields used in banners/cards.
+     * Decode legacy entities BEFORE removing markup; callers must still e().
+     * Do not use for URLs, identifiers or full rich-text article bodies.
+     */
+    public static function summary(?string $value): string
+    {
+        $text = Security::plainText($value);
+        // Block boundaries and line breaks must not join adjacent words.
+        $text = preg_replace('/<\/?(?:p|div|h[1-6]|li|ul|ol|blockquote|tr|td|th|br|hr)\b[^>]*>/i', ' ', $text) ?? '';
+        $text = strip_tags($text);
+        return trim(preg_replace('/[\s\x{00a0}]+/u', ' ', $text) ?? '');
+    }
+
     public static function labels(): array
     {
         return [

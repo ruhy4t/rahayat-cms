@@ -3,7 +3,7 @@ $galleryItems = $data['galleryItems'] ?? ($galleryItems ?? []);
 $firstSlide = $slides[0] ?? null;
 $heroImage = !empty($firstSlide['image']) ? '/storage/' . ltrim((string) $firstSlide['image'], '/') : '';
 $heroTitle = trim((string) ($profile['name'] ?? '')) ?: SCHOOL_NAME;
-$heroSummary = trim((string) ($profile['motto'] ?? '')) ?: trim((string) ($profile['tagline'] ?? ''));
+$heroSummary = PublicTheme::summary($profile['motto'] ?? '') ?: trim((string) ($profile['tagline'] ?? ''));
 $primaryHref = Security::safeLinkUrl((string) ($firstSlide['button_url'] ?? '')) ?: '/profil';
 $primaryLabel = trim((string) ($firstSlide['button_text'] ?? '')) ?: $copy('home_primary_button_label', 'Tentang Kami');
 ?>

@@ -29,6 +29,8 @@ jobs:
         run: git ls-files '*.php' -z | xargs -0 -n1 php -l
       - name: Run database-free security regression
         run: php scripts/test-security-patch.php
+      - name: Run public theme text regression
+        run: php scripts/test-public-theme-text.php
       - name: Run visitor statistics regression
         run: php scripts/test-visitor-statistics.php
 

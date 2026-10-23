@@ -1,0 +1,13 @@
+app/Core/PublicTheme.php
+views/frontend/home/partials/home-next.php
+views/frontend/home/partials/next/blocks/featured.php
+views/frontend/home/partials/next/blocks/news.php
+views/frontend/home/partials/next/blocks/programs.php
+views/frontend/next/achievements.php
+views/frontend/next/banner.php
+views/frontend/next/calendar.php
+views/frontend/next/news-index.php
+views/frontend/next/news-show.php
+views/frontend/next/profile.php
+views/layouts/partials/footer-next.php
+views/layouts/partials/nav-next.php

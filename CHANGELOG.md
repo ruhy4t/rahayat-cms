@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Perbaiki moto rich text yang muncul sebagai tag HTML di hero, header, footer, banner, profil, dan kalender empat tema baru. Data editor dan tampilan tema lama tidak diubah.
+- Bersihkan markup pada ringkasan berita, fasilitas/program, dan kartu prestasi, termasuk entitas HTML lama; isi artikel tetap memakai sanitizer HTML, bukan dicetak mentah.
+- Tambahkan regresi teks publik serta fixture 84 halaman dengan moto HTML dan ringkasan ber-encoding. Daftar unggah patch tersedia di `production-upload-theme-html-fix.txt`.
+
 ## 1.12.0 - 2026-10-23
 
 - Tambahkan Nawala Indigo, Arunika Emerald, Wibawa Crimson, dan Samudra Cendekia dengan empat komposisi beranda berbeda serta tampilan halaman turunannya; empat tema lama tetap tersedia.

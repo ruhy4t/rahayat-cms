@@ -1,1 +1,1 @@
-<header class="next-page-banner"><div class="next-shell"><p><?= e($profile['name'] ?? SCHOOL_NAME) ?></p><h1><?= e($pageHeading ?? $title ?? '') ?></h1><?php if (!empty($profile['motto'])): ?><p><?= e($profile['motto']) ?></p><?php endif; ?></div></header>
+<header class="next-page-banner"><div class="next-shell"><p><?= e($profile['name'] ?? SCHOOL_NAME) ?></p><h1><?= e($pageHeading ?? $title ?? '') ?></h1><?php if (!empty($profile['motto'])): ?><p><?= e(PublicTheme::summary($profile['motto'])) ?></p><?php endif; ?></div></header>
