@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Perbaiki ruang kosong panjang pada Pengaturan admin: jadikan area main containing block elemen absolut, batasi penyusutan flex, dan tutup wrapper pengaturan secara eksplisit. Tambahkan audit layout desktop/mobile dan keterjangkauan tombol simpan.
 - Perbaiki popup foto galeri setelah navigasi dinamis, hilangkan tautan foto tab baru, serta kembalikan fokus ke pemicu tanpa menggulir halaman.
 - Padatkan sambutan kepala sekolah pada beranda dan halaman detail empat tema baru tanpa mengubah konten admin atau komposisi tema lama.
 - Pertahankan posisi gulir dan fokus menu sidebar admin setelah navigasi; tambahkan pintasan Maintenance Mode di bagian atas Pengaturan.

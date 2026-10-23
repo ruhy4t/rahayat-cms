@@ -109,3 +109,6 @@ sidebar.scrollTop=410;
 navEvents.get('click')({target:{closest:()=>activeLink},button:0});
 assert.deepEqual(JSON.parse(storage.get('rahayat-admin-navigation-v1')),{top:410,focusPath:'/admin/pengaturan'});
 console.log('PASS: admin sidebar scroll retention, active focus without page jump, and navigation-state persistence.');
+const backendLayout=await readFile(new URL('../views/layouts/backend.php',import.meta.url),'utf8');
+assert.match(backendLayout,/<main class="[^"]*\brelative\b[^\"]*\bmin-h-0\b/, 'Admin main must contain absolute descendants and shrink inside the viewport');
+console.log('PASS: admin main bounds absolute controls inside the scroll container.');

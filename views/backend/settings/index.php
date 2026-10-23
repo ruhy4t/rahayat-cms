@@ -418,6 +418,7 @@ $defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
 
 
 
+</div>
     <script>
         function saveTheme() {
             const theme = document.querySelector('input[name="theme"]:checked')?.value;

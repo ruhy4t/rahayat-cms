@@ -31,8 +31,9 @@ const {sessionId}=await command('Target.attachToTarget',{targetId,flatten:true})
 const call=(method,params={})=>command(method,params,sessionId);
 await call('Page.enable');await call('Runtime.enable');
 await call('DOM.enable');await call('CSS.enable');
-const themes=['nawala-indigo','arunika-emerald','wibawa-crimson','samudra-cendekia'];
-const pages=['home','profile','news','article','gallery','gtk','contact','agenda','calendar','achievements','album','event','achievement','program','principal','alumni-detail','testimonials','alumni','spmb','register','status'];
+const adminOnly=process.argv.includes('--admin-settings');
+const themes=adminOnly?['admin']:['nawala-indigo','arunika-emerald','wibawa-crimson','samudra-cendekia'];
+const pages=adminOnly?['settings']:['home','profile','news','article','gallery','gtk','contact','agenda','calendar','achievements','album','event','achievement','program','principal','alumni-detail','testimonials','alumni','spmb','register','status'];
 const audit=String(function(){
   const canvas=document.createElement('canvas');canvas.width=canvas.height=1;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
@@ -56,11 +57,33 @@ const audit=String(function(){
 });
 const results=[];
 try{
-  for(const theme of themes)for(const page of pages)for(const width of [1440,390]){
+  for(const theme of themes)for(const page of pages)for(const width of (adminOnly?[1920,1440,390]:[1440,390])){
     await call('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
     await call('Page.navigate',{url:pathToFileURL(join(root,`${theme}-${page}.html`)).href});
     await call('Runtime.evaluate',{expression:'Promise.race([new Promise(r=>{if(document.readyState==="complete")r();else window.addEventListener("load",()=>r(),{once:true});}),new Promise(r=>setTimeout(r,2500))])',awaitPromise:true});
     await call('Runtime.evaluate',{expression:'document.fonts.ready',awaitPromise:true});
+    if(adminOnly){
+      const layout=await call('Runtime.evaluate',{expression:`(() => {
+        const main=document.querySelector('main');
+        main.scrollTop=main.scrollHeight;
+        const button=document.querySelector('#maintenanceForm button[type="submit"]');
+        const bounds=main.getBoundingClientRect(),target=button.getBoundingClientRect();
+        return {width:innerWidth,viewportHeight:innerHeight,documentHeight:document.documentElement.scrollHeight,
+          mainHeight:main.clientHeight,mainScrollHeight:main.scrollHeight,
+          formsInMain:['settingsForm','socialForm','whatsappForm','maintenanceForm'].every(id=>main.contains(document.getElementById(id))),
+          lastSaveReachable:target.top>=bounds.top&&target.bottom<=bounds.bottom,
+          overflow:document.documentElement.scrollWidth>innerWidth+1};
+      })()`,returnByValue:true});
+      console.log(JSON.stringify({adminSettings:layout.result.value}));
+      const metrics=layout.result.value;
+      if(metrics.documentHeight>metrics.viewportHeight+1||!metrics.formsInMain||!metrics.lastSaveReachable||metrics.overflow)process.exitCode=1;
+      const bottomShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+      await writeFile(join(root,`admin-settings-bottom-${width}.png`),Buffer.from(bottomShot.data,'base64'));
+      await call('Runtime.evaluate',{expression:'document.querySelector("main").scrollTop=0'});
+      const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+      await writeFile(join(root,`admin-settings-${width}.png`),Buffer.from(shot.data,'base64'));
+      continue;
+    }
     const doc=await call('DOM.getDocument');
     const interactive=await call('DOM.querySelectorAll',{nodeId:doc.root.nodeId,selector:'a,button,summary,input,select,textarea'});
     for(const state of ['normal','menu-open','hover','focus',...(page==='album'?['gallery-open']:[])]){
@@ -105,8 +128,12 @@ try{
       }
     }
   }
-  await writeFile(join(root,'audit.json'),JSON.stringify(results,null,2));
-  const failed=results.filter(r=>r.overflow||r.failures.length);
-  console.log(JSON.stringify({states:results.length,checked:results.reduce((s,r)=>s+r.checked,0),failed:failed.length,uncertain:results.reduce((s,r)=>s+r.uncertain.length,0),failures:failed.slice(0,6).map(r=>({theme:r.theme,page:r.page,width:r.width,state:r.state,overflow:r.overflow,failures:r.failures}))},null,2));
-  if(failed.length)process.exitCode=1;
+  if(adminOnly){
+    console.log(`${process.exitCode?'FAIL':'PASS'}: admin settings layout at 1920, 1440 and 390px; document bounded, all forms inside main, final save reachable.`);
+  } else {
+    await writeFile(join(root,'audit.json'),JSON.stringify(results,null,2));
+    const failed=results.filter(r=>r.overflow||r.failures.length);
+    console.log(JSON.stringify({states:results.length,checked:results.reduce((s,r)=>s+r.checked,0),failed:failed.length,uncertain:results.reduce((s,r)=>s+r.uncertain.length,0),failures:failed.slice(0,6).map(r=>({theme:r.theme,page:r.page,width:r.width,state:r.state,overflow:r.overflow,failures:r.failures}))},null,2));
+    if(failed.length)process.exitCode=1;
+  }
 }finally{socket.close();edge.kill();}

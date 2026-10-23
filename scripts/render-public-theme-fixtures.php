@@ -83,4 +83,19 @@ foreach (PublicTheme::NAMES as $themeName) {
         file_put_contents($output.'/'.$themeName.'-'.$pageName.'.html',$html);
     }
 }
-echo 'Rendered '.(count($pages)*count(PublicTheme::NAMES))." synthetic pages in storage/cache/theme-preview.\n";
+(static function () use ($output): void {
+    $model = new SiteSetting();
+    $data = ['title'=>'Pengaturan', 'settings'=>[], 'themes'=>$model->getAvailableThemes(),
+        'currentTheme'=>'arunika-emerald', 'fonts'=>$model->getAvailableFonts(),
+        'profile'=>['name'=>'Sekolah Uji', 'phone'=>'021123456'], 'flash'=>null];
+    $user = ['id'=>0, 'name'=>'Administrator Uji', 'role'=>'admin'];
+    $themeName = 'arunika-emerald';
+    $themeConfig = $data['themes'][$themeName];
+    $title = 'Pengaturan';
+    $_SERVER['REQUEST_URI'] = '/admin/pengaturan';
+    ob_start(); require VIEW_PATH . '/backend/settings/index.php'; $content = ob_get_clean();
+    ob_start(); require VIEW_PATH . '/layouts/backend.php'; $html = ob_get_clean();
+    $html = str_replace('<head>', '<head><base href="http://rahayat-cms.test/">', $html);
+    file_put_contents($output . '/admin-settings.html', $html);
+})();
+echo 'Rendered '.(count($pages)*count(PublicTheme::NAMES))." public synthetic pages and admin settings in storage/cache/theme-preview.\n";

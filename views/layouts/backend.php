@@ -453,9 +453,9 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <div class="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden lg:ml-0">
             <!-- Top Bar -->
-            <header class="bg-white shadow-sm z-40">
+            <header class="shrink-0 bg-white shadow-sm z-40">
                 <div class="flex items-center justify-between h-16 px-6">
                     <!-- Mobile menu button -->
                     <button onclick="toggleSidebar()" class="lg:hidden text-slate-500 hover:text-slate-700">
@@ -520,7 +520,7 @@
             </header>
 
             <!-- Page Content -->
-            <main class="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6">
+            <main class="relative flex-1 min-w-0 min-h-0 overflow-y-auto p-4 sm:p-6">
                 <!-- Flash Messages -->
                 <!-- Flash Messages -->
                 <?php if (isset($flash) && $flash): ?>
