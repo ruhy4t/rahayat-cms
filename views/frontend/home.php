@@ -10,6 +10,11 @@ $theme = $data['theme'] ?? 'indigo-modern';
 $spmbPublic = $spmbPublic ?? ($data['spmbPublic'] ?? ['active' => false]);
 $copy = static fn (string $key, string $fallback): string => trim((string) ($settings[$key] ?? '')) ?: $fallback;
 
+if (in_array($theme, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)) {
+    include __DIR__ . '/home/partials/home-next.php';
+    return;
+}
+
 // Cendekia SMP owns its complete homepage composition. Keeping it in a
 // dedicated partial prevents layout changes from leaking into older themes.
 if ($theme === 'cendekia-smp') {

@@ -53,6 +53,7 @@ class HomeController extends Controller
             'facilities' => $this->safeValue(fn () => $this->facilityModel->getActive(), []),
             'ekskul' => $this->safeValue(fn () => $this->ekskulModel->getActive(), []),
             'testimonials' => $this->safeValue(fn () => $this->testimonialModel->getForHomepage(6), []),
+            'galleryItems' => $this->safeValue(fn () => $this->itemModel->getRecent(6), []),
             'flash' => $this->getFlash()
         ];
 

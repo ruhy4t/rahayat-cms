@@ -69,6 +69,10 @@ try {
         academicCheck(substr_count($home, 'id="academic-home-title"') === 1, 'Academic section on ' . $theme);
         academicCheck(strpos($home, 'id="principal-message-title"') < strpos($home, 'id="academic-home-title"'), 'Section order on ' . $theme);
         academicCheck(!str_contains($home, '<script>alert(1)</script>'), 'Escaped summary on ' . $theme);
+        if (in_array($theme, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)) {
+            academicCheck(substr_count($home, 'class="next-hero"') === 1, 'Dedicated modern hero on ' . $theme);
+            academicCheck(str_contains($home, 'next-news-layout'), 'Dedicated news and agenda composition on ' . $theme);
+        }
     }
     $settings['principal_message_enabled'] = '0';
     ob_start(); include VIEW_PATH . '/frontend/academic/principal-card.php'; $hidden = ob_get_clean();

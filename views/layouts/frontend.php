@@ -116,6 +116,9 @@
     <link rel="stylesheet" href="/css/academic.css?v=<?= filemtime(ROOT_PATH . '/public/css/academic.css') ?>">
     <script src="/js/academic-calendar.js?v=<?= filemtime(ROOT_PATH . '/public/js/academic-calendar.js') ?>" defer></script>
     <link rel="stylesheet" href="/css/app.css?v=<?= filemtime(ROOT_PATH . '/public/css/app.css') ?>">
+    <?php if (in_array($themeName, ['nawala-indigo', 'arunika-emerald', 'wibawa-crimson', 'samudra-cendekia'], true)): ?>
+        <link rel="stylesheet" href="/css/themes/next-themes.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/next-themes.css') ?>">
+    <?php endif; ?>
     <?php $themeStylesheet = ROOT_PATH . '/public/css/themes/' . $themeName . '.css'; ?>
     <?php if (($themeName === 'cendekia-smp' || str_contains($themeName, 'nawala-') || str_contains($themeName, 'arunika-') || str_contains($themeName, 'wibawa-') || str_contains($themeName, 'samudra-')) && is_file($themeStylesheet)): ?>
         <link rel="stylesheet" href="/css/themes/<?= e($themeName) ?>.css?v=<?= filemtime($themeStylesheet) ?>">
