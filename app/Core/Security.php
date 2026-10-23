@@ -453,6 +453,18 @@ class Security
         return self::isSafeLinkUrl($url) ? self::plainText($url) : '';
     }
 
+    /** HTTP(S) URL; renderers may explicitly allow same-origin root-relative media. */
+    public static function safeHttpUrl(?string $url, bool $allowLocal = false): string
+    {
+        $url = self::safeLinkUrl($url);
+        if ($allowLocal && str_starts_with($url, '/')) { return $url; }
+        if ($url === '' || !filter_var($url, FILTER_VALIDATE_URL)
+            || !in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+            return '';
+        }
+        return $url;
+    }
+
     /**
      * Extract a Google Maps embed URL from pasted embed code.
      *

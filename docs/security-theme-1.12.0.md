@@ -74,3 +74,34 @@ cache request-local sehingga tidak di-query ulang per label.
 Referensi keamanan: [OWASP XSS Prevention](https://cheatsheetseries.owasp.org/cheatsheets/Cross_Site_Scripting_Prevention_Cheat_Sheet/)
 menempatkan encoding kontekstual dan sanitasi HTML sebagai kontrol utama;
 CSP adalah lapisan tambahan, bukan pengganti keduanya.
+
+## Audit lanjutan setelah tag v1.12.0
+
+- `FILTER_VALIDATE_URL` menerima `javascript://example.invalid/%0Aalert(1)`.
+  Input video API kini memakai whitelist HTTP/HTTPS; renderer admin, galeri
+  lama, dan galeri baru juga menyaring URL historis sebelum menjadi href/src.
+  Media root-relative lama tetap didukung secara eksplisit pada renderer,
+  tetapi URL protocol-relative dan skema aktif ditolak. Ini menutup jalur URL
+  berbahaya; tidak diklaim sebagai pembuktian eksekusi XSS pada semua browser.
+- 23 penanganan exception API tidak lagi mengirim detail SQL/error internal.
+  Log hanya berisi metode dan kelas exception, bukan query, payload, atau PII.
+- Statistik footer menyimpan hanya angka today/week/month/total pada satu
+  cache privat server, maksimal 30 detik. Ini bukan cache HTML, dokumen,
+  autentikasi, atau token CSRF. Pencatatan kunjungan tidak dihentikan; angka
+  publik dapat tertunda sampai 30 detik. Laporan dengan tanggal eksplisit
+  selalu live. Cache rusak, tanggal berbeda, TTL tidak valid, dan cache yang
+  tidak dapat ditulis memakai perhitungan database sebagai fallback.
+- Regresi: security-patch 108, HTTP security 68, statistik SQLite 19.
+  Tes cache menonaktifkan tabel sementara di database SQLite in-memory untuk
+  membuktikan cache hit tidak menyentuh database, lalu menguji kedaluwarsa,
+  kerusakan, validasi nilai, dan kegagalan direktori cache.
+- `php scripts/test-public-theme-http.php --benchmark` mengukur 55 request
+  per tema (220 total). Sampel lokal: median 35,8–42,2 ms dan p95 63,0–78,8 ms.
+  Ini TTFB HTML lokal, bukan waktu muat aset, load test, atau angka produksi.
+  Cache hit menghindari dua query agregat; tidak diklaim sebagai persentase
+  peningkatan end-to-end karena sampel sebelum/sesudah tidak identik.
+- Apache lokal belum memuat mod_deflate/mod_brotli. Konfigurasi hosting untuk
+  kompresi, OPcache, HTTPS dan proteksi proxy/CDN perlu diperiksa pemilik.
+  Tidak mengubah konfigurasi layanan di luar repository atau server produksi.
+- Tidak ada perubahan struktur database atau SQL yang perlu diimpor. Patch
+  tersedia pada main setelah tag awal v1.12.0, bukan arsip tag lama tersebut.

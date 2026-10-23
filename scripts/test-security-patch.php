@@ -264,6 +264,31 @@ try {
     check(!Security::isSafeLinkUrl('java&#x73;cript:alert(1)'), 'Entity encoded scheme accepted');
     check(!Security::isSafeLinkUrl('//evil.example'), 'Protocol-relative link accepted');
     check(Security::safeLinkUrl('javascript:alert(1)') === '', 'safeLinkUrl kept an unsafe value');
+    foreach (['javascript://example.invalid/%0Aalert(1)', 'java&#x73;cript://example.invalid/%0Aalert(1)',
+        'data:text/html,attack', 'file:///etc/passwd', 'ftp://example.invalid/video.mp4', '//example.invalid/video.mp4'] as $url) {
+        check(Security::safeHttpUrl($url) === '', 'Unsafe video URL accepted');
+    }
+    check(Security::safeHttpUrl('https://example.invalid/video.mp4?a=1&amp;b=2') === 'https://example.invalid/video.mp4?a=1&b=2', 'Canonical HTTPS video URL rejected');
+    check(Security::safeHttpUrl('http://example.invalid/video.mp4') !== '', 'HTTP video URL rejected');
+    check(Security::safeHttpUrl('/storage/uploads/video.mp4', true) === '/storage/uploads/video.mp4', 'Legacy local media rejected');
+    check(Security::safeHttpUrl('//example.invalid/video.mp4', true) === '', 'Protocol-relative media accepted');
+    check(Security::safeHttpUrl('/storage/uploads/video.mp4') === '', 'Absolute video input validation weakened');
+    foreach (['frontend/gallery-detail.php', 'frontend/next/gallery-detail.php', 'backend/gallery/view.php'] as $galleryView) {
+        $html = (static function (string $template): string {
+            $album = ['id'=>1, 'type'=>'video', 'title'=>'Synthetic video album'];
+            $items = [['id'=>1, 'type'=>'video', 'title'=>'Synthetic video', 'description'=>'',
+                'video_source'=>'other', 'video_url'=>'javascript://example.invalid/%0Aalert(1)',
+                'is_active'=>1, 'sort_order'=>0, 'created_at'=>'2026-10-23']];
+            $data = compact('album', 'items'); $settings=[]; $profile=['name'=>'Synthetic school'];
+            ob_start(); require VIEW_PATH . '/' . $template; return ob_get_clean();
+        })($galleryView);
+        $dom = new DOMDocument(); @$dom->loadHTML($html);
+        $unsafe = false;
+        foreach ((new DOMXPath($dom))->query('//@href | //@src') as $link) {
+            if (preg_match('/^javascript:/i', trim($link->nodeValue))) { $unsafe = true; }
+        }
+        check(!$unsafe, 'Legacy unsafe video URL rendered in ' . $galleryView);
+    }
     $encoded = 'java&#x73;cript:alert(1)';
     for ($layer = 0; $layer < 12; $layer++) {
         check(Security::safeLinkUrl($encoded) === '', 'Repeatedly encoded unsafe URL accepted');

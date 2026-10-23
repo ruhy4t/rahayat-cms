@@ -108,9 +108,10 @@ $isVideo = $albumType === 'video';
                                 <div class="text-sm text-slate-500 mt-1 line-clamp-2">
                                     <?= e($item['description'] ?? '-') ?>
                                 </div>
-                                <?php if ($isVideo && !empty($item['video_url'] ?? $item['youtube_url'])): ?>
+                                <?php $safeVideoUrl = Security::safeHttpUrl($item['video_url'] ?? $item['youtube_url'] ?? '', true); ?>
+                                <?php if ($isVideo && $safeVideoUrl !== ''): ?>
                                     <?php $sourceLabel = ucfirst((string) (($item['video_source'] ?? '') ?: 'youtube')); ?>
-                                    <a href="<?= e($item['video_url'] ?? $item['youtube_url']) ?>" target="_blank" rel="noopener noreferrer"
+                                    <a href="<?= e($safeVideoUrl) ?>" target="_blank" rel="noopener noreferrer"
                                         class="inline-flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 mt-1">
                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                                         Sumber: <?= e($sourceLabel === 'Direct' ? 'Link langsung' : $sourceLabel) ?>

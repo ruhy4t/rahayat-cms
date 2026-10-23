@@ -6,11 +6,13 @@ if (!str_ends_with((string)parse_url($base,PHP_URL_HOST),'.test')) { throw new R
 $db=Database::getInstance();
 $backup=$db->fetch('SELECT * FROM site_settings WHERE setting_key = ?', ['theme']);
 $model=new SiteSetting(); $checks=0;
+$rounds=in_array('--benchmark',$argv,true)?5:1;
 try {
     foreach (PublicTheme::NAMES as $theme) {
         $model->set('theme',$theme);
         $timings = [];
         foreach (['/','/profil','/berita','/galeri','/profil/gtk','/kontak','/agenda','/kalender-pendidikan','/prestasi','/testimoni','/alumni'] as $path) {
+          for ($round=0;$round<$rounds;$round++) {
             $curl=curl_init($base.$path);
             curl_setopt_array($curl,[CURLOPT_RETURNTRANSFER=>true,CURLOPT_TIMEOUT=>15,CURLOPT_USERAGENT=>'ThemeTestBot/1.0']);
             $html=curl_exec($curl);$status=curl_getinfo($curl,CURLINFO_RESPONSE_CODE);
@@ -20,9 +22,10 @@ try {
             if (!str_contains($html,'next-header') || !str_contains($html,'next-footer')) { throw new RuntimeException('Theme chrome missing'); }
             if (substr_count($html, 'href="/css/themes/compositions.css?') !== 1) { throw new RuntimeException('Composition stylesheet must load exactly once'); }
             $checks++;
+          }
         }
         sort($timings);
-        printf("LOCAL TTFB %s: median %.1f ms; max %.1f ms (11 routes; not a production benchmark).\n", $theme, $timings[intdiv(count($timings), 2)], max($timings));
+        printf("LOCAL TTFB %s: median %.1f ms; p95 %.1f ms; max %.1f ms (%d requests; not a production benchmark).\n", $theme, $timings[intdiv(count($timings), 2)], $timings[(int)ceil(count($timings)*0.95)-1], max($timings), count($timings));
     }
 } finally {
     if ($backup) { $db->update('site_settings',['setting_value'=>$backup['setting_value'],'updated_at'=>$backup['updated_at']],'setting_key = ?',['theme']); }

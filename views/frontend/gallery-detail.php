@@ -53,7 +53,7 @@ $isVideo = ($album['type'] ?? 'foto') === 'video';
                         <?php
                         $videoSource = $item['video_source'] ?? (!empty($item['youtube_video_id']) ? 'youtube' : '');
                         $videoId = $item['video_id'] ?? $item['youtube_video_id'] ?? '';
-                        $videoUrl = $item['video_url'] ?? $item['youtube_url'] ?? '';
+                        $videoUrl = Security::safeHttpUrl($item['video_url'] ?? $item['youtube_url'] ?? '', true);
                         ?>
                         <?php if ($videoUrl !== '' || $videoId !== ''): ?>
                             <div

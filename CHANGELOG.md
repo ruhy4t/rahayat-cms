@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Batasi URL video galeri ke HTTP/HTTPS pada API; saring juga tautan lama saat dirender di galeri/admin, dengan dukungan media lokal yang aman. Jangan mengirim detail exception SQL melalui respons API.
+- Cache angka agregat statistik footer maksimal 30 detik untuk menghindari dua query agregasi berulang per halaman; laporan bertanggal tetap membaca database langsung. Tambahkan regresi URL/error API/cache serta benchmark HTTP lokal 220 request.
 - Perbaiki ruang kosong panjang pada Pengaturan admin: jadikan area main containing block elemen absolut, batasi penyusutan flex, dan tutup wrapper pengaturan secara eksplisit. Tambahkan audit layout desktop/mobile dan keterjangkauan tombol simpan.
 - Perbaiki popup foto galeri setelah navigasi dinamis, hilangkan tautan foto tab baru, serta kembalikan fokus ke pemicu tanpa menggulir halaman.
 - Padatkan sambutan kepala sekolah pada beranda dan halaman detail empat tema baru tanpa mengubah konten admin atau komposisi tema lama.

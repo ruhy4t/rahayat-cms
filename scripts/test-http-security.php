@@ -11,6 +11,8 @@ $password = 'Synthetic-' . $suffix;
 $users = [];
 $newsIds = [];
 $registrationId = null;
+$galleryAlbumId = null;
+$galleryItemIds = [];
 $file = STORAGE_PATH . '/spmb/http-test-' . $suffix . '.pdf';
 $publicFile = STORAGE_PATH . '/uploads/http-test-' . $suffix . '.pdf';
 $restrictedFiles = [];
@@ -58,6 +60,13 @@ try {
     PrivateDocument::encryptFile($file);
     $path = '/index.php?url=storage/spmb/' . basename($file);
     $anonymous = client();
+    $galleryAlbumId = (int) $db->insert('gallery_albums', ['title'=>'Synthetic video security test',
+        'slug'=>'video-security-' . $suffix, 'type'=>'video', 'is_active'=>1]);
+    $galleryModel = new GalleryItem();
+    $legacyVideoId = (int) $galleryModel->create(['album_id'=>$galleryAlbumId, 'type'=>'video',
+        'title'=>'Synthetic legacy URL', 'video_source'=>'other',
+        'video_url'=>'javascript://example.invalid/%0Aalert(1)', 'is_active'=>1]);
+    $galleryItemIds[] = $legacyVideoId;
     file_put_contents($publicFile, "%PDF-1.4\nSYNTHETIC PUBLIC CACHE TEST\n");
     $publicPath = '/index.php?url=storage/uploads/' . basename($publicFile);
     $public = request($anonymous, $publicPath);
@@ -101,6 +110,23 @@ try {
         $login = request($handle, '/login');
         request($handle, '/login', [CSRF_TOKEN_NAME => token($login['body']), 'username' => $user['username'], 'password' => $password]);
         $result = request($handle, $path);
+        if ($label === 'student') {
+            $videoData = [CSRF_TOKEN_NAME=>token(request($handle, '/admin')['body']),
+                'album_id'=>$galleryAlbumId, 'type'=>'video', 'video_source'=>'other', 'title'=>'Synthetic rejected URL'];
+            foreach (['javascript://example.invalid/%0Aalert(1)', 'ftp://example.invalid/video.mp4'] as $unsafeUrl) {
+                verify(request($handle, '/api/gallery/store', array_merge($videoData, ['video_url'=>$unsafeUrl]))['status'] === 422, 'Unsafe video URL was stored');
+                verify(request($handle, '/api/gallery/update/' . $legacyVideoId, array_merge($videoData, ['video_url'=>$unsafeUrl]))['status'] === 422, 'Unsafe video URL was updated');
+            }
+            $validVideo = request($handle, '/api/gallery/store', array_merge($videoData, ['video_url'=>'https://example.invalid/video.mp4']));
+            $created = json_decode($validVideo['body'], true);
+            if (isset($created['data']['id'])) { $galleryItemIds[] = (int) $created['data']['id']; }
+            verify($validVideo['status'] === 200 && isset($created['data']['id']), 'Valid HTTPS video URL rejected');
+            $invalidLength = request($handle, '/api/gallery/store', array_merge($videoData,
+                ['title'=>str_repeat('X', 300), 'video_url'=>'https://example.invalid/video.mp4']));
+            $failed = json_decode($invalidLength['body'], true);
+            if (isset($failed['data']['id'])) { $galleryItemIds[] = (int) $failed['data']['id']; }
+            verify($invalidLength['status'] === 500 && ($failed['message'] ?? '') === 'Gagal menyimpan gambar', 'Database error details leaked through API');
+        }
         $allowed = in_array($label, ['admin', 'committee'], true);
         verify($result['status'] === ($allowed ? 200 : 403), 'Role authorization failed: ' . $label);
         if ($allowed) {
@@ -111,6 +137,15 @@ try {
         $migration = request($handle, '/admin/pembaruan/migrasi');
         verify(str_contains($migration['body'], 'name="backup_ready"') === ($label === 'admin'), 'Migration admin isolation failed');
         if ($label === 'admin') {
+            foreach (['/admin/galeri/view/' . $galleryAlbumId, '/galeri/video-security-' . $suffix] as $galleryPath) {
+                $galleryPage = request($handle, $galleryPath);
+                verify($galleryPage['status'] === 200, 'Gallery security fixture failed to render');
+                $document = new DOMDocument(); @$document->loadHTML($galleryPage['body']);
+                $links = (new DOMXPath($document))->query('//@href | //@src');
+                $unsafe = false;
+                foreach ($links as $link) { if (preg_match('/^javascript:/i', trim($link->nodeValue))) { $unsafe = true; } }
+                verify(!$unsafe, 'Legacy active video URL leaked into rendered gallery links');
+            }
             $settingsPage = request($handle, '/admin/pengaturan');
             verify($settingsPage['status'] === 200 && str_contains($settingsPage['body'], 'href="#maintenanceForm"'), 'Maintenance shortcut missing');
             verify(str_contains($settingsPage['body'], 'id="maintenanceForm"') && str_contains($settingsPage['body'], 'name="maintenance_mode"'), 'Maintenance controls missing');
@@ -156,6 +191,8 @@ try {
     verify(!str_contains($correct['body'], 'SECRET-NOTE-') && !str_contains($correct['body'], 'SECRET-SCHOOL-'), 'Excessive status data exposed');
     verify(str_contains($correct['body'], 'name="content-protection" content="true"'), 'Private page copy/print protection lost');
 } finally {
+    foreach ($galleryItemIds as $id) { $db->delete('gallery_items', 'id = ?', [$id]); }
+    if ($galleryAlbumId) { $db->delete('gallery_albums', 'id = ?', [$galleryAlbumId]); }
     if ($registrationId) { $db->delete('spmb_registrations', 'id = ?', [$registrationId]); }
     foreach ($newsIds as $id) { $db->delete('news', 'id = ?', [$id]); }
     foreach ($users as $user) { $db->delete('users', 'id = ?', [$user['id']]); }

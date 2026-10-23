@@ -226,7 +226,8 @@ class ApiController extends Controller
 
             $this->jsonSuccess($news, 'Berita berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan berita: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan berita', 500);
         }
     }
 
@@ -318,7 +319,8 @@ class ApiController extends Controller
 
             $this->jsonSuccess($updatedNews, 'Berita berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui berita: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui berita', 500);
         }
     }
 
@@ -344,7 +346,8 @@ class ApiController extends Controller
             $this->newsModel->delete($newsId);
             $this->jsonSuccess(null, 'Berita berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus berita: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus berita', 500);
         }
     }
 
@@ -390,7 +393,8 @@ class ApiController extends Controller
             $category = $this->categoryModel->find((int) $id);
             $this->jsonSuccess($category, 'Kategori berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan kategori: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan kategori', 500);
         }
     }
 
@@ -435,7 +439,8 @@ class ApiController extends Controller
             $updated = $this->categoryModel->find($categoryId);
             $this->jsonSuccess($updated, 'Kategori berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui kategori: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui kategori', 500);
         }
     }
 
@@ -463,7 +468,8 @@ class ApiController extends Controller
             $this->categoryModel->delete($categoryId);
             $this->jsonSuccess(null, 'Kategori berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus kategori: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus kategori', 500);
         }
     }
 
@@ -509,7 +515,8 @@ class ApiController extends Controller
             $slide = $this->slideModel->find((int) $id);
             $this->jsonSuccess($slide, 'Slide berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan slide: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan slide', 500);
         }
     }
 
@@ -556,7 +563,8 @@ class ApiController extends Controller
             $updated = $this->slideModel->find($slideId);
             $this->jsonSuccess($updated, 'Slide berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui slide: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui slide', 500);
         }
     }
 
@@ -584,7 +592,8 @@ class ApiController extends Controller
             $this->slideModel->delete($slideId);
             $this->jsonSuccess(null, 'Slide berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus slide: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus slide', 500);
         }
     }
 
@@ -610,7 +619,8 @@ class ApiController extends Controller
                 $this->jsonError('Slide tidak ditemukan', 404);
             }
         } catch (Exception $e) {
-            $this->jsonError('Gagal mengubah status: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal mengubah status', 500);
         }
     }
 
@@ -655,7 +665,8 @@ class ApiController extends Controller
             $menu = $this->menuModel->find((int) $id);
             $this->jsonSuccess($menu, 'Menu berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan menu: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan menu', 500);
         }
     }
 
@@ -712,7 +723,8 @@ class ApiController extends Controller
             $updated = $this->menuModel->find($menuId);
             $this->jsonSuccess($updated, 'Menu berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui menu: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui menu', 500);
         }
     }
 
@@ -740,7 +752,8 @@ class ApiController extends Controller
             $this->menuModel->delete($menuId);
             $this->jsonSuccess(null, 'Menu berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus menu: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus menu', 500);
         }
     }
 
@@ -836,7 +849,8 @@ class ApiController extends Controller
             unset($user['password']);
             $this->jsonSuccess($user, 'Pengguna berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan pengguna: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan pengguna', 500);
         }
     }
 
@@ -907,7 +921,8 @@ class ApiController extends Controller
             unset($updated['password']);
             $this->jsonSuccess($updated, 'Pengguna berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui pengguna: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui pengguna', 500);
         }
     }
 
@@ -941,7 +956,8 @@ class ApiController extends Controller
             $this->userModel->delete($userId);
             $this->jsonSuccess(null, 'Pengguna berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus pengguna: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus pengguna', 500);
         }
     }
 
@@ -989,7 +1005,7 @@ class ApiController extends Controller
             }
         } elseif ($type === 'video') {
             $videoSource = strtolower($this->postSafe('video_source') ?: 'youtube');
-            $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
+            $videoUrl = Security::safeHttpUrl($this->postSafe('video_url') ?: $this->postSafe('youtube_url'));
             if (!in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok', 'facebook', 'direct', 'other'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
                 $this->jsonError('Sumber atau URL video tidak valid', 422);
                 return;
@@ -1032,7 +1048,8 @@ class ApiController extends Controller
             $item = $this->galleryItemModel->find((int) $id);
             $this->jsonSuccess($item, 'Gambar berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan gambar: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan gambar', 500);
         }
     }
 
@@ -1067,7 +1084,7 @@ class ApiController extends Controller
         // Handle video (YouTube URL) update
         if ($type === 'video') {
             $videoSource = strtolower($this->postSafe('video_source') ?: ($item['video_source'] ?? 'youtube'));
-            $videoUrl = $this->postSafe('video_url') ?: $this->postSafe('youtube_url');
+            $videoUrl = Security::safeHttpUrl($this->postSafe('video_url') ?: $this->postSafe('youtube_url'));
             if (!in_array($videoSource, ['youtube', 'vimeo', 'instagram', 'tiktok', 'facebook', 'direct', 'other'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
                 $this->jsonError('Sumber atau URL video tidak valid', 422);
                 return;
@@ -1116,7 +1133,8 @@ class ApiController extends Controller
             $updatedItem = $this->galleryItemModel->find($itemId);
             $this->jsonSuccess($updatedItem, 'Item berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui item: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui item', 500);
         }
     }
 
@@ -1151,7 +1169,8 @@ class ApiController extends Controller
             $this->galleryItemModel->delete($itemId);
             $this->jsonSuccess(null, 'Gambar berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus gambar: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus gambar', 500);
         }
     }
 
@@ -1202,7 +1221,8 @@ class ApiController extends Controller
             $album = $this->galleryAlbumModel->find((int) $id);
             $this->jsonSuccess($album, 'Album berhasil ditambahkan');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menyimpan album: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menyimpan album', 500);
         }
     }
 
@@ -1267,7 +1287,8 @@ class ApiController extends Controller
             $updated = $this->galleryAlbumModel->find($albumId);
             $this->jsonSuccess($updated, 'Album berhasil diperbarui');
         } catch (Exception $e) {
-            $this->jsonError('Gagal memperbarui album: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal memperbarui album', 500);
         }
     }
 
@@ -1294,7 +1315,8 @@ class ApiController extends Controller
             $this->galleryAlbumModel->delete($albumId);
             $this->jsonSuccess(null, 'Album berhasil dihapus');
         } catch (Exception $e) {
-            $this->jsonError('Gagal menghapus album: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal menghapus album', 500);
         }
     }
 
@@ -1332,7 +1354,8 @@ class ApiController extends Controller
             $this->userModel->updatePassword($userId, $newPassword);
             $this->jsonSuccess(null, 'Password berhasil diubah');
         } catch (Exception $e) {
-            $this->jsonError('Gagal mengubah password: ' . $e->getMessage(), 500);
+            error_log(__METHOD__ . ': ' . get_class($e));
+            $this->jsonError('Gagal mengubah password', 500);
         }
     }
 }
