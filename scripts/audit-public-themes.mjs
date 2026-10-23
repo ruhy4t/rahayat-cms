@@ -9,6 +9,7 @@ const root=resolve('storage/cache/theme-preview');
 const profile=await mkdtemp(join(tmpdir(),'rahayat-theme-audit-'));
 const edge=spawn('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',[
   '--headless=new','--disable-gpu','--no-first-run','--no-default-browser-check',
+  '--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows',
   '--remote-debugging-port=0',`--user-data-dir=${profile}`,'about:blank',
 ],{windowsHide:true,stdio:['ignore','ignore','pipe']});
 const endpoint=await new Promise((res,rej)=>{
@@ -19,7 +20,12 @@ const endpoint=await new Promise((res,rej)=>{
 const socket=new WebSocket(endpoint); await new Promise((res,rej)=>{socket.onopen=res;socket.onerror=rej;});
 let sequence=0;const pending=new Map();
 socket.onmessage=({data})=>{const msg=JSON.parse(data);if(msg.id&&pending.has(msg.id)){const {res,rej}=pending.get(msg.id);pending.delete(msg.id);msg.error?rej(new Error(msg.error.message)):res(msg.result);}};
-const command=(method,params={},sessionId)=>new Promise((res,rej)=>{const id=++sequence;pending.set(id,{res,rej});socket.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));});
+const command=(method,params={},sessionId)=>new Promise((res,rej)=>{
+  const id=++sequence;
+  const timeout=setTimeout(()=>{pending.delete(id);rej(new Error(`Browser audit timed out: ${method}`));},40000);
+  pending.set(id,{res:value=>{clearTimeout(timeout);res(value);},rej:error=>{clearTimeout(timeout);rej(error);}});
+  socket.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));
+});
 const {targetId}=await command('Target.createTarget',{url:'about:blank'});
 const {sessionId}=await command('Target.attachToTarget',{targetId,flatten:true});
 const call=(method,params={})=>command(method,params,sessionId);
@@ -61,19 +67,24 @@ try{
       if(state==='menu-open')await call('Runtime.evaluate',{expression:'document.querySelectorAll("details").forEach(e=>e.open=true)'});
       if(state==='hover'||state==='focus')for(const nodeId of interactive.nodeIds)await call('CSS.forcePseudoState',{nodeId,forcedPseudoClasses:state==='hover'?['hover']:['focus','focus-visible']});
       if(state==='gallery-open'){
-        const check=await call('Runtime.evaluate',{expression:`(() => {
+        const check=await call('Runtime.evaluate',{expression:`(async () => {
           const links=[...document.querySelectorAll('[data-gallery-image]')];
           const viewer=document.querySelector('[data-gallery-viewer]');
           if(links.length<2||!viewer)return false;
+          links[0].focus({preventScroll:true});
+          const scroll=window.scrollY;
           links[0].click();
           if(!viewer.open)return false;
+          if(document.activeElement!==viewer.querySelector('[data-gallery-close]'))return false;
           viewer.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
           if(viewer.querySelector('img').alt!==links[1].dataset.caption)return false;
           viewer.querySelector('[data-gallery-close]').click();
+          await new Promise(resolve=>setTimeout(resolve,50));
           if(viewer.open)return false;
+          if(document.activeElement!==links[0]||window.scrollY!==scroll)return false;
           links[0].click();
           return viewer.open;
-        })()`,returnByValue:true});
+        })()`,returnByValue:true,awaitPromise:true});
         if(check.result.value!==true)throw new Error(`Gallery keyboard interaction failed: ${theme}/${width}`);
       }
       const evaluated=await call('Runtime.evaluate',{expression:`(${audit})()`,returnByValue:true});
@@ -85,6 +96,9 @@ try{
       const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
       await writeFile(join(root,`${theme}${page==='home'?'':'-'+page}-${width}.png`),Buffer.from(shot.data,'base64'));
       if(page==='home'){
+        await call('Runtime.evaluate',{expression:'document.querySelector(".next-principal-block")?.scrollIntoView({block:"start"})'});
+        const principalShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+        await writeFile(join(root,`${theme}-principal-${width}.png`),Buffer.from(principalShot.data,'base64'));
         await call('Runtime.evaluate',{expression:'window.scrollTo(0,document.body.scrollHeight)'});
         const footerShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
         await writeFile(join(root,`${theme}-footer-${width}.png`),Buffer.from(footerShot.data,'base64'));

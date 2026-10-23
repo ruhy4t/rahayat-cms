@@ -34,6 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!parent.contains(event.relatedTarget)) branch.open = false;
         });
     });
+    initializeNextModules();
+});
+
+// SPA navigation replaces main after DOMContentLoaded has already fired.
+function initializeNextModules() {
     const form = document.querySelector('form[action="/alumni/kirim"]');
     const continuation = form?.querySelector('[name="further_education"]');
     const updateContinuation = () => {
@@ -45,27 +50,34 @@ document.addEventListener('DOMContentLoaded', () => {
             field.closest('label').hidden = !required;
         }
     };
-    if (continuation) { continuation.addEventListener('change', updateContinuation); updateContinuation(); }
+    if (continuation && !continuation.dataset.nextReady) {
+        continuation.dataset.nextReady = 'true';
+        continuation.addEventListener('change', updateContinuation); updateContinuation();
+    }
 
     const viewer = document.querySelector('[data-gallery-viewer]');
-    if (viewer && typeof viewer.showModal === 'function') {
+    if (viewer && typeof viewer.showModal === 'function' && !viewer.dataset.nextReady) {
+        viewer.dataset.nextReady = 'true';
         const pictures = [...document.querySelectorAll('[data-gallery-image]')];
         const image = viewer.querySelector('img');
         const caption = viewer.querySelector('[data-gallery-caption]');
         const previous = viewer.querySelector('[data-gallery-previous]');
         const next = viewer.querySelector('[data-gallery-next]');
         let index = 0;
+        let opener = null;
         const show = position => {
             index = (position + pictures.length) % pictures.length;
-            image.src = pictures[index].href;
+            image.src = pictures[index].dataset.gallerySrc;
             image.alt = pictures[index].dataset.caption || '';
             caption.textContent = image.alt;
             previous.hidden = next.hidden = pictures.length < 2;
         };
         pictures.forEach((picture, position) => picture.addEventListener('click', event => {
             event.preventDefault();
+            opener = picture;
             show(position);
             viewer.showModal();
+            viewer.querySelector('[data-gallery-close]').focus({preventScroll: true});
         }));
         viewer.querySelector('[data-gallery-close]').addEventListener('click', () => viewer.close());
         previous.addEventListener('click', () => show(index - 1));
@@ -75,5 +87,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.key === 'ArrowRight') { event.preventDefault(); show(index + 1); }
         });
         viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
+        viewer.addEventListener('close', () => {
+            if (opener?.isConnected) opener.focus({preventScroll: true});
+        });
     }
-});
+}
+document.addEventListener('app:content-loaded', initializeNextModules);

@@ -24,6 +24,11 @@ $themes=(new SiteSetting())->getAvailableThemes();
 $sampleItem=$item;
 $sampleItem['image']='__theme-fixture.svg';
 $slides=[['image'=>'__theme-fixture.svg']];
+$profile['principal_photo'] = '__theme-fixture.svg';
+$profile['welcome_message'] = '<p>Sambutan kepala sekolah yang dikelola melalui admin.</p>';
+$settings['principal_message_enabled'] = '1';
+$settings['principal_message_title'] = 'Sambutan Kepala Sekolah';
+$settings['principal_message_summary'] = 'Selamat datang. Bersama keluarga sekolah, kami membangun lingkungan belajar yang aman, inklusif, dan bermakna.';
 $pages=['home'=>'frontend/home.php','profile'=>'frontend/next/profile.php','news'=>'frontend/next/news-index.php','article'=>'frontend/next/news-show.php','gallery'=>'frontend/next/gallery.php','gtk'=>'frontend/next/gtk.php','contact'=>'frontend/next/contact.php','agenda'=>'frontend/next/agenda.php','calendar'=>'frontend/next/calendar.php','achievements'=>'frontend/next/achievements.php'];
 $pages += ['album'=>'frontend/next/gallery-detail.php','event'=>'frontend/next/event-detail.php','achievement'=>'frontend/next/achievement-detail.php','program'=>'frontend/next/program-detail.php','principal'=>'frontend/next/principal.php','alumni-detail'=>'frontend/next/alumni-detail.php','testimonials'=>'frontend/testimonials.php','alumni'=>'frontend/alumni/index.php','spmb'=>'frontend/spmb/index.php','register'=>'frontend/spmb/register.php','status'=>'frontend/spmb/status.php'];
 $pages['testimonials']='frontend/next/testimonials.php';
@@ -55,6 +60,10 @@ foreach (PublicTheme::NAMES as $themeName) {
         if ($xpath->query('//nav[contains(@class,"next-desktop-nav")]//a[@href="/profil"]')->length !== 1) { throw new RuntimeException('Parent link duplicated or missing'); }
         if ($xpath->query('//*[contains(@class,"next-submenu")]/a[@href="/profil"]')->length !== 0) { throw new RuntimeException('Duplicate parent in submenu'); }
         if (str_contains($html,'nav-cendekia') || str_contains($html,'cendekia-header')) { throw new RuntimeException('Legacy header leaked'); }
+        if ($pageName === 'album' && (
+            $xpath->query('//button[@data-gallery-image and @aria-controls="next-gallery-viewer" and not(@target)]')->length !== 2
+            || $xpath->query('//dialog[@id="next-gallery-viewer"]')->length !== 1
+        )) { throw new RuntimeException('Gallery must use same-page dialog triggers'); }
         foreach ($xpath->query('//body//text()[not(ancestor::script) and not(ancestor::style) and not(ancestor::textarea)]') as $textNode) {
             if (preg_match('/<\/?(?:p|strong|span|div|br)\b/i', $textNode->textContent)) {
                 throw new RuntimeException('HTML published as visible text: ' . $themeName . '/' . $pageName);
@@ -64,6 +73,7 @@ foreach (PublicTheme::NAMES as $themeName) {
             throw new RuntimeException('School motto missing from header');
         }
         if ($pageName === 'home') {
+            if ($xpath->query('//*[contains(@class,"next-principal-block")]//*[@id="principal-message-title"]')->length !== 1) { throw new RuntimeException('Compact principal card missing'); }
             $expectedLayout=['nawala-indigo'=>'portal','arunika-emerald'=>'campus','wibawa-crimson'=>'editorial','samudra-cendekia'=>'explore'][$themeName];
             if ($xpath->query('//*[@data-home-layout="'.$expectedLayout.'"]')->length!==1) { throw new RuntimeException('Distinct theme composition missing'); }
             $stats=$xpath->query('//div[contains(@class,"next-stat")]/strong');

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Perbaiki popup foto galeri setelah navigasi dinamis, hilangkan tautan foto tab baru, serta kembalikan fokus ke pemicu tanpa menggulir halaman.
+- Padatkan sambutan kepala sekolah pada beranda dan halaman detail empat tema baru tanpa mengubah konten admin atau komposisi tema lama.
+- Pertahankan posisi gulir dan fokus menu sidebar admin setelah navigasi; tambahkan pintasan Maintenance Mode di bagian atas Pengaturan.
 - Perbaiki moto rich text yang muncul sebagai tag HTML di hero, header, footer, banner, profil, dan kalender empat tema baru. Data editor dan tampilan tema lama tidak diubah.
 - Bersihkan markup pada ringkasan berita, fasilitas/program, dan kartu prestasi, termasuk entitas HTML lama; isi artikel tetap memakai sanitizer HTML, bukan dicetak mentah.
 - Tambahkan regresi teks publik serta fixture 84 halaman dengan moto HTML dan ringkasan ber-encoding. Daftar unggah patch tersedia di `production-upload-theme-html-fix.txt`.

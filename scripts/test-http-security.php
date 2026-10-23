@@ -111,6 +111,9 @@ try {
         $migration = request($handle, '/admin/pembaruan/migrasi');
         verify(str_contains($migration['body'], 'name="backup_ready"') === ($label === 'admin'), 'Migration admin isolation failed');
         if ($label === 'admin') {
+            $settingsPage = request($handle, '/admin/pengaturan');
+            verify($settingsPage['status'] === 200 && str_contains($settingsPage['body'], 'href="#maintenanceForm"'), 'Maintenance shortcut missing');
+            verify(str_contains($settingsPage['body'], 'id="maintenanceForm"') && str_contains($settingsPage['body'], 'name="maintenance_mode"'), 'Maintenance controls missing');
             verify($migration['status'] === 200, 'Migration page failed to render');
             verify(request($handle, '/admin/pembaruan/migrasi/run')['status'] === 405, 'Migration permits GET mutation');
             verify(request($handle, '/admin/pembaruan/migrasi/run', ['backup_ready' => '1', CSRF_TOKEN_NAME => 'invalid'])['status'] === 403, 'Migration accepts invalid CSRF');

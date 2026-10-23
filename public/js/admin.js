@@ -284,3 +284,45 @@
     document.head.appendChild(style);
 
 })();
+
+/* Admin navigation state: persist only sidebar position, never page/form data. */
+(function () {
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.querySelector('#sidebar nav');
+        if (!nav) return;
+        const key = 'rahayat-admin-navigation-v1';
+        let state = {};
+        try { state = JSON.parse(sessionStorage.getItem(key) || '{}') || {}; } catch (_) {}
+        const links = [...nav.querySelectorAll('a[href^="/admin"]')];
+        const path = window.location.pathname.replace(/\/$/, '') || '/admin';
+        const active = links.filter(link => {
+            const href = new URL(link.href, window.location.origin).pathname.replace(/\/$/, '');
+            return path === href || (href !== '/admin' && path.startsWith(href + '/'));
+        }).sort((a, b) => b.pathname.length - a.pathname.length)[0];
+        if (Number.isFinite(state.top) && state.top >= 0) nav.scrollTop = state.top;
+        const save = () => {
+            try { sessionStorage.setItem(key, JSON.stringify({top: nav.scrollTop, focusPath: state.focusPath || ''})); } catch (_) {}
+        };
+        if (active) {
+            active.setAttribute('aria-current', 'page');
+            const bounds = nav.getBoundingClientRect();
+            const item = active.getBoundingClientRect();
+            if (item.top < bounds.top) nav.scrollTop -= bounds.top - item.top;
+            if (item.bottom > bounds.bottom) nav.scrollTop += item.bottom - bounds.bottom;
+            if (state.focusPath === active.pathname) active.focus({preventScroll: true});
+        }
+        state.focusPath = '';
+        save();
+        nav.addEventListener('scroll', save, {passive: true});
+        nav.addEventListener('click', event => {
+            const link = event.target.closest('a[href^="/admin"]');
+            if (!link || !nav.contains(link) || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+            state.focusPath = link.pathname;
+            save();
+        });
+        window.addEventListener('pagehide', save);
+        document.querySelector('a[href="#maintenanceForm"]')?.addEventListener('click', () => {
+            document.getElementById('maintenanceForm')?.focus({preventScroll: true});
+        });
+    });
+})();

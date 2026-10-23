@@ -20,6 +20,7 @@ $defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
             <?= e($title) ?>
         </h1>
         <p class="text-slate-500 mt-1">Konfigurasi website dan pilih tema tampilan</p>
+        <a href="#maintenanceForm" class="inline-flex mt-3 px-4 py-2 rounded-lg bg-slate-800 text-white text-sm font-medium">Mode Maintenance →</a>
     </div>
 
     <?php if ($flash): ?>
@@ -385,7 +386,7 @@ $defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
             </h2>
             <p class="text-slate-500 text-sm mt-1">Aktifkan mode perbaikan untuk menutup akses publik sementara</p>
         </div>
-        <form id="maintenanceForm" class="p-6 space-y-4">
+        <form id="maintenanceForm" class="p-6 space-y-4" tabindex="-1">
             <input type="hidden" name="csrf_token" value="<?= Security::csrf() ?>">
 
             <div class="flex items-center gap-3 p-4 bg-slate-50 rounded-lg border border-slate-200">
@@ -400,7 +401,7 @@ $defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-slate-700 mb-1">Pesa Maintenance</label>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Pesan Maintenance</label>
                 <textarea name="maintenance_message" rows="3"
                     class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
                     placeholder="Mohon maaf, website sedang dalam perbaikan..."><?= e($settings['maintenance_message'] ?? '') ?></textarea>

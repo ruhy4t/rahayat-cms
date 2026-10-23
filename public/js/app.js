@@ -274,6 +274,7 @@
 
                     // Update content protection state based on the newly loaded page
                     ContentProtection.updateState(doc);
+                    document.dispatchEvent(new CustomEvent('app:content-loaded'));
                 }
             } catch (error) {
                 console.error('Navigation error:', error);

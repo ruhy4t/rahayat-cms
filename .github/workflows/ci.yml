@@ -46,6 +46,7 @@ jobs:
       - run: npm ci
       - run: node scripts/test-academic-calendar.mjs
       - run: node scripts/test-migration-ui.mjs
+      - run: node scripts/test-theme-navigation.mjs
       - run: npm run build:css
       - name: Verify generated assets are committed
         run: git diff --exit-code -- public/css public/fonts public/vendor
