@@ -7,8 +7,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const copies = [
   ["node_modules/sweetalert2/dist/sweetalert2.all.min.js", "public/vendor/sweetalert2/sweetalert2.all.min.js"],
   ["node_modules/chart.js/dist/chart.umd.js", "public/vendor/chart.js/chart.umd.js"],
-  ["node_modules/chart.js/LICENSE.md", "public/vendor/chart.js/LICENSE.md"],
   ["node_modules/sortablejs/Sortable.min.js", "public/vendor/sortablejs/Sortable.min.js"],
+];
+
+const normalizedTextCopies = [
+  ["node_modules/chart.js/LICENSE.md", "public/vendor/chart.js/LICENSE.md"],
   ["node_modules/sortablejs/LICENSE", "public/vendor/sortablejs/LICENSE"],
 ];
 
@@ -23,6 +26,13 @@ for (const [source, destination] of copies) {
   const target = join(root, destination);
   await mkdir(dirname(target), { recursive: true });
   await copyFile(join(root, source), target);
+}
+
+for (const [source, destination] of normalizedTextCopies) {
+  const target = join(root, destination);
+  await mkdir(dirname(target), { recursive: true });
+  const contents = await readFile(join(root, source), "utf8");
+  await writeFile(target, `${contents.replace(/\r\n?/g, "\n").trimEnd()}\n`, "utf8");
 }
 
 const sweetAlertLicense = await readFile(join(root, "node_modules/sweetalert2/LICENSE"), "utf8");

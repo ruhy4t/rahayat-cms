@@ -1,0 +1,3 @@
+# Generated text assets must be reproducible on Windows and Linux.
+public/vendor/chart.js/LICENSE.md text eol=lf
+public/vendor/sortablejs/LICENSE text eol=lf
