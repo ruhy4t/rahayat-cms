@@ -54,6 +54,18 @@ Hasil fixture tidak menjamin kontras gambar eksternal, dokumen PDF, maupun
 konten pihak ketiga. Konten rich text dapat mengandung gambar/video yang harus
 tetap diperiksa saat dipublikasikan.
 
+## Prinsip penyempurnaan visual
+
+Referensi struktur informasi: [MIT](https://www.mit.edu/),
+[Harvard](https://www.harvard.edu/), dan [RISD](https://www.risd.edu/).
+Referensi hierarki dan ritme tipografi:
+[GOV.UK type scale](https://design-system.service.gov.uk/styles/type-scale/).
+Implementasi menggunakan identitas sekolah dan font lokal milik CMS.
+Lebar isi dibatasi, kartu tanpa foto tidak menyisakan media kosong, menu
+aktif ditandai, dan header/footer memiliki ukuran serta hierarki yang konsisten.
+Penampil foto album menggunakan dialog native dengan tombol navigasi,
+keyboard kiri/kanan, dan Escape. Audit mencakup keadaan dialog terbuka.
+
 Smoke test HTTP mengganti pengaturan tema hanya selama pengujian lokal dan
 mengembalikan nilai awal di blok `finally`. Jangan jalankan tes ini ketika
 database lokal diarahkan ke produksi.

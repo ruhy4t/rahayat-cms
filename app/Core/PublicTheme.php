@@ -24,6 +24,8 @@ final class PublicTheme
             'category' => 'Kategori', 'filter' => 'Tampilkan', 'all_categories' => 'Semua kategori',
             'npsn' => 'NPSN', 'accreditation' => 'Akreditasi', 'established_year' => 'Tahun berdiri',
             'prestasi' => 'Prestasi & Penghargaan', 'back' => 'Kembali',
+            'explore'=>'Jelajahi sekolah', 'connect'=>'Terhubung dengan kami',
+            'close'=>'Tutup', 'previous'=>'Sebelumnya', 'next'=>'Berikutnya',
             'testimonials'=>'Testimoni', 'alumni'=>'Direktori Alumni', 'submit'=>'Kirim untuk ditinjau',
             'name'=>'Nama lengkap', 'relationship'=>'Hubungan dengan sekolah', 'graduation_year'=>'Tahun lulus',
             'occupation'=>'Pekerjaan/instansi', 'testimonial'=>'Testimoni', 'photo'=>'Foto',

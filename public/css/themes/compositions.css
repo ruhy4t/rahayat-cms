@@ -1,4 +1,85 @@
 /* Four independent page compositions; content components keep the CMS contract. */
+.next-shell { width:min(100% - 3rem,1240px); }
+.next-brand-monogram { display:grid; place-items:center; width:46px; height:46px; flex-shrink:0; border:1px solid #cbd5e1; border-radius:.5rem; background:var(--theme-ink); color:#fff; font-size:1.4rem; font-weight:800; }
+.next-brand { max-width:360px; }
+.next-brand>span:last-child { min-width:0; overflow-wrap:anywhere; }
+body .next-header { box-shadow:0 4px 24px #0f172a08; }
+body .next-header .next-desktop-nav { border-bottom:0; }
+body .next-header .next-menu-list a { font-size:.875rem; }
+body .next-header .next-desktop-nav>.next-menu-list>li>a,body .next-header .next-desktop-nav>.next-menu-list>li>.next-menu-parent>a { border-radius:0; padding:1.15rem .9rem; position:relative; }
+body .next-header .next-desktop-nav>.next-menu-list>li>a[aria-current]::after,body .next-header .next-desktop-nav>.next-menu-list>li>.next-menu-parent>a[aria-current]::after { content:''; position:absolute; bottom:.45rem; left:.9rem; right:.9rem; height:2px; background:currentColor; }
+body .next-header nav :is(a,summary):hover { background:#f1f5f9; color:#172554; }
+body.theme-wibawa-crimson .next-header .next-desktop-nav :is(a,summary):hover { background:#fff; color:#071a2e; }
+body .next-header .next-submenu { padding:.6rem; border:1px solid #cbd5e1; border-radius:.6rem; box-shadow:0 16px 32px #0f172a18; }
+body .next-header .next-submenu a { padding:.8rem 1rem; font-weight:500; line-height:1.5; }
+body .next-header .next-submenu a[aria-current] { background:#e2e8f0; color:#0f172a; font-weight:700; }
+.next-menu-parent summary { color:inherit; }
+.composition-identity .composition-eyebrow { font-size:.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; margin:0 0 1.15rem; line-height:1.7; }
+.next-heading>div { max-width:46rem; }
+.next-heading>a { display:inline-flex; align-items:center; gap:.7rem; font-size:.85rem; flex-shrink:0; }
+.next-heading>a::after { content:'↗'; font-size:1.1rem; }
+.next-card-body { position:relative; }
+.next-meta { display:flex; align-items:center; flex-wrap:wrap; gap:.5rem; letter-spacing:.025em; text-transform:none; }
+.next-meta>span { padding:.2rem .5rem; background:#f1f5f9; color:#334155; font-size:.75rem; font-weight:700; }
+body .next-news-card { box-shadow:none; border-color:#dbe2e9; }
+body .next-card-body h3 { font-size:1.1rem; font-weight:750; line-height:1.5; letter-spacing:-.015em; margin-top:.75rem; }
+.next-card-body>p:not(.next-meta) { line-height:1.75; margin-top:.6rem; color:#475569; font-size:.875rem; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.next-story-link { display:inline-grid; place-items:center; width:32px; height:32px; margin-top:1rem; color:var(--theme-ink); border:1px solid #cbd5e1; border-radius:50%; }
+.next-story-link:hover { background:var(--theme-ink); color:#fff; }
+.next-news-card--text>.next-media { display:none; }
+.next-news-card--text { border-top:3px solid var(--theme-ink); }
+body .next-news-card.next-news-card--text { display:block; }
+body .composition-feature.composition-feature--text { display:block; }
+.composition-feature--text .composition-feature-media { display:none; }
+.next-program { position:relative; }
+.next-program-image { overflow:hidden; }
+.next-program-index { display:block; font-size:.75rem; letter-spacing:.08em; font-weight:700; color:#475569; margin:0 0 .8rem; }
+.next-program h3 { padding-right:1.5rem; font-weight:750; line-height:1.5; }
+.next-program h3 a::after { content:'↗'; position:absolute; right:1.25rem; font-size:1.2rem; }
+.next-program p { line-height:1.75; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.next-program--text { min-height:180px; display:flex; flex-direction:column; justify-content:center; }
+.composition-photo img,.next-media img,.next-program-image img { transition:transform .4s ease; }
+@media(hover:hover) { .next-news-card:hover .next-media img,.next-program:hover .next-program-image img { transform:scale(1.035); } }
+
+body .next-footer { padding-top:3rem; }
+body .next-footer nav { border:0; }
+.next-footer-grid { gap:3.5rem; }
+.next-footer-identity h2 { font-size:1.25rem; max-width:24rem; line-height:1.5; }
+.next-footer-identity p { font-size:.85rem; line-height:1.8; }
+.next-footer .next-footer-heading { font-size:.75rem; letter-spacing:.08em; font-weight:750; text-transform:uppercase; padding-block:.5rem; margin-bottom:1rem; }
+.next-footer .next-menu-list a { font-size:.85rem; padding:.6rem 0; font-weight:500; }
+.next-footer .next-menu-parent>a { flex:1; }
+.next-footer .next-menu-parent summary { min-width:36px; }
+.next-footer .visitor-statistics__title { font-size:.875rem; letter-spacing:0; }
+.next-footer-menu { list-style:none; padding:0; margin:0; columns:2; column-gap:1.5rem; }
+.next-footer-menu>li { break-inside:avoid; margin-bottom:1.25rem; }
+.next-footer-menu a { display:inline-block; font-size:.85rem; padding:.35rem 0; line-height:1.6; }
+.next-footer-menu>li>a { font-weight:650; }
+.next-footer-menu ul { list-style:none; padding:0; margin:.25rem 0 0; }
+.next-footer-menu ul a { font-size:.8rem; color:#cbd5e1; }
+.next-footer-social>a { border-radius:2rem; padding:.45rem .8rem; font-size:.7rem; }
+.next-copyright { display:flex; align-items:center; min-height:3rem; margin-top:2.5rem; font-size:.75rem; }
+body.theme-arunika-emerald>.next-footer { background:#f2f5ed; color:#18392f; border-top:1px solid #b8c6b9; }
+body.theme-arunika-emerald>.next-footer :is(h2,p,a,small,dt,dd) { color:#18392f; }
+body.theme-arunika-emerald>.next-footer .next-submenu { background:#fff; color:#18392f; }
+body.theme-arunika-emerald>.next-footer a:is(:hover,:focus-visible) { color:#fff; background:#064e3b; }
+body.theme-wibawa-crimson>.next-footer .next-footer-grid { grid-template-columns:2fr 1fr 1fr; }
+body.theme-wibawa-crimson>.next-footer { border-top:5px solid #991b1b; }
+body.theme-samudra-cendekia>.next-footer { border-top:6px solid #facc15; border-radius:2rem 2rem 0 0; }
+.next-article-body { max-width:68ch; }
+.next-article-meta { border-top:1px solid #cbd5e1; padding-top:1rem; }
+.next-archive-body>p:last-child { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+.next-richtext :is(p,li) { text-wrap:pretty; }
+.next-empty { border:1px dashed #94a3b8; border-radius:.5rem; text-align:center; }
+.next-gallery-viewer { margin:auto; padding:3.5rem 1.5rem 1.5rem; width:min(94vw,1100px); max-height:94dvh; border:1px solid #64748b; border-radius:.75rem; background:#0f172a; color:#fff; }
+.next-gallery-viewer::backdrop { background:#020617d9; }
+.next-gallery-viewer figure { margin:0; }
+.next-gallery-viewer img { display:block; width:100%; max-height:70dvh; object-fit:contain; }
+.next-gallery-viewer figcaption { padding:1rem 0; font-size:.9rem; }
+.next-gallery-close { position:absolute; right:1rem; top:.5rem; padding:.3rem .7rem; font-size:1.8rem; color:#fff; }
+.next-gallery-controls { display:flex; justify-content:space-between; gap:1rem; }
+.next-gallery-controls button { padding:.65rem 1rem; color:#fff; border:1px solid #94a3b8; border-radius:.3rem; }
+html:has(.next-gallery-viewer[open]) { overflow:hidden; }
 .composition-identity h1 { font-size:clamp(1.9rem,3.3vw,3rem); font-weight:800; line-height:1.18; letter-spacing:-.025em; }
 .composition-identity>p { font-size:1.05rem; line-height:1.8; margin-top:1.2rem; }
 .composition-contact { border:1px solid currentColor; }
@@ -46,9 +127,9 @@
 /* Arunika: photographic campus introduction and an open, story-led rhythm. */
 .home-campus { background:#fffdf7; }
 .campus-introduction { position:relative; padding-top:2rem; padding-bottom:5rem; }
-.campus-introduction .composition-photo { height:460px; border-radius:2rem 2rem 0 0; }
-.campus-welcome { position:relative; width:min(88%,850px); margin:-120px auto 0; padding:2.5rem 3rem; background:#fffdf7; color:#064e3b; border:1px solid #a7b7ab; border-radius:1.5rem; text-align:center; }
-.campus-welcome .next-actions { justify-content:center; }
+.campus-introduction .composition-photo { height:500px; border-radius:1rem; }
+.campus-welcome { position:relative; width:min(84%,660px); margin:-200px 0 0 3rem; padding:2.5rem 3rem; background:#fffdf7; color:#064e3b; border:1px solid #d1dacf; border-radius:.75rem; text-align:left; box-shadow:0 12px 36px #18392f12; }
+.campus-welcome .next-actions { justify-content:flex-start; }
 .campus-welcome .composition-contact { color:#064e3b; }
 .home-campus>.next-stats { background:#f2f8f3; border-block:1px solid #cbd5e1; }
 .home-campus .next-section { padding-block:4rem; }
@@ -61,9 +142,12 @@
 
 /* Wibawa: formal masthead, leading story, ruled editorial rows. */
 .home-editorial { background:#fffdfa; }
-.editorial-introduction { display:grid; grid-template-columns:1fr 1fr; border-bottom:6px solid #991b1b; margin-top:2rem; }
-.editorial-welcome { padding:3rem; background:#071a2e; color:#fff; display:flex; align-items:center; }
-.editorial-welcome .composition-contact { color:#fff; }
+.editorial-introduction { display:grid; grid-template-columns:2fr 3fr; border-bottom:6px solid #991b1b; margin-top:2rem; }
+.editorial-welcome { padding:2.5rem; background:#fffdfa; color:#071a2e; display:flex; align-items:center; border-top:1px solid #cbd5e1; }
+.editorial-welcome .composition-contact { color:#071a2e; }
+.editorial-welcome .composition-eyebrow { color:#991b1b; }
+.theme-wibawa-crimson .next-masthead .next-brand { max-width:none; margin-inline:auto; }
+.theme-wibawa-crimson .next-header .next-desktop-nav { display:flex; justify-content:center; }
 .editorial-introduction .composition-photo { height:380px; }
 .home-editorial>.next-stats { border-bottom:3px solid #071a2e; }
 .home-editorial .composition-feature { grid-template-columns:1fr 1fr; border:0; border-block:2px solid #071a2e; padding-block:1.5rem; }
@@ -132,6 +216,7 @@ body.theme-wibawa-crimson .next-page-banner h1,.theme-wibawa-crimson .next-page-
     .theme-arunika-emerald .next-local-nav { display:block; }
     .theme-samudra-cendekia .next-profile-layout { grid-template-columns:1fr; }
     .theme-samudra-cendekia .next-local-nav,.theme-samudra-cendekia .next-profile-content { grid-column:auto; grid-row:auto; }
+    body.theme-wibawa-crimson>.next-footer .next-footer-grid { grid-template-columns:1fr 1fr; }
 }
 @media(max-width:650px) {
     .portal-welcome { grid-template-columns:1fr; }
@@ -139,7 +224,7 @@ body.theme-wibawa-crimson .next-page-banner h1,.theme-wibawa-crimson .next-page-
     .portal-welcome .composition-photo { min-height:200px; max-height:230px; }
     .campus-introduction { padding-top:1rem; padding-bottom:2rem; }
     .campus-introduction .composition-photo { height:260px; border-radius:1rem; }
-    .campus-welcome { width:94%; margin-top:-3rem; padding:1.5rem; }
+    .campus-welcome { width:94%; margin:-3rem auto 0; padding:1.5rem; }
     .editorial-introduction,.composition-feature,.home-editorial .composition-feature,.home-explore .composition-feature { grid-template-columns:1fr; }
     .editorial-introduction .composition-photo { height:220px; }
     .composition-feature-media { min-height:200px; }
@@ -155,4 +240,13 @@ body.theme-wibawa-crimson .next-page-banner h1,.theme-wibawa-crimson .next-page-
     .theme-arunika-emerald .next-profile-content { display:block; }
     .theme-samudra-cendekia .next-media-grid { grid-template-columns:1fr; }
     .theme-samudra-cendekia .next-media-item:first-child { grid-column:auto; grid-row:auto; }
+    .next-shell { width:calc(100% - 2rem); }
+    .next-brand { max-width:calc(100% - 56px); }
+    .next-brand-monogram { width:38px; height:38px; font-size:1.1rem; }
+    body.theme-wibawa-crimson>.next-footer .next-footer-grid { grid-template-columns:1fr; }
+    .theme-wibawa-crimson .next-masthead .next-brand { margin:0; max-width:calc(100% - 56px); }
+}
+@media(prefers-reduced-motion:reduce) {
+    .composition-photo img,.next-media img,.next-program-image img { transition:none; }
+    .next-news-card:hover .next-media img,.next-program:hover .next-program-image img { transform:none; }
 }

@@ -57,17 +57,38 @@ try{
     await call('Runtime.evaluate',{expression:'document.fonts.ready',awaitPromise:true});
     const doc=await call('DOM.getDocument');
     const interactive=await call('DOM.querySelectorAll',{nodeId:doc.root.nodeId,selector:'a,button,summary,input,select,textarea'});
-    for(const state of ['normal','menu-open','hover','focus']){
+    for(const state of ['normal','menu-open','hover','focus',...(page==='album'?['gallery-open']:[])]){
       if(state==='menu-open')await call('Runtime.evaluate',{expression:'document.querySelectorAll("details").forEach(e=>e.open=true)'});
       if(state==='hover'||state==='focus')for(const nodeId of interactive.nodeIds)await call('CSS.forcePseudoState',{nodeId,forcedPseudoClasses:state==='hover'?['hover']:['focus','focus-visible']});
+      if(state==='gallery-open'){
+        const check=await call('Runtime.evaluate',{expression:`(() => {
+          const links=[...document.querySelectorAll('[data-gallery-image]')];
+          const viewer=document.querySelector('[data-gallery-viewer]');
+          if(links.length<2||!viewer)return false;
+          links[0].click();
+          if(!viewer.open)return false;
+          viewer.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowRight',bubbles:true}));
+          if(viewer.querySelector('img').alt!==links[1].dataset.caption)return false;
+          viewer.querySelector('[data-gallery-close]').click();
+          if(viewer.open)return false;
+          links[0].click();
+          return viewer.open;
+        })()`,returnByValue:true});
+        if(check.result.value!==true)throw new Error(`Gallery keyboard interaction failed: ${theme}/${width}`);
+      }
       const evaluated=await call('Runtime.evaluate',{expression:`(${audit})()`,returnByValue:true});
       results.push({theme,page,width,state,...evaluated.result.value});
     }
-    if(page==='home'){
+    if(['home','profile','news','article'].includes(page)){
       for(const nodeId of interactive.nodeIds)await call('CSS.forcePseudoState',{nodeId,forcedPseudoClasses:[]});
-      await call('Runtime.evaluate',{expression:'document.querySelectorAll(".next-header details").forEach(e=>e.open=false)'});
+      await call('Runtime.evaluate',{expression:'document.querySelectorAll("details").forEach(e=>e.open=false)'});
       const shot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
-      await writeFile(join(root,`${theme}-${width}.png`),Buffer.from(shot.data,'base64'));
+      await writeFile(join(root,`${theme}${page==='home'?'':'-'+page}-${width}.png`),Buffer.from(shot.data,'base64'));
+      if(page==='home'){
+        await call('Runtime.evaluate',{expression:'window.scrollTo(0,document.body.scrollHeight)'});
+        const footerShot=await call('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+        await writeFile(join(root,`${theme}-footer-${width}.png`),Buffer.from(footerShot.data,'base64'));
+      }
     }
   }
   await writeFile(join(root,'audit.json'),JSON.stringify(results,null,2));

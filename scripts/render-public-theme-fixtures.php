@@ -38,7 +38,7 @@ foreach (PublicTheme::NAMES as $themeName) {
         $data['prestasi']=[$item];
         $data['prestasiItem']=$item; $data['ekskulItem']=['name'=>'Program pengembangan murid','description'=>'Kegiatan dari admin.'];
         $data['alumni']=['name'=>'Alumni Pengujian','graduation_year'=>2020,'story'=>'Cerita alumni yang disetujui.'];
-        $album=$albums[0]; $items=[];
+        $album=$albums[0]; $items=$pageName==='album'?[['type'=>'image','file_path'=>'__theme-fixture.svg','title'=>'Kegiatan pengujian satu'],['type'=>'image','file_path'=>'__theme-fixture.svg','title'=>'Kegiatan pengujian dua']]:[];
         $_SERVER['REQUEST_URI']=$pageName==='home'?'/':'/'.$pageName;
         ob_start(); require VIEW_PATH.'/'.$template; $content=ob_get_clean();
         ob_start(); require VIEW_PATH.'/layouts/frontend.php'; $html=ob_get_clean();

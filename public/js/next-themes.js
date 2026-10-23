@@ -46,4 +46,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
     if (continuation) { continuation.addEventListener('change', updateContinuation); updateContinuation(); }
+
+    const viewer = document.querySelector('[data-gallery-viewer]');
+    if (viewer && typeof viewer.showModal === 'function') {
+        const pictures = [...document.querySelectorAll('[data-gallery-image]')];
+        const image = viewer.querySelector('img');
+        const caption = viewer.querySelector('[data-gallery-caption]');
+        const previous = viewer.querySelector('[data-gallery-previous]');
+        const next = viewer.querySelector('[data-gallery-next]');
+        let index = 0;
+        const show = position => {
+            index = (position + pictures.length) % pictures.length;
+            image.src = pictures[index].href;
+            image.alt = pictures[index].dataset.caption || '';
+            caption.textContent = image.alt;
+            previous.hidden = next.hidden = pictures.length < 2;
+        };
+        pictures.forEach((picture, position) => picture.addEventListener('click', event => {
+            event.preventDefault();
+            show(position);
+            viewer.showModal();
+        }));
+        viewer.querySelector('[data-gallery-close]').addEventListener('click', () => viewer.close());
+        previous.addEventListener('click', () => show(index - 1));
+        next.addEventListener('click', () => show(index + 1));
+        viewer.addEventListener('keydown', event => {
+            if (event.key === 'ArrowLeft') { event.preventDefault(); show(index - 1); }
+            if (event.key === 'ArrowRight') { event.preventDefault(); show(index + 1); }
+        });
+        viewer.addEventListener('click', event => { if (event.target === viewer) viewer.close(); });
+    }
 });
