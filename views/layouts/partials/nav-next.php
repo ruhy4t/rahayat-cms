@@ -7,9 +7,9 @@ $renderNextMenus = static function (array $items) use (&$renderNextMenus): void 
         $external = ($item['target'] ?? '_self') === '_blank';
         echo '<li>';
         if (!empty($item['children'])) {
-            echo '<details class="next-menu-branch"><summary>' . e($item['title']) . '</summary><div class="next-submenu">';
+            echo '<div class="next-menu-parent"><a href="' . e($href) . '"' . ($external ? ' target="_blank" rel="noopener noreferrer"' : '') . '>' . e($item['title']) . '</a><details class="next-menu-branch"><summary aria-label="' . e($item['title']) . '"><span aria-hidden="true">&#9662;</span></summary><div class="next-submenu">';
             $renderNextMenus($item['children']);
-            echo '</div></details>';
+            echo '</div></details></div>';
         } else {
             echo '<a href="' . e($href) . '"' . ($external ? ' target="_blank" rel="noopener noreferrer"' : '') . '>' . e($item['title']) . '</a>';
         }

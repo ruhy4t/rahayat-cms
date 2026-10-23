@@ -228,6 +228,16 @@ $defaultThemeFont = $defaultThemeFonts[$currentTheme] ?? 'Inter';
                 <?php endforeach; ?>
             </div>
 
+            <details class="pt-4 border-t border-slate-100">
+                <summary class="font-semibold text-slate-800 cursor-pointer">Label halaman tema baru</summary>
+                <div class="grid md:grid-cols-2 gap-4 mt-4">
+                    <?php foreach (PublicTheme::labels() as $labelKey => $defaultLabel): ?>
+                        <label class="block text-sm text-slate-700"><?= e($defaultLabel) ?>
+                            <input type="text" maxlength="200" name="public_label_<?= e($labelKey) ?>" value="<?= e($settings['public_label_' . $labelKey] ?? $defaultLabel) ?>" class="block w-full px-4 py-2 border border-slate-300 rounded-lg">
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+            </details>
             <div class="pt-4 border-t border-slate-100">
                 <button type="submit"
                     class="px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors">

@@ -29,6 +29,7 @@ class NewsController extends Controller
         $category = $this->get('category');
 
         $baseData = [
+            'newsCategories' => (new NewsCategory())->getActive(),
             'profile' => $this->profileModel->getProfile(),
             'settings' => $this->settingModel->getAll(),
             'theme' => $this->settingModel->getTheme()

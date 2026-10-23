@@ -1,0 +1,4 @@
+<?php $pageHeading = PublicTheme::text($settings, 'gallery'); include __DIR__ . '/banner.php'; ?>
+<section class="next-shell next-archive"><div class="next-archive-grid next-albums">
+<?php foreach ($albums ?? [] as $album): ?><article class="next-archive-card"><a class="next-archive-image" href="/galeri/<?= e($album['slug']) ?>"><?php if (!empty($album['cover_image'])): ?><img src="/storage/<?= e($album['cover_image']) ?>" alt="<?= e($album['title']) ?>" loading="lazy" decoding="async"><?php endif; ?></a><div class="next-archive-body"><p class="next-byline"><?= (int) ($album['item_count'] ?? 0) ?></p><h2><a href="/galeri/<?= e($album['slug']) ?>"><?= e($album['title']) ?></a></h2><?php if (!empty($album['description'])): ?><p><?= e($album['description']) ?></p><?php endif; ?></div></article><?php endforeach; ?>
+</div><?php if (empty($albums)): ?><p class="next-empty"><?= e(PublicTheme::text($settings, 'empty')) ?></p><?php endif; ?></section>

@@ -734,6 +734,18 @@ class DashboardController extends Controller
             }
         }
 
+        foreach (PublicTheme::labels() as $labelKey => $defaultLabel) {
+            $settingKey = 'public_label_' . $labelKey;
+            $labelValue = $this->post($settingKey);
+            if ($labelValue !== null) {
+                if (!is_string($labelValue) || mb_strlen($labelValue) > 200) {
+                    $this->json(['success' => false, 'message' => 'Label maksimal 200 karakter'], 422);
+                    return;
+                }
+                $this->settingModel->set($settingKey, trim($labelValue));
+            }
+        }
+
         $this->json(['success' => true, 'message' => 'Pengaturan berhasil disimpan']);
     }
 

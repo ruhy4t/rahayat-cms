@@ -123,6 +123,10 @@
     <?php if (($themeName === 'cendekia-smp' || str_contains($themeName, 'nawala-') || str_contains($themeName, 'arunika-') || str_contains($themeName, 'wibawa-') || str_contains($themeName, 'samudra-')) && is_file($themeStylesheet)): ?>
         <link rel="stylesheet" href="/css/themes/<?= e($themeName) ?>.css?v=<?= filemtime($themeStylesheet) ?>">
     <?php endif; ?>
+    <?php if (PublicTheme::isModern($themeName)): ?>
+        <link rel="stylesheet" href="/css/themes/next-modules.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/next-modules.css') ?>">
+        <script src="/js/next-themes.js?v=<?= filemtime(ROOT_PATH . '/public/js/next-themes.js') ?>" defer></script>
+    <?php endif; ?>
 
     <style>
         body {
@@ -141,6 +145,7 @@
             $headingFont = array_key_exists($headingFont, $availableFonts) ? $headingFont : $bodyFont;
             ?>
             font-family: '<?= e($bodyFont) ?>', sans-serif;
+            --next-heading-font: '<?= e($headingFont) ?>', sans-serif;
             <?php if (in_array($themeName, ['emerald-campus', 'arunika-emerald'], true)): ?>
                 --base-radius-sm: 0.5rem;
                 --base-radius: 0.75rem;

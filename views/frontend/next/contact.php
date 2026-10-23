@@ -1,0 +1,7 @@
+<?php $pageHeading = PublicTheme::text($settings, 'contact'); include __DIR__ . '/banner.php'; ?>
+<div class="next-shell next-contact-layout"><section class="next-contact-directory">
+<?php foreach (['address','phone','email'] as $key): ?><?php if (!empty($profile[$key])): ?><article class="next-contact-item"><h2><?= e(PublicTheme::text($settings, $key)) ?></h2><p><?= e($profile[$key]) ?></p></article><?php endif; ?><?php endforeach; ?>
+<?php $mapUrl = Security::safeEmbedSrc($profile['google_maps_embed'] ?? ''); if ($mapUrl !== ''): ?><iframe src="<?= e($mapUrl) ?>" title="<?= e(PublicTheme::text($settings, 'address')) ?>" loading="lazy" referrerpolicy="no-referrer-when-downgrade" class="next-contact-map"></iframe><?php endif; ?>
+</section><section class="next-contact-hours"><h2><?= e(PublicTheme::text($settings, 'hours')) ?></h2><dl>
+<?php foreach (['monday'=>'Senin','tuesday'=>'Selasa','wednesday'=>'Rabu','thursday'=>'Kamis','friday'=>'Jumat','saturday'=>'Sabtu','sunday'=>'Minggu'] as $key=>$day): ?><?php $isClosed = (int) ($profile['is_closed_' . $key] ?? 0) === 1; $open = (string) ($profile[$key . '_open'] ?? ''); $close = (string) ($profile[$key . '_close'] ?? ''); ?><div><dt><?= e($day) ?></dt><dd><?= e($isClosed ? PublicTheme::text($settings, 'closed') : ($open !== '' && $close !== '' ? substr($open,0,5) . ' – ' . substr($close,0,5) : '—')) ?></dd></div><?php endforeach; ?>
+</dl></section></div>

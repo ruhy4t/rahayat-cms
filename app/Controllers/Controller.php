@@ -133,6 +133,20 @@ abstract class Controller
                 'frontend.profile' => 'profile',
                 'frontend.news.index' => 'news-index',
                 'frontend.news.show' => 'news-show',
+                'frontend.gallery' => 'gallery',
+                'frontend.gallery-detail' => 'gallery-detail',
+                'frontend.gtk' => 'gtk',
+                'frontend.contact' => 'contact',
+                'frontend.prestasi' => 'achievements',
+                'frontend.academic.agenda' => 'agenda',
+                'frontend.academic.calendar' => 'calendar',
+                'frontend.academic.detail' => 'event-detail',
+                'frontend.prestasi-detail' => 'achievement-detail',
+                'frontend.ekstrakurikuler-detail' => 'program-detail',
+                'frontend.academic.principal' => 'principal',
+                'frontend.alumni.show' => 'alumni-detail',
+                'frontend.testimonials' => 'testimonials',
+                'frontend.alumni.index' => 'alumni',
             ];
             if (isset($modernViews[$view])) {
                 $viewFile = VIEW_PATH . '/frontend/next/' . $modernViews[$view] . '.php';

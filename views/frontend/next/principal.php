@@ -1,0 +1,2 @@
+<?php $pageHeading=$settings['principal_message_title'] ?? $title; include __DIR__.'/banner.php'; ?>
+<article class="next-shell next-article-layout"><aside class="next-article-meta"><?php if (!empty($profile['principal_photo'])): ?><img class="next-detail-image" src="/storage/<?= e($profile['principal_photo']) ?>" alt="<?= e($profile['principal_name'] ?? '') ?>"><?php endif; ?><strong><?= e($profile['principal_name'] ?? '') ?></strong></aside><div class="next-richtext"><?= Security::sanitizeHtml((string) ($profile['welcome_message'] ?? '')) ?></div></article>
