@@ -107,6 +107,18 @@ body.theme-samudra-cendekia>.next-footer { background:var(--theme-ink); }
 .theme-samudra-cendekia .next-staff-card { border-bottom:4px solid #0369a1; }
 .theme-samudra-cendekia .next-timeline-event { border-left:3px solid #0369a1; padding-left:2rem; }
 /* Typography always follows the validated admin font settings. */
+body .next-hero h1 { font-size:clamp(1.9rem,3.4vw,3.25rem); line-height:1.16; letter-spacing:-.025em; }
+body .next-page-banner h1,body .next-article-header h1,body .next-module-content h1 { font-size:clamp(1.75rem,2.8vw,2.65rem); line-height:1.22; }
+body .next-heading h2,body .next-cta h2 { font-size:clamp(1.4rem,2.2vw,2rem); line-height:1.3; }
+body .next-document-panel>h2,body .next-calendar-intro h2 { font-size:clamp(1.25rem,1.8vw,1.65rem); line-height:1.35; }
+body[class*="theme-"] .next-archive-grid .next-archive-card h2 { font-size:clamp(1.1rem,1.5vw,1.35rem); line-height:1.4; }
+body .next-hero__summary,body .next-deck,body .next-quote blockquote { font-size:clamp(1rem,1.25vw,1.125rem); line-height:1.75; }
+body .next-richtext { font-size:1rem; line-height:1.8; }
+body .next-contact-item p { font-size:clamp(1rem,1.5vw,1.25rem); line-height:1.6; }
+body .next-stat strong { font-size:clamp(1.5rem,2.4vw,2rem); line-height:1.3; font-variant-numeric:tabular-nums; }
+.next-stat-unit { font-size:.65em; font-weight:700; margin-left:.08em; }
+body .next-timeline-event time strong { font-size:2rem; }
+body .next-masthead .next-brand strong { font-size:clamp(1rem,1.3vw,1.15rem); }
 body.theme-wibawa-crimson .next-hero h1,body.theme-wibawa-crimson .next-heading h2 { font-family:var(--next-heading-font); }
 .next-richtext [style*="color"],.next-richtext [style*="background"] { color:inherit!important; background-color:transparent!important; }
 .next-richtext :is(table,iframe,video) { max-width:100%; }

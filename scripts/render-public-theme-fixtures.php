@@ -44,6 +44,11 @@ foreach (PublicTheme::NAMES as $themeName) {
         if ($xpath->query('//nav[contains(@class,"next-desktop-nav")]//a[@href="/profil"]')->length !== 1) { throw new RuntimeException('Parent link duplicated or missing'); }
         if ($xpath->query('//*[contains(@class,"next-submenu")]/a[@href="/profil"]')->length !== 0) { throw new RuntimeException('Duplicate parent in submenu'); }
         if (str_contains($html,'nav-cendekia') || str_contains($html,'cendekia-header')) { throw new RuntimeException('Legacy header leaked'); }
+        if ($pageName === 'home') {
+            $stats=$xpath->query('//div[contains(@class,"next-stat")]/strong');
+            $values=[]; foreach ($stats as $stat) { $values[]=trim($stat->textContent); }
+            if ($values!==['1024+','78+','A','98%']) { throw new RuntimeException('Statistic units are incorrect: '.json_encode($values)); }
+        }
         file_put_contents($output.'/'.$themeName.'-'.$pageName.'.html',$html);
     }
 }
