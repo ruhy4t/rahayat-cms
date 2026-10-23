@@ -1,0 +1,48 @@
+name: Laporan bug
+description: Laporkan perilaku aplikasi yang tidak sesuai.
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Jangan sertakan credential, data pribadi siswa, dokumen SPMB, atau dump database.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Ringkasan
+      description: Apa yang terjadi dan apa yang seharusnya terjadi?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah reproduksi
+      placeholder: "1. Buka ...\n2. Klik ...\n3. Terjadi ..."
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versi Rahayat CMS
+      placeholder: 1.11.1
+    validations:
+      required: true
+  - type: dropdown
+    id: php
+    attributes:
+      label: Versi PHP
+      options: ["8.4", "8.5", "Lainnya"]
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Lingkungan
+      description: Web server, database, browser, dan informasi relevan lainnya.
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Pemeriksaan keamanan
+      options:
+        - label: Laporan ini tidak membuka celah keamanan atau data sensitif. Jika iya, saya akan memakai Private Vulnerability Reporting.
+          required: true

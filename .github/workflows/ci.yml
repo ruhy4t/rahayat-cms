@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  php-safe-tests:
+    name: PHP lint and safe tests (${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, dom, fileinfo, gd, mbstring, pdo_mysql, pdo_sqlite, sodium
+          coverage: none
+      - name: Lint PHP
+        shell: bash
+        run: git ls-files '*.php' -z | xargs -0 -n1 php -l
+      - name: Run database-free security regression
+        run: php scripts/test-security-patch.php
+      - name: Run visitor statistics regression
+        run: php scripts/test-visitor-statistics.php
+
+  frontend:
+    name: Frontend build and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/test-academic-calendar.mjs
+      - run: node scripts/test-migration-ui.mjs
+      - run: npm run build:css
+      - name: Verify generated assets are committed
+        run: git diff --exit-code -- public/css public/fonts public/vendor
+
+  database-regression:
+    name: MariaDB regression tests
+    runs-on: ubuntu-latest
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_DATABASE: schoolweb_test
+          MARIADB_USER: schoolweb_test
+          MARIADB_PASSWORD: test-password
+          MARIADB_ROOT_PASSWORD: root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+    env:
+      DB_HOST: 127.0.0.1
+      DB_PORT: 3306
+      DB_NAME: schoolweb_test
+      DB_USER: schoolweb_test
+      DB_PASS: test-password
+      APP_DEBUG: false
+      APP_URL: http://localhost
+      DATA_ENCRYPTION_KEY: ci-only-synthetic-key-at-least-32-characters
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: curl, dom, fileinfo, gd, mbstring, pdo_mysql, sodium
+          coverage: none
+      - name: Import test schema
+        run: mysql --host=127.0.0.1 --user=schoolweb_test --password=test-password schoolweb_test < database/schema.sql
+      - run: php scripts/test-security.php
+      - run: php scripts/test-academic.php
+      - run: php scripts/test-web-migration.php

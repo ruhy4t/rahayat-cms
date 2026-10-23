@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Laporan keamanan privat
+    url: https://github.com/ruhy4t/rahayat-cms/security/advisories/new
+    about: Jangan publikasikan detail kerentanan melalui issue biasa.
