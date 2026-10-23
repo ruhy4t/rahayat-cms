@@ -1,8 +1,8 @@
 {
   "name": "Rahayat CMS",
-  "version": "1.11.1",
-  "released_at": "2026-10-01",
-  "summary": "Patch keamanan: menutup eskalasi hak akses, penulisan data tanpa login, dan stored XSS; pengerasan unggahan, redirect, migrasi, dan konfigurasi Apache.",
+  "version": "1.12.0",
+  "released_at": "2026-10-23",
+  "summary": "Empat tema publik baru dengan pengaturan admin, penguatan sanitasi rich text dan URL, perlindungan storage privat, serta cache media publik.",
   "branch": "main",
   "repository_url": "https://github.com/ruhy4t/rahayat-cms",
   "download_url": "https://github.com/ruhy4t/rahayat-cms/archive/refs/heads/main.zip",

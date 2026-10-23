@@ -264,6 +264,12 @@ try {
     check(!Security::isSafeLinkUrl('java&#x73;cript:alert(1)'), 'Entity encoded scheme accepted');
     check(!Security::isSafeLinkUrl('//evil.example'), 'Protocol-relative link accepted');
     check(Security::safeLinkUrl('javascript:alert(1)') === '', 'safeLinkUrl kept an unsafe value');
+    $encoded = 'java&#x73;cript:alert(1)';
+    for ($layer = 0; $layer < 12; $layer++) {
+        check(Security::safeLinkUrl($encoded) === '', 'Repeatedly encoded unsafe URL accepted');
+        $encoded = str_replace('&', '&amp;', $encoded);
+    }
+    check(Security::safeLinkUrl('https://example.invalid/?a=1&amp;b=2') === 'https://example.invalid/?a=1&b=2', 'Safe URL not canonicalized');
 
     check(Security::safeLocalPath('/admin/berita?page=2') === '/admin/berita?page=2', 'Local path rejected');
     check(Security::safeLocalPath('//evil.example') === null, 'Protocol-relative path accepted');
@@ -277,6 +283,18 @@ try {
     check(Security::sanitizeRichTextIfNeeded($clean) === $clean, 'Clean rich text was rewritten');
     check(!str_contains(Security::sanitizeRichTextIfNeeded('<p>x</p><script>alert(1)</script>'), '<script'), 'Script survived the rich-text guard');
     check(!str_contains(Security::sanitizeRichTextIfNeeded('<img src=x onerror="alert(1)">'), 'onerror'), 'Event handler survived the rich-text guard');
+    foreach (['java&#x73;cript:alert(1)', 'java&#9;script:alert(1)', 'jav&#97;script:alert(1)', 'data:text/html,attack'] as $url) {
+        $safe = Security::sanitizeRichTextIfNeeded('<a href="' . $url . '">Link</a>');
+        check(!str_contains($safe, 'href='), 'Obfuscated scheme survived the rich-text guard');
+        check(Security::sanitizeRichTextIfNeeded('<a href="' . $url . '">Link</a>') === $safe, 'Cached sanitizer result differs');
+    }
+    check(Security::sanitizeRichTextIfNeeded('<input autofocus name=x>') === '', 'Unexpected active element survived');
+    check(Security::sanitizeRichTextIfNeeded('Sekolah &amp; murid') === 'Sekolah &amp; murid', 'Plain text changed');
+    foreach (['cache', 'rate_limits', 'backups', 'logs', 'academic_documents'] as $folder) {
+        check(Security::isRestrictedStoragePath(strtoupper($folder) . '/test.pdf'), 'Restricted canonical folder accepted');
+        check(Security::isRestrictedStoragePath($folder . '\\test.pdf'), 'Windows restricted folder accepted');
+    }
+    check(!Security::isRestrictedStoragePath('uploads/cache/photo.jpg'), 'Public nested folder incorrectly blocked');
 
     foreach ([1, 2, 10] as $depth) {
         $html = str_repeat('<section>', $depth) . '<img src=x onerror="window.__audit=1">' . str_repeat('</section>', $depth);

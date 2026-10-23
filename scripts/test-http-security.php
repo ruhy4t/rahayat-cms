@@ -12,6 +12,8 @@ $users = [];
 $newsIds = [];
 $registrationId = null;
 $file = STORAGE_PATH . '/spmb/http-test-' . $suffix . '.pdf';
+$publicFile = STORAGE_PATH . '/uploads/http-test-' . $suffix . '.pdf';
+$restrictedFiles = [];
 $checks = 0;
 function verify(bool $result, string $message): void {
     global $checks;
@@ -56,6 +58,39 @@ try {
     PrivateDocument::encryptFile($file);
     $path = '/index.php?url=storage/spmb/' . basename($file);
     $anonymous = client();
+    file_put_contents($publicFile, "%PDF-1.4\nSYNTHETIC PUBLIC CACHE TEST\n");
+    $publicPath = '/index.php?url=storage/uploads/' . basename($publicFile);
+    $public = request($anonymous, $publicPath);
+    verify($public['status'] === 200 && str_contains($public['body'], 'SYNTHETIC PUBLIC CACHE TEST'), 'Public storage media broken');
+    verify((bool) preg_match('/^ETag:\s*(.+)\r?$/mi', $public['headers'], $match), 'Public media ETag absent');
+    $etag = trim($match[1]);
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, ['If-None-Match: ' . $etag]);
+    $cached = request($anonymous, $publicPath);
+    verify($cached['status'] === 304 && $cached['body'] === '', 'Public media cache revalidation failed');
+    verify((bool) preg_match('/^Last-Modified:\s*(.+)\r?$/mi', $public['headers'], $modifiedMatch), 'Public Last-Modified absent');
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, ['If-Modified-Since: ' . trim($modifiedMatch[1])]);
+    verify(request($anonymous, $publicPath)['status'] === 304, 'Date-based media revalidation failed');
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, ['If-Modified-Since: invalid-date']);
+    verify(request($anonymous, $publicPath)['status'] === 200, 'Invalid date incorrectly returned 304');
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, ['If-None-Match: W/"stale"', 'If-Modified-Since: ' . trim($modifiedMatch[1])]);
+    verify(request($anonymous, $publicPath)['status'] === 200, 'If-None-Match precedence broken');
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, ['If-None-Match: W/"stale"']);
+    verify(request($anonymous, $publicPath)['status'] === 200, 'Stale ETag incorrectly returned 304');
+    // A cached public response must never authorize a private document.
+    verify(request($anonymous, $path)['status'] === 403, 'Cache validator bypassed private authorization');
+    curl_setopt($anonymous, CURLOPT_HTTPHEADER, []);
+    foreach (['cache', 'logs', 'backups', 'rate_limits', 'academic_documents'] as $folder) {
+        $directory = STORAGE_PATH . '/' . $folder;
+        if (!is_dir($directory)) { continue; }
+        $restricted = $directory . '/http-test-' . $suffix . '.pdf';
+        $restrictedFiles[] = $restricted;
+        file_put_contents($restricted, 'SYNTHETIC RESTRICTED TEST');
+        $result = request($anonymous, '/index.php?url=storage/' . $folder . '/' . basename($restricted));
+        verify($result['status'] === 404 && !str_contains($result['body'], 'SYNTHETIC RESTRICTED TEST'), 'Restricted storage leaked: ' . $folder);
+    }
+    foreach (['/.git/config', '/.github/copilot-instructions.md', '/AGENTS.md', '/config/local.php'] as $blockedPath) {
+        verify(in_array(request($anonymous, $blockedPath)['status'], [403, 404], true), 'Internal path publicly readable: ' . $blockedPath);
+    }
     foreach (['storage/spmb/', 'storage/./spmb/', 'storage/SPMB/', 'storage/spmb./'] as $variant) {
         $result = request($anonymous, '/index.php?url=' . $variant . basename($file));
         verify(in_array($result['status'], [403, 404], true), 'Anonymous document bypass: ' . $variant);
@@ -71,6 +106,7 @@ try {
         if ($allowed) {
             verify($result['body'] === $bytes, 'Decrypted HTTP document differs');
             verify(str_contains($result['headers'], 'private, no-store'), 'Private cache header missing');
+            verify(!preg_match('/^ETag:/mi', $result['headers']), 'Private document received public cache validator');
         }
         $migration = request($handle, '/admin/pembaruan/migrasi');
         verify(str_contains($migration['body'], 'name="backup_ready"') === ($label === 'admin'), 'Migration admin isolation failed');
@@ -121,5 +157,7 @@ try {
     foreach ($newsIds as $id) { $db->delete('news', 'id = ?', [$id]); }
     foreach ($users as $user) { $db->delete('users', 'id = ?', [$user['id']]); }
     if (is_file($file)) { unlink($file); }
+    if (is_file($publicFile)) { unlink($publicFile); }
+    foreach ($restrictedFiles as $restricted) { if (is_file($restricted)) { unlink($restricted); } }
 }
 echo "PASS: {$checks} HTTP security checks; synthetic records removed.\n";

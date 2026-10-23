@@ -242,7 +242,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
             }
         }
         $privateFile = strtolower(explode('/', $normalizedFile)[0]) === 'spmb';
-        if (in_array(strtolower(explode('/', $normalizedFile)[0]), ['cache', 'rate_limits', 'backups', 'logs', 'academic_documents'], true)) {
+        if (Security::isRestrictedStoragePath($normalizedFile)) {
             http_response_code(404); exit('File not found');
         }
         if ($privateFile) { header('Cache-Control: private, no-store'); }
@@ -264,7 +264,7 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
         ) {
             // Canonical classification also protects symlinks into private storage.
             $relativePath = str_replace('\\', '/', substr($realPath, strlen($storagePrefix)));
-            if (str_starts_with(strtolower($relativePath), 'academic_documents/')) { http_response_code(404); exit('File not found'); }
+            if (Security::isRestrictedStoragePath($relativePath)) { http_response_code(404); exit('File not found'); }
             $canonicalPrivate = str_starts_with(strtolower($relativePath), 'spmb/');
             if ($canonicalPrivate !== $privateFile) { http_response_code(404); exit('File not found'); }
             // Determine content type
@@ -298,6 +298,25 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
                 header('Content-Disposition: attachment; filename="' . basename($realPath) . '"');
                 header("Content-Security-Policy: default-src 'none'; sandbox");
             }
+            if (!$privateFile) {
+                // Metadata validators avoid streaming unchanged public media.
+                // Private documents must never enter this cache/304 branch.
+                $modified = filemtime($realPath);
+                $etag = 'W/"' . hash('sha256', $relativePath . ':' . $modified . ':' . filesize($realPath)) . '"';
+                header('ETag: ' . $etag);
+                header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $modified) . ' GMT');
+                $matches = array_map('trim', explode(',', $_SERVER['HTTP_IF_NONE_MATCH'] ?? ''));
+                $notModified = in_array($etag, $matches, true) || in_array('*', $matches, true);
+                if (!isset($_SERVER['HTTP_IF_NONE_MATCH']) && isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+                    $since = strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']);
+                    $notModified = $since !== false && $since >= $modified;
+                }
+                if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true) && $notModified) {
+                    session_write_close();
+                    http_response_code(304);
+                    exit;
+                }
+            }
             try {
                 $privateBody = $privateFile ? PrivateDocument::read($realPath) : null;
             } catch (Throwable $error) {
@@ -310,7 +329,9 @@ if (strpos($_GET['url'] ?? '', 'storage/') === 0) {
 
             // Stream file
             session_write_close();
-            if ($privateBody !== null) { echo $privateBody; } else { readfile($realPath); }
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
+                if ($privateBody !== null) { echo $privateBody; } else { readfile($realPath); }
+            }
             exit;
         }
     }

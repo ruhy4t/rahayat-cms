@@ -5,6 +5,8 @@ Options -Indexes
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Block hidden metadata/credentials, including nested paths. ACME remains available.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L,NC]
     RewriteRule ^(\.git|\.sixth)(/|$) - [F,L]
     RewriteRule ^(app|config|database|views|scripts)(/|$) - [F,L]
     # Deny active content in storage BEFORE the catch-all rewrite below, which
@@ -30,7 +32,7 @@ Options -Indexes
     Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on'"
 </IfModule>
 
-<FilesMatch "^(user\.txt|README\.md|CHANGELOG\.md|CONTRIBUTING\.md|SECURITY\.md|DEPLOYMENT-.*\.md|package\.json|package-lock\.json|version\.json)$">
+<FilesMatch "^(user\.txt|README\.md|AGENTS\.md|CHANGELOG\.md|CONTRIBUTING\.md|SECURITY\.md|DEPLOYMENT-.*\.md|production-upload-.*\.txt|package\.json|package-lock\.json|version\.json)$">
     Require all denied
 </FilesMatch>
 

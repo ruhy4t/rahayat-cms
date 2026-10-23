@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 1.12.0 - 2026-10-23
+
+- Tambahkan Nawala Indigo, Arunika Emerald, Wibawa Crimson, dan Samudra Cendekia dengan empat komposisi beranda berbeda serta tampilan halaman turunannya; empat tema lama tetap tersedia.
+- Kelola pilihan tema, tipografi, label, dan informasi beranda melalui admin; hero memakai identitas sekolah, bukan judul foto.
+- Lengkapi navigasi hover/fokus, galeri keyboard, formulir publik dengan CSRF/CAPTCHA, serta pemeriksaan responsivitas dan kontras tema baru.
+- Sanitasi seluruh markup rich text, termasuk skema URL berbahaya yang disamarkan sebagai entitas HTML; gunakan cache terbatas dalam request untuk konten berulang.
+- Tolak URL dengan encoding berlapis yang belum kanonik, periksa folder storage privat sebelum dan setelah resolusi filesystem, serta blokir metadata/credential tersembunyi pada Apache.
+- Tambahkan ETag/Last-Modified dan respons 304 hanya untuk media publik; dokumen privat tetap berotorisasi dan no-store. Hapus stylesheet komposisi yang dimuat dua kali.
+- Perluas regresi menjadi 94 pemeriksaan security-patch dan 56 pemeriksaan HTTP keamanan. Panduan produksi dan daftar path tersedia di DEPLOYMENT-1.12.0.md serta production-upload-1.12.0.txt.
+
 ## 1.11.1 - 2026-10-01
 
 - Perbaiki resolusi nama aksi pada router sehingga daftar otorisasi yang peka huruf besar/kecil tidak lagi dapat dilewati. Ini menutup jalur eskalasi hak akses ke administrator melalui endpoint API.

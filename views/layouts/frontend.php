@@ -126,7 +126,6 @@
     <?php if (PublicTheme::isModern($themeName)): ?>
         <link rel="stylesheet" href="/css/themes/next-modules.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/next-modules.css') ?>">
         <link rel="stylesheet" href="/css/themes/compositions.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/compositions.css') ?>">
-        <link rel="stylesheet" href="/css/themes/compositions.css?v=<?= filemtime(ROOT_PATH . '/public/css/themes/compositions.css') ?>">
         <script src="/js/next-themes.js?v=<?= filemtime(ROOT_PATH . '/public/js/next-themes.js') ?>" defer></script>
     <?php endif; ?>
 

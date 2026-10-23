@@ -96,7 +96,7 @@ class SchoolProfile extends Model
 
         // These columns are printed as HTML on the public site. New writes are
         // sanitised in profileUpdate(); this guards rows stored before that fix
-        // and costs nothing for content that is already clean.
+        // with bounded request-local reuse for repeated rich-text values.
         foreach (self::RICH_TEXT_FIELDS as $field) {
             if (isset($profile[$field]) && is_string($profile[$field])) {
                 $profile[$field] = Security::sanitizeRichTextIfNeeded($profile[$field]);

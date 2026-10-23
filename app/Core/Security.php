@@ -423,6 +423,11 @@ class Security
         if ($url === '') {
             return false;
         }
+        // Reject excessive encoding instead of letting output escaping/browser
+        // decoding reveal a different scheme after this validation boundary.
+        if (html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8') !== $url) {
+            return false;
+        }
         if (preg_match('/[\x00-\x20\\\\]/', $url)) {
             return false;
         }
@@ -445,7 +450,7 @@ class Security
     {
         $url = trim((string) $url);
 
-        return self::isSafeLinkUrl($url) ? $url : '';
+        return self::isSafeLinkUrl($url) ? self::plainText($url) : '';
     }
 
     /**
@@ -498,9 +503,9 @@ class Security
     }
 
     /**
-     * Sanitise stored rich text on output, but only when it can still contain
-     * active markup. Already-clean content is returned untouched, so normal
-     * page rendering does not pay for a DOM parse.
+     * Parse all stored markup, including entity-obfuscated URL schemes.
+     * Plain text needs no parser; a bounded request-local cache avoids parsing
+     * the same rich text repeatedly without persisting sensitive content.
      */
     public static function sanitizeRichTextIfNeeded(?string $html): string
     {
@@ -509,11 +514,29 @@ class Security
             return '';
         }
 
-        if (!preg_match('/<\s*(script|iframe|svg|math|object|embed|style|form|meta|link|base)\b|on[a-z]+\s*=|javascript\s*:|data\s*:\s*text\//i', $html)) {
+        if (!str_contains($html, '<')) {
             return $html;
         }
 
-        return self::sanitizeHtml($html);
+        static $cache = [];
+        $cacheable = strlen($html) <= 65536;
+        $key = $cacheable ? hash('sha256', $html) : '';
+        if ($cacheable && isset($cache[$key])) {
+            return $cache[$key];
+        }
+        $clean = self::sanitizeHtml($html);
+        if ($cacheable) {
+            if (count($cache) >= 16) { array_shift($cache); }
+            $cache[$key] = $clean;
+        }
+        return $clean;
+    }
+
+    /** Check both the requested and filesystem-canonical storage path. */
+    public static function isRestrictedStoragePath(string $path): bool
+    {
+        $folder = strtolower(explode('/', str_replace('\\', '/', $path))[0]);
+        return in_array($folder, ['cache', 'rate_limits', 'backups', 'logs', 'academic_documents'], true);
     }
 
     /**
