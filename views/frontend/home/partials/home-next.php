@@ -2,8 +2,8 @@
 $galleryItems = $data['galleryItems'] ?? ($galleryItems ?? []);
 $firstSlide = $slides[0] ?? null;
 $heroImage = !empty($firstSlide['image']) ? '/storage/' . ltrim((string) $firstSlide['image'], '/') : '';
-$heroTitle = trim((string) ($firstSlide['title'] ?? '')) ?: $copy('home_hero_title_prefix', 'Selamat Datang di') . ' ' . ($profile['name'] ?? SCHOOL_NAME);
-$heroSummary = trim((string) ($firstSlide['subtitle'] ?? '')) ?: trim(strip_tags((string) ($profile['vision'] ?? $profile['tagline'] ?? '')));
+$heroTitle = trim((string) ($profile['name'] ?? '')) ?: SCHOOL_NAME;
+$heroSummary = trim((string) ($profile['motto'] ?? '')) ?: trim((string) ($profile['tagline'] ?? ''));
 $primaryHref = Security::safeLinkUrl((string) ($firstSlide['button_url'] ?? '')) ?: '/profil';
 $primaryLabel = trim((string) ($firstSlide['button_text'] ?? '')) ?: $copy('home_primary_button_label', 'Tentang Kami');
 ?>
@@ -11,7 +11,6 @@ $primaryLabel = trim((string) ($firstSlide['button_text'] ?? '')) ?: $copy('home
     <div class="next-hero__veil"></div>
     <div class="next-shell next-hero__content">
         <div class="next-hero__copy">
-            <p class="next-kicker"><?= e($profile['motto'] ?? $profile['tagline'] ?? $copy('home_hero_eyebrow', 'Sekolah berkarakter dan berprestasi')) ?></p>
             <h1><?= e($heroTitle) ?></h1>
             <?php if ($heroSummary !== ''): ?><p class="next-hero__summary"><?= e($heroSummary) ?></p><?php endif; ?>
             <div class="next-actions">
