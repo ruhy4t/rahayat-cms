@@ -23,8 +23,22 @@ Instruksi ini berlaku untuk seluruh repository Rahayat CMS.
 - Baca file terkait dan cari implementasi serupa sebelum mengedit.
 - Buat perubahan sekecil dan seterfokus mungkin; jangan melakukan refactor yang tidak diminta.
 - Pertahankan gaya, struktur, penamaan, dan bahasa antarmuka yang sudah ada.
+- Sebelum mengubah kode bersama, periksa pemanggil, alur terkait, kontrak route/API/form, serta tes yang relevan agar dampak perubahan diketahui.
+- Pertahankan perilaku fitur lain, data tersimpan, dan kompatibilitas yang sudah berjalan. Perubahan perilaku yang memang diminta harus dibatasi pada ruang lingkup tugas dan diverifikasi.
+- Jangan mengubah schema, konfigurasi, dependency, atau aset di luar kebutuhan tugas. Jangan melakukan optimasi spekulatif atau mengorbankan keamanan demi kecepatan.
+- Jaga waktu respons: hindari query tanpa batas, N+1, pemindaian data berulang, dan pekerjaan berat yang tidak perlu pada alur request. Gunakan pola query dan indeks yang sesuai dengan kebutuhan nyata.
+- Untuk UI yang terdampak, pertahankan alur dan pola desain yang ada; periksa desktop dan mobile, termasuk keadaan kosong, gagal, dan berhasil, serta aksesibilitas.
 - Jika mengubah dependency atau pipeline aset, perbarui lockfile dan artefak build yang memang dilacak repository.
 - Jangan menjalankan migrasi yang mengubah data nyata atau pengujian HTTP terhadap produksi. Gunakan lingkungan development/lokal saja.
+
+## Database dan keamanan data
+
+- Pertahankan kompatibilitas MariaDB/MySQL dan gunakan `utf8mb4`. Perubahan schema harus aman untuk instalasi yang sudah memiliki data.
+- Setiap perubahan database wajib disertai file `.sql` idempoten yang dapat diimpor melalui phpMyAdmin, aman dijalankan ulang, dan tidak menghapus atau menimpa data yang sudah ada tanpa permintaan eksplisit.
+- Selaraskan SQL phpMyAdmin dengan mekanisme migrasi aplikasi yang berlaku agar hasilnya konsisten dan tidak diterapkan dua kali secara berbeda.
+- Gunakan prepared statements, validasi input, otorisasi default-deny untuk data sensitif, CSRF untuk aksi yang mengubah data, dan escaping output sesuai konteks.
+- Jangan melemahkan proteksi keamanan atau mengekspos data sensitif demi kemudahan maupun performa.
+- Jangan menjalankan migrasi yang mengubah data nyata atau pengujian terhadap produksi. Gunakan database development khusus dan bersihkan fixture setelah tes.
 
 ## Verifikasi wajib
 
@@ -76,6 +90,8 @@ Kewajiban push ini berlaku untuk tugas yang memang mengubah repository. Untuk pe
 Sampaikan secara ringkas:
 
 - perubahan utama yang dilakukan;
+- daftar semua file yang berubah dalam bentuk path file biasa (bukan tautan), termasuk path file yang perlu diunggah ke produksi;
+- untuk perubahan database, path file SQL idempoten untuk impor phpMyAdmin dan ringkasan perubahan skemanya;
 - verifikasi yang dijalankan beserta hasilnya dan tes yang tidak dapat dijalankan;
 - hash commit dan status push ke `origin/main` jika ada perubahan;
 - risiko atau tindak lanjut yang benar-benar masih diperlukan.

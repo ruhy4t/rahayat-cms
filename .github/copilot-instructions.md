@@ -15,6 +15,10 @@ Instruksi ini berlaku untuk seluruh repository Rahayat CMS. Baca juga `/AGENTS.m
 - Ubah hanya file yang diperlukan untuk tugas aktif.
 - Jangan melakukan refactor, perubahan format massal, migrasi, atau pembaruan dependency yang tidak diminta.
 - Jangan menghapus atau menimpa perubahan lokal yang tidak berkaitan dengan tugas.
+- Sebelum mengubah kode bersama, telusuri pemanggil dan alur terkait serta kontrak route/API/form agar dampak perubahan terukur.
+- Pertahankan perilaku fitur lain, data tersimpan, dan kompatibilitas yang sudah berjalan. Batasi perubahan perilaku hanya pada kebutuhan yang diminta dan verifikasi alur yang terdampak.
+- Hindari perubahan schema, konfigurasi, dependency, atau aset yang tidak diperlukan. Jangan melakukan optimasi spekulatif atau mengorbankan keamanan demi kecepatan.
+- Jaga performa alur yang terdampak: hindari query tanpa batas, N+1, pemindaian berulang, dan pekerjaan berat yang tidak perlu pada request.
 - Cari implementasi serupa sebelum menambahkan controller, model, view, route, atau helper baru.
 - Jangan membuat duplikat kelas. Autoloader aplikasi mencari kelas langsung di `app/Core/`, `app/Controllers/`, dan `app/Models/`.
 - Jangan mengedit file hasil build secara manual. Ubah sumbernya lalu jalankan build yang sesuai.
@@ -34,6 +38,8 @@ Instruksi ini berlaku untuk seluruh repository Rahayat CMS. Baca juga `/AGENTS.m
 
 - Pertahankan kompatibilitas MariaDB/MySQL dan gunakan `utf8mb4`.
 - Migrasi harus idempoten bila memungkinkan dan aman untuk instalasi yang telah memiliki data.
+- Setiap perubahan database wajib menyertakan file `.sql` idempoten yang dapat diimpor melalui phpMyAdmin, aman dijalankan ulang, dan tidak menghapus atau menimpa data yang sudah ada tanpa permintaan eksplisit.
+- Selaraskan SQL phpMyAdmin dengan mekanisme migrasi aplikasi yang berlaku agar hasilnya konsisten dan tidak diterapkan dua kali secara berbeda.
 - Jangan menjalankan migrasi `--apply` atau pengujian terhadap database produksi.
 - Tes database hanya boleh memakai database development khusus; fixture harus di-rollback atau dibersihkan.
 
@@ -41,6 +47,7 @@ Instruksi ini berlaku untuk seluruh repository Rahayat CMS. Baca juga `/AGENTS.m
 
 - Pertahankan keempat tema publik: `indigo-modern`, `emerald-campus`, `crimson-bold`, dan `cendekia-smp`, kecuali tugas secara eksplisit mengubah cakupan tema.
 - Periksa perubahan tampilan pada desktop dan mobile. Hindari overflow horizontal, teks terpotong, dan kontrol yang saling bertumpuk.
+- Pertahankan alur UI/UX dan pola desain yang sudah berjalan di luar ruang lingkup tugas; periksa keadaan kosong, berhasil, dan gagal pada layar yang terdampak.
 - Gunakan elemen semantik, label yang terlihat, focus state, `aria-*` yang tepat, kontras memadai, dan dukungan `prefers-reduced-motion`.
 - Gunakan lazy loading untuk gambar non-kritis. Gambar hero pertama boleh eager dengan `fetchpriority="high"`; gambar berikutnya harus lazy.
 - Pertahankan aset produksi lokal dan jangan menambahkan CDN tanpa persetujuan.
@@ -79,3 +86,5 @@ Jangan menyatakan tes lulus jika tes tidak dijalankan. Jika tes wajib untuk area
 - Jangan force-push, mengubah riwayat, melewati proteksi branch, atau memasukkan file rahasia/runtime.
 - Jangan membuat commit kosong untuk tugas analisis tanpa perubahan.
 - Dalam laporan akhir, sebutkan perubahan utama, tes yang dijalankan, tes yang tidak dapat dijalankan, dan risiko yang masih tersisa.
+- Cantumkan daftar semua file yang berubah sebagai path file biasa (bukan tautan), termasuk file yang perlu diunggah ke produksi.
+- Jika database berubah, cantumkan path file SQL idempoten untuk impor phpMyAdmin dan ringkasan perubahan database.
